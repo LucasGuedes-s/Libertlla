@@ -87,6 +87,28 @@
   margin-top: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .container_login {
+    flex-direction: column;
+  }
+
+  .image_section {
+    height: 40vh;
+  }
+
+  .login_section {
+    padding: 1rem;
+  }
+
+  .login_section h1 {
+    font-size: 2rem;
+  }
+
+  .login_form {
+    width: 90%;
+  }
+}
+
 </style>
 
 <script>
