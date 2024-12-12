@@ -38,7 +38,7 @@
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  background-color: #4D1032;
+  background-color: #54123F;
 }
 
 .login_section h1 {
@@ -52,7 +52,7 @@
 .login_form {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 70%;
   max-width: 1000px;
 }
 .login_form label {
@@ -68,7 +68,7 @@
   border: 1px solid #9B287B;
   border-radius: 10px;
   margin-bottom: 1rem;
-  background-color: #4c1f3e;
+  background-color: #4D10;
   color: #ffffff;
 }
 .login_form input::placeholder {
