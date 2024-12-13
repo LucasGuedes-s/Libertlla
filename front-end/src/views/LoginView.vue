@@ -11,7 +11,6 @@
                 <label for="senha">Senha</label>
                 <input type="password" name="senha" placeholder="Digite a sua senha" v-model="senha">
                 <button type="submit" class="bnt_entrar" @click="login">Entrar</button>
-
             </form>
         </div>
     </div>
@@ -124,7 +123,7 @@ export default {
     },
 methods:{
     async login(){
-        await axios.post("http://localhost:8080/usuario/login", {
+        await axios.post("http://localhost:3000/login", {
             usuario:{
                 email:this.email,
                 senha: this.senha
@@ -133,7 +132,6 @@ methods:{
             console.log(response.status)
             console.log(response)
             localStorage.setItem('dados', JSON.stringify(response.data.usuario));
-            router.push('/home')
         }).catch(Error =>{
             console.error(Error);
             Swal.fire({
