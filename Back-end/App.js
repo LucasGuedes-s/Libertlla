@@ -10,6 +10,7 @@ const PORT = 3000;
 app.get('/', (req, res) => {
     res.send('Olá, mundo');
 });
+app.use(express.json());
 
 app.use(userRouter)
 

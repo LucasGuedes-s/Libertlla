@@ -8,48 +8,52 @@ datasource db {
 }
 
 model Profissionais {
-  id              Int  @id @default(autoincrement())
-  nome            String
-  email           String @unique
-  senha           String
-  permissao       Permissoes    @relation(fields: [permissaoId], references: [id])
-  permissaoId     Int
-  foto            String? @db.VarChar(2048)
-  especialidade   String
-  processos       Processo?     @relation(fields: [processo], references: [id])
-  processo        Int?
+  id            Int        @id @default(autoincrement())
+  nome          String
+  email         String     @unique
+  senha         String
+  permissaoId   Int
+  foto          String?    @db.VarChar(2048)
+  especialidade String
+  processo      Int?
+  permissao     Permissoes @relation(fields: [permissaoId], references: [id])
+  processos     Processo?  @relation(fields: [processo], references: [id])
 }
-model Ocorrencias{
-  id                   Int  @id @default(autoincrement())
-  tipo_denuncia        String
-  tipo_violencia       String    
-  agressor             String
-  provas               String[] @db.VarChar(2048)
-  descricao            String
-  local                String?
-  data_denuncia        DateTime? @db.Date
-  data_ocorrencia      String
-  ocorrencias          Processo[]
+
+model Ocorrencias {
+  id              Int        @id @default(autoincrement())
+  tipo_denuncia   String
+  tipo_violencia  String
+  agressor        String
+  provas          String[]   @db.VarChar(2048)
+  descricao       String
+  local           String?
+  data_denuncia   DateTime?  @db.Date
+  data_ocorrencia String
+  ocorrencias     Processo[]
 }
-model Processo{
-  id              Int  @id @default(autoincrement())
-  status          String?
-  ocorrecia       Ocorrencias?     @relation(fields: [ocorrencia], references: [id])
-  ocorrencia      Int?
-  registros       Registro?     @relation(fields: [registro], references: [id])
-  registro        Int?
-  profissionais   Profissionais[]
-  permissao       Int
+
+model Processo {
+  id            Int             @id @default(autoincrement())
+  status        String?
+  ocorrencia    Int?
+  registro      Int?
+  permissao     Int
+  ocorrecia     Ocorrencias?    @relation(fields: [ocorrencia], references: [id])
+  registros     Registro?       @relation(fields: [registro], references: [id])
+  profissionais Profissionais[]
 }
-model Registro{
-  id              Int  @id @default(autoincrement())
-  anexos          String[] @db.VarChar(2048)
-  descricoes      String?
-  data            String?
-  processos       Processo[]
+
+model Registro {
+  id         Int        @id @default(autoincrement())
+  anexos     String[]   @db.VarChar(2048)
+  descricoes String?
+  data       String?
+  processos  Processo[]
 }
-model Permissoes{
-  id             Int  @id @default(autoincrement())
-  descricao      String?
-  profissionais    Profissionais[]
+
+model Permissoes {
+  id            Int             @id @default(autoincrement())
+  descricao     String?
+  profissionais Profissionais[]
 }
