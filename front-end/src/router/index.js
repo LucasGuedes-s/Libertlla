@@ -30,7 +30,7 @@ const routes = [
   {
     path: '/formulariodedenuncia',
     name: 'formulariodedenuncia',
-    component: FormularioDenunciaView
+    component: FormularioDenunciaView,
   },
   {
     path: '/loginprofissional',

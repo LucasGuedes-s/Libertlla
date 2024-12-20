@@ -17,6 +17,7 @@
 </template>
 
 <style scoped>
+
 .container_login {
   display: flex;
   height: 100vh;
