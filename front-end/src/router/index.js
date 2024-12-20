@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import FormularioDenunciaView from '@/views/FormularioDenunciaView.vue'
 
 Vue.use(VueRouter)
 
@@ -25,6 +26,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView
+  },
+  {
+    path: '/formulariodedenuncia',
+    name: 'formulariodedenuncia',
+    component: FormularioDenunciaView
   },
   {
     path: '/loginprofissional',
