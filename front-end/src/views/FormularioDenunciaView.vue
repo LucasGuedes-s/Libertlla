@@ -1,10 +1,10 @@
 <template>
     <div class="form-container">   
         <h1>Denúncia Anônima</h1>
-        <form>
+        <form @submit.prevent="realizarDenuncia">
             <div class="form-group">
                 <label for="">Tipo de Violência:</label>
-                <select name="tipodeviolencia" id="tipodeviolencia">
+                <select name="tipodeviolencia" id="tipodeviolencia"  v-model="tipodeviolencia">
                     <option value="violencia_domestica">Violência Doméstica</option>
                     <option value="agressão_fisica_ou_verbal">Agressão Física ou Verbal</option>
                     <option value="assedio">Assédio</option>
@@ -16,7 +16,7 @@
 
             <div class="form-group">
                 <label for="">Relação com o Agressor:</label>
-                <select name="relacao_agressor" id="relacao_agressor">
+                <select name="relacao_agressor" id="relacao_agressor" v-model="relacao_agressor">
                     <option value="parente_familiar">Parente | Familiar</option>
                     <option value="desconhecido">Desconhecido(a)</option>
                     <option value="amigo">Amigo(a)</option>
@@ -28,12 +28,12 @@
 
             <div class="form-group" id="descricao">
                 <label for="descricao">Descrição:</label>
-                <textarea id="descricao" name="descricao" rows="8"></textarea>
+                <textarea id="descricao" name="descricao" rows="8" v-model="descricao"></textarea>
             </div>
 
             <div class="form-group" id="data_ocorrido">
                 <label for="data_ocorrido">Data do Ocorrido:</label>
-                <input type="date" id="data" name="data">
+                <input type="date" id="data" name="data" v-model="data_ocorrido">
             </div>
 
 
@@ -44,18 +44,18 @@
 
             <div class="form-group" id="local_do_ocorrido">
                 <label for="local_do_ocorrido">Local do Ocorrido:</label>
-                <textarea id="local_do_ocorrido" name="local_do_ocorrido" rows="1" placeholder="Rua, Bairro, Nº de Residência..."></textarea>
+                <textarea id="local_do_ocorrido" name="local_do_ocorrido" v-model="local_do_ocorrido" rows="1" placeholder="Rua, Bairro, Nº de Residência..."></textarea>
             </div>
 
-            <button type="submit" class="btn_realizardenuncia">Realizar Denúncia!</button>
+            <button type="submit" click="realizarDenuncia" class="btn_realizardenuncia">Realizar Denúncia!</button>
 
         </form>
     </div>
 </template>
 
-<style>
+<style scoped>
 body {
-    background-color: #4D1032;
+    background-color: #4D1032 !important;
     font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
@@ -142,3 +142,47 @@ h2 {
     background-color: #FF00AE; /* Cor alterada quando o mouse passa por cima (exemplo: verde mais escuro) */
 }
 </style>
+<script>
+import axios from 'axios';
+
+export default {
+    name: 'FormularioDenuncia',
+    data() {
+        return {
+            tipodeviolencia: '',
+            local_do_ocorrido: '',
+            relacao_agressor: '',
+            data_ocorrido: '',
+            descricao: ''
+        }
+    },
+    mounted() {
+        document.body.style.backgroundColor = "#4D1032"; // Define a cor específica para esta página
+    },
+    beforeUnmount() {
+        document.body.style.backgroundColor = ""; // Reseta a cor ao sair da página
+    },
+    methods:{
+        async realizarDenuncia() {
+            await axios.post("http://localhost:3000/cadastrar/ocorrencia", {
+            ocorrencias: {
+                    tipo_denuncia: this.tipodeviolencia,
+                    tipo_violencia: this.tipodeviolencia,
+                    agressor: this.relacao_agressor,
+                    provas: [],
+                    descricao: this.descricao,
+                    local: this.local_do_ocorrido,
+                    data_ocorrencia: this.data_ocorrido
+            }
+            })
+            .then((response) => {
+                console.log("Ocorrência cadastrada com sucesso:", response.data);
+            })
+            .catch((error) => {
+                console.error("Erro ao cadastrar a ocorrência:", error);
+            });
+
+    },
+    }
+}
+</script>
