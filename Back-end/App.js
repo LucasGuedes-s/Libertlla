@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const userRouter = require('../Back-end/routes/user.router')
+const ocorrencias = require('../Back-end/routes/ocorrencia.router')
 
 // Definir a porta do servidor
 const PORT = 3000;
@@ -13,6 +14,7 @@ app.get('/', (req, res) => {
 app.use(express.json());
 
 app.use(userRouter)
+app.use(ocorrencias)
 
 // Iniciar o servidor
 app.listen(PORT, () => {
