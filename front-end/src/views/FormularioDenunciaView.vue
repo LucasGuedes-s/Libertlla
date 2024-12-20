@@ -72,8 +72,8 @@ h1 {
 
 .form-container {
     width: 90%;
-    margin: 3rem auto;
-    padding: 2rem;
+    margin: 48px auto;
+    padding: 32px;
     border-radius: 10px;
     border: 1px solid #FF00AE;
     color: white;
