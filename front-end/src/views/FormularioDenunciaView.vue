@@ -1,4 +1,8 @@
 <template>
+<div>
+    <header>
+        <img src="../assets/imagemcabeçalho.png" alt="Imagem de Cabeçalho" class="header-image">
+    </header>
     <div class="form-container">   
         <h1>Denúncia Anônima</h1>
         <form @submit.prevent="realizarDenuncia">
@@ -51,27 +55,31 @@
 
         </form>
     </div>
+</div>
 </template>
 
 <style scoped>
 body {
     background-color: #4D1032 !important;
-    font-family: 'Montserrat', sans-serif;
+    font-family:  "Montserrat", sans-serif;
     margin: 0;
     padding: 0;
 }
 
-header{
-    width: 100%; 
-    height: auto;
+header img {
+    width: 100%; /* Imagem vai ocupar toda a largura disponível */
+    height: auto; /* Manter a proporção da imagem */
 }
 
 h1 {
     margin-top: 10px;
+    margin-bottom: 20px;
+    font-family:  "Montserrat", sans-serif;
+    font-weight: bold;
 }
 
 .form-container {
-    width: 90%;
+    width: 95%;
     margin: 48px auto;
     padding: 32px;
     border-radius: 10px;
@@ -109,6 +117,7 @@ form {
 
 ::placeholder {
     color: white;
+    font-size: 14px;
 }
 
 select option:hover {
