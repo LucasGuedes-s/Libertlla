@@ -53,7 +53,6 @@ body {
   font-size: 25px;
   font-weight: 800; /* ExtraBold */
   text-transform: uppercase; /* Torna o texto maiúsculo */
-
 }
 #navbarNav a{
   color: #ffff;

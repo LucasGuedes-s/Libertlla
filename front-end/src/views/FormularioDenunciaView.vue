@@ -17,6 +17,24 @@
                         <option value="perseguicao_ou_stalking">Perseguição ou Stalking</option>
                     </select>
                 </div>
+<div>
+    <header>
+        <img src="../assets/imagemcabeçalho.png" alt="Imagem de Cabeçalho" class="header-image">
+    </header>
+    <div class="form-container">   
+        <h1>Denúncia Anônima</h1>
+        <form @submit.prevent="realizarDenuncia">
+            <div class="form-group">
+                <label for="">Tipo de Violência:</label>
+                <select name="tipodeviolencia" id="tipodeviolencia"  v-model="tipodeviolencia">
+                    <option value="violencia_domestica">Violência Doméstica</option>
+                    <option value="agressão_fisica_ou_verbal">Agressão Física ou Verbal</option>
+                    <option value="assedio">Assédio</option>
+                    <option value="abuso_sexual">Abuso Sexual</option>
+                    <option value="ameaca_ou_intimidação">Ameaça ou Intimidação</option>
+                    <option value="perseguicao_ou_stalking">Perseguição ou Stalking</option>
+                </select>
+            </div>
 
                 <div class="form-group">
                     <label for="">Relação com o Agressor:</label>
@@ -57,12 +75,16 @@
             </form>
         </div>
     </div>
+        </form>
+    </div>
+</div>
 </template>
 
 <style scoped>
 body {
     background-color: #4D1032 !important;
     font-family: "Montserrat", sans-serif;
+    font-family:  "Montserrat", sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -72,16 +94,23 @@ header img {
     /* Imagem vai ocupar toda a largura disponível */
     height: auto;
     /* Manter a proporção da imagem */
+header img {
+    width: 100%; /* Imagem vai ocupar toda a largura disponível */
+    height: auto; /* Manter a proporção da imagem */
 }
 
 h1 {
     margin-top: 10px;
+    margin-bottom: 20px;
+    font-family:  "Montserrat", sans-serif;
+    font-weight: bold;
     margin-bottom: 20px;
     font-family: "Montserrat", sans-serif;
     font-weight: bold;
 }
 
 .form-container {
+    width: 95%;
     width: 95%;
     margin: 48px auto;
     padding: 32px;
@@ -125,6 +154,7 @@ textarea {
 
 ::placeholder {
     color: white;
+    font-size: 14px;
     font-size: 14px;
 }
 
