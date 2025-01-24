@@ -46,7 +46,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #5C164E;
+    /* background-color: #5C164E; */
+    background-color: #54123F;
     padding-top: 20px;
     text-align: center;
     box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.10);

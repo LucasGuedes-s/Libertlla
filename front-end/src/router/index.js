@@ -4,6 +4,8 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import FormularioDenunciaView from '@/views/FormularioDenunciaView.vue'
 
+import MinhasOcorrenciasView from '@/views/MinhasOcorrencias.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -39,14 +41,23 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import('../views/LoginView.vue')
-  }
+  },
 
-]
+  {
+    path: '/minhasocorrencias',
+    name: 'minhasocorrencias',
+     // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: MinhasOcorrenciasView
+  }
+];
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
 })
+
 
 export default router

@@ -16,7 +16,7 @@
       <h1>Como você pode denunciar?</h1>
       <ul class="button-container">
         <li class="item">
-          <a class="link-button" aria-current="page" href="#">
+          <a class="link-button" aria-current="page" href="/formulariodedenuncia">
             <i class="bi bi-card-list"></i>
             Formulário</a>
         </li>
