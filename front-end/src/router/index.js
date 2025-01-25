@@ -5,6 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import FormularioDenunciaView from '@/views/FormularioDenunciaView.vue'
 
 import MinhasOcorrenciasView from '@/views/MinhasOcorrencias.vue'
+import DashboardView from '@/views/DashboardView.vue'
 
 Vue.use(VueRouter)
 
@@ -28,6 +29,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: DashboardView
   },
   {
     path: '/formulariodedenuncia',
