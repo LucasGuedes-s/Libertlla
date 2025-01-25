@@ -1,34 +1,37 @@
 <template>
   <div class="minhasocorrencias d-flex">
-    <SideBar />
-
-    <div class="content container">
+    <button class="btn-toggle-sidebar d-block d-md-none" :class="{ hidden: !sidebarVisible }" @click="toggleSidebar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list"
+        viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+      </svg>
+    </button>
+    <SideBar v-if="sidebarVisible" />
+    <div class="ocorrencia container">
       <h1 class="titulo mb-4">Minhas Ocorrências:</h1>
 
       <div class="ocorrencia-form border rounded p4 row">
         <div class="col-12 col-md-6">
           <label for="data">Data:</label>
-          <input class="form-control" id="data" name="data">
+          <input class="form-control" id="data" name="data" />
         </div>
 
         <div class="col-12 col-md-6">
           <label for="tipo-denuncia">Tipo de denúncia:</label>
-          <input type="text" class="form-control" id="tipo-denuncia" name="tipo-denuncia">
+          <input type="text" class="form-control" id="tipo-denuncia" name="tipo-denuncia" />
         </div>
 
         <div class="col-12 mt-3">
           <label for="descricao">Descrição:</label>
-          <input class="form-control" id="descricao" name="descricao" rows="4">
+          <input class="form-control" id="descricao" name="descricao" rows="4" />
         </div>
 
         <div class="col-12 mt-3 d-flex flex-column flex-md-row justify-content-start gap-3">
           <button type="button" class="btn btn-custom-primary w-100 w-md-auto">Detalhar</button>
           <button type="button" class="btn btn-custom-secondary w-100 w-md-auto">Adicionar Progresso</button>
         </div>
-
-
       </div>
-
     </div>
   </div>
 </template>
@@ -39,6 +42,16 @@ import SideBar from '@/components/SideBar.vue';
 export default {
   components: {
     SideBar,
+  },
+  data() {
+    return {
+      sidebarVisible: true, // O estado começa como visível
+    };
+  },
+  methods: {
+    toggleSidebar() {
+      this.sidebarVisible = !this.sidebarVisible; // Alterna entre mostrar e esconder
+    },
   },
 };
 </script>
@@ -58,11 +71,12 @@ label {
   font-weight: 700;
 }
 
-.content {
+.ocorrencia {
   margin-left: 260px;
   padding: 20px;
   border-radius: 100px;
 }
+
 .ocorrencia-form {
   margin-top: 30px;
   border-color: #d3d3d3b6;
@@ -83,19 +97,63 @@ label {
   margin-bottom: 10px;
 }
 
-.form-group.half {
-  width: 48%;
-}
-
 .btn-custom-primary,
 .btn-custom-secondary {
   background-color: rgba(245, 245, 245, 255);
   color: rgba(152, 152, 152, 255);
-  border: 1 px solid rgba(152, 152, 152, 255);
+  border: 1px solid rgba(245, 245, 245, 255);
   border-radius: 5px;
   font-size: 14px;
   font-family: "Montserrat", sans-serif;
   font-weight: 500;
   width: 49%;
+}
+.btn-custom-primary:hover,
+.btn-custom-secondary:hover {
+  background-color: rgba(245, 245, 245, 255); /* Mudando a cor de fundo */
+  color: rgba(152, 152, 152, 255);/* Mudando a cor do texto */
+  border: 1px solid rgba(245, 245, 245, 255); /* Mudando a cor da borda */
+}
+
+@media (max-width: 768px) {
+  .titulo {
+    margin-left: -11%;
+    color: #9B287B;
+  }
+
+  .ocorrencia {
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ocorrencia-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10%;
+  }
+
+  .btn-toggle-sidebar {
+    position: fixed;
+    top: -2%;
+    left: 0;
+    background-color: transparent;
+    border: none;
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    padding: 10px;
+    z-index: 1000;
+    cursor: pointer;
+  }
+
+  /*para o botão ficar roxo qnd a o sidebar ficar oculto */
+  .btn-toggle-sidebar.hidden {
+    color: #9B287B;
+  }
 }
 </style>
