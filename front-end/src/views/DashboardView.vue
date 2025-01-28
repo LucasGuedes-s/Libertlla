@@ -144,6 +144,25 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 14px;
 }
+@media (max-width: 768px) {
+  .dashboard {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .section_contagemdedenuncias {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .div_ocorrencias {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .card_contagem p {
+    font-size: 24px;
+  }
+}
 </style>
 
 <script>
