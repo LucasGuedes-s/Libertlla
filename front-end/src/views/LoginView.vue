@@ -114,6 +114,7 @@
 <script>
 import router from '@/router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
     data() {
@@ -130,11 +131,10 @@ methods:{
                 senha: this.senha
             }
         }).then(response =>{
-            console.log(response.status)
-            console.log(response)
-            localStorage.setItem('dados', JSON.stringify(response.data.usuario));
+          console.log(response.data)
+          router.push('/dashboard');
         }).catch(Error =>{
-            console.error(Error);
+            console.log(Error);
             Swal.fire({
                 icon: 'error',
                 title: 'Usuario ou senha incorretos',

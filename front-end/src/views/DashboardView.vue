@@ -36,22 +36,32 @@
         </div>
         <div class="ocorrencias_chat">
           <h2>Ocorrências por Chat</h2>
-          <div class="info_denuncia">
-            <p><strong>Denúncia:</strong></p>
+          <div class="info_denuncia" v-for="(solicitacao, index) in solicitacoes" :key="index">
+            <p><strong>Denúncia: {{ solicitacao.username }} </strong></p>
             <p><strong>Data:</strong></p>
             <p><strong>Tipo de Denúncia:</strong></p>
             <div class="buttons">
-              <button class="detalhar-btn">Detalhar</button>
-              <button class="aceitar-btn">Aceitar</button>
+              <button class="aceitar-btn" @click="acceptChat(solicitacao.socketId)">Aceitar</button>
             </div>
           </div>
+        </div>
+        <div v-if="isChatActive" class="chat-container-admin-admin">
+          <h3>Chat Ativo</h3>
+          <div class="messages">
+            <div v-for="(message, index) in messages" :key="index" class="message">
+              {{ message.from }} {{ message.content }}
+            </div>
+          </div>
+          <input v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
+          <button @click="sendMessage">Enviar</button>
+
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style>
+<style scooped>
 .dashboard {
   margin-left: 250px;
   padding: 20px;
@@ -144,6 +154,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 14px;
 }
+
 @media (max-width: 768px) {
   .dashboard {
     margin-left: 0;
@@ -163,12 +174,123 @@
     font-size: 24px;
   }
 }
+
+.chat-container-admin {
+  max-width: 80%;
+  height: 50%;
+  margin: 50px auto;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color:rgb(255, 255, 255); /* Fundo do contêiner principal */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+}
+
+.chat-container-admin h2 {
+  background-color: #802062; /* Fundo do cabeçalho */
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+.messages {
+  border: 1px solid #ddd;
+  height: 300px;
+  overflow-y: scroll;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+input, button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 10px;
+}
 </style>
 
 <script>
 import SideBar from '@/components/SideBar.vue';
+import { io } from "socket.io-client";
 
 export default {
+  data() {
+    return {
+      socket: null,
+      inputMessage: "",
+      messages: [],
+      solicitacoes: [],
+      isChatActive: false,
+      activeClient: null, // ID do cliente com o qual está interagindo
+    };
+  },
+  mounted() {
+    // Conecta ao servidor Socket.io como admin
+    this.socket = io("http://localhost:3000");
+
+    // Envia sinal de que é o admin
+    this.socket.emit("admin connect");
+
+    // Recebe solicitações de chat
+    this.socket.on("chat request", (request) => {
+      this.solicitacoes.push(request);
+    });
+
+    // Remove solicitações atendidas
+    this.socket.on("chat taken", ({ clientSocketId }) => {
+      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
+    });
+
+    // Recebe mensagens do servidor
+    this.socket.on("chat message", (msg) => {
+      this.messages.push(msg);
+    });
+
+    // Notifica o administrador se o chat terminar
+    this.socket.on("chat ended", (reason) => {
+      alert(`Chat encerrado: ${reason}`);
+      this.endChat();
+    });
+  },
+  methods: {
+    acceptChat(socketId) {
+      // Aceita a solicitação de chat
+      this.socket.emit("accept chat", socketId);
+      this.isChatActive = true;
+      this.activeClient = socketId; // Armazena o ID do cliente
+      this.requests = []; // Limpa as solicitações
+    },
+    sendMessage() {
+      if (this.inputMessage.trim()) {
+        const message = {
+          from: 'Admin',
+          content: this.inputMessage
+        };
+        this.socket.emit("chat message", message); // Envia para o servidor
+        this.messages.push(message); // Adiciona localmente no admin
+        this.inputMessage = ""; // Limpa o campo de entrada
+      }
+    },
+    endChat() {
+      // Encerra o chat ativo
+      this.isChatActive = false;
+      this.activeClient = null;
+      this.messages = [];
+    }
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
   components: {
     SideBar,
   },

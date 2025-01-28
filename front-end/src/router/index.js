@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import FormularioDenunciaView from '@/views/FormularioDenunciaView.vue'
-
 import MinhasOcorrenciasView from '@/views/MinhasOcorrencias.vue'
 import DashboardView from '@/views/DashboardView.vue'
 
@@ -16,13 +15,13 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/about',
-    name: 'about',
+    path: '/chat',
+    name: 'chat',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+      return import(/* webpackChunkName: "about" */ '../views/ChatView.vue')
     }
   },
   {
