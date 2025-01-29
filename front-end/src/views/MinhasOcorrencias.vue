@@ -1,12 +1,5 @@
 <template>
   <div class="minhasocorrencias d-flex">
-    <button class="btn-toggle-sidebar d-block d-md-none" :class="{ hidden: !sidebarVisible }" @click="toggleSidebar">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list"
-        viewBox="0 0 16 16">
-        <path fill-rule="evenodd"
-          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
-      </svg>
-    </button>
     <SideBar v-if="sidebarVisible" />
     <div class="ocorrencia container">
       <h1 class="titulo mb-4">Minhas Ocorrências:</h1>
@@ -45,12 +38,12 @@ export default {
   },
   data() {
     return {
-      sidebarVisible: true, // O estado começa como visível
+      sidebarVisible: true, 
     };
   },
   methods: {
     toggleSidebar() {
-      this.sidebarVisible = !this.sidebarVisible; // Alterna entre mostrar e esconder
+      this.sidebarVisible = !this.sidebarVisible; 
     },
   },
 };
@@ -138,22 +131,5 @@ label {
     margin-right: 10%;
   }
 
-  .btn-toggle-sidebar {
-    position: fixed;
-    top: -2%;
-    left: 0;
-    background-color: transparent;
-    border: none;
-    color: rgb(255, 255, 255);
-    font-size: 24px;
-    padding: 10px;
-    z-index: 1000;
-    cursor: pointer;
-  }
-
-  /*para o botão ficar roxo qnd a o sidebar ficar oculto */
-  .btn-toggle-sidebar.hidden {
-    color: #9B287B;
-  }
 }
 </style>
