@@ -5,74 +5,64 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
-const userRouter = require('../Back-end/routes/user.router')
-const ocorrencias = require('../Back-end/routes/ocorrencia.router')
-
-// Definir a porta do servidor
-const PORT = 3000;
-const server = http.createServer(app);
-const io = require("socket.io")(server, {
-    cors: {
-        origin: "*", // Permite apenas seu domínio
-        methods: ["GET", "POST"],
-    },
-});
-
+// Configurar CORS antes das rotas
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type'],
 }));
 
+// Middleware para interpretar JSON
 app.use(express.json());
 
-app.use(userRouter)
-app.use(ocorrencias)
+// Importar rotas
+const userRouter = require('../Back-end/routes/user.router');
+const ocorrencias = require('../Back-end/routes/ocorrencia.router');
+app.use(userRouter);
+app.use(ocorrencias);
 
-let adminSockets = [];  // Lista de administradores conectados
-let activeChats = {};   // Mapeamento de chats ativos (socketId do cliente -> administrador)
+// Definir a porta do servidor
+const PORT = 3000;
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+});
+
+// Gerenciamento de administradores e chats
+let adminSockets = new Set(); // Usando Set para evitar duplicações
+let activeChats = new Map();  // Usando Map para mapeamento eficiente
 
 io.on('connection', (socket) => {
-    //console.log('Usuário conectado:', socket.id);
+    console.log('Usuário conectado:', socket.id);
 
-    // Verificar se o usuário é admin
+    // Conectar administrador
     socket.on('admin connect', () => {
-        adminSockets.push(socket);
-        //console.log('Admin conectado:', socket.id);
+        adminSockets.add(socket);
+        console.log('Admin conectado:', socket.id);
     });
 
-    // Quando um cliente solicita iniciar um chat
+    // Cliente solicita chat
     socket.on('request chat', (username) => {
-        //console.log(`${username} (${socket.id}) solicitou iniciar um chat`);
-
-        // Verificar se já existe um chat ativo para este cliente
-        if (activeChats[socket.id]) {
+        if (activeChats.has(socket.id)) {
             socket.emit('chat error', 'Chat já está em andamento.');
             return;
         }
-
-        // Notifica todos os administradores conectados
         adminSockets.forEach((admin) => {
             admin.emit('chat request', { username, socketId: socket.id });
         });
     });
 
-    // Quando o admin aceita a solicitação de chat
+    // Admin aceita chat
     socket.on('accept chat', (clientSocketId) => {
-        // Verificar se o chat já foi aceito
-        if (activeChats[clientSocketId]) {
+        if (activeChats.has(clientSocketId)) {
             socket.emit('chat error', 'Chat já foi aceito por outro administrador.');
             return;
         }
-
-        // Registrar o administrador responsável pelo chat
-        activeChats[clientSocketId] = socket.id;
-
-        // Informar o cliente que o chat foi aceito
+        activeChats.set(clientSocketId, socket.id);
         io.to(clientSocketId).emit('chat accepted');
-        //console.log(`Chat entre admin ${socket.id} e cliente ${clientSocketId} iniciado.`);
-
-        // Informar outros administradores que o chat foi aceito
         adminSockets.forEach((admin) => {
             if (admin.id !== socket.id) {
                 admin.emit('chat taken', { clientSocketId });
@@ -80,42 +70,31 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Recebe mensagem de cliente ou admin
-    socket.on("chat message", (data) => {
-        //console.log("Mensagem recebida:", data);
-
-        const { from, content } = data;
-        const adminSocketId = activeChats[socket.id]; // Admin associado ao cliente
-
+    // Mensagens do chat
+    socket.on('chat message', ({ from, content }) => {
+        const adminSocketId = activeChats.get(socket.id);
         if (adminSocketId) {
-            // Enviar a mensagem para o admin responsável
-            io.to(adminSocketId).emit("chat message", { from, content });
-            //console.log(`Mensagem enviada para admin ${adminSocketId}:`, content);
+            io.to(adminSocketId).emit('chat message', { from, content });
         } else {
-            // Enviar a mensagem para o cliente associado
-            const clientSocketId = Object.keys(activeChats).find(
-                key => activeChats[key] === socket.id
-            );
-            if (clientSocketId) {
-                io.to(clientSocketId).emit("chat message", { from, content });
-                //console.log(`Mensagem enviada para cliente ${clientSocketId}:`, content);
+            for (let [clientSocketId, adminId] of activeChats.entries()) {
+                if (adminId === socket.id) {
+                    io.to(clientSocketId).emit('chat message', { from, content });
+                    break;
+                }
             }
         }
     });
 
-    // Evento de desconexão
+    // Desconexão do usuário
     socket.on('disconnect', () => {
-        //console.log('Usuário desconectado:', socket.id);
+        console.log('Usuário desconectado:', socket.id);
+        adminSockets.delete(socket);
 
-        // Remover da lista de administradores, se aplicável
-        adminSockets = adminSockets.filter((admin) => admin.id !== socket.id);
-
-        // Encerrar chats ativos deste administrador
-        for (const [clientSocketId, adminSocketId] of Object.entries(activeChats)) {
+        // Remover chats ativos do administrador desconectado
+        for (let [clientSocketId, adminSocketId] of activeChats.entries()) {
             if (adminSocketId === socket.id) {
-                delete activeChats[clientSocketId];
+                activeChats.delete(clientSocketId);
                 io.to(clientSocketId).emit('chat ended', 'Administrador desconectado.');
-                //console.log(`Chat encerrado entre admin ${socket.id} e cliente ${clientSocketId}`);
             }
         }
     });

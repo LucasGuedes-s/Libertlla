@@ -15,8 +15,19 @@ async function CadrastrarOcorrencias(req, res) {
             data_ocorrencia: req.ocorrencias.data_ocorrencia
         } 
     })
-    console.log(ocorrencias)
     return ocorrencias;
 }
+async function getProcesso(req, res) {
+    const profissionalId = req
+    const processos = await prisma.Profissionais.findFirst({
+        where: {
+            email: profissionalId // Filtra pelo ID do profissional
+        },
+        select: {
+            processos: true, // Inclui os dados da ocorrência associada
+        }
+    });
+    return processos;
+}
 
-module.exports = {CadrastrarOcorrencias}
+module.exports = {CadrastrarOcorrencias, getProcesso}

@@ -30,6 +30,7 @@ model Ocorrencias {
   local           String?
   data_denuncia   DateTime?  @db.Date
   data_ocorrencia String
+  status          String @default("Andamento") // Adicionando um valor padrão
   ocorrencias     Processo[]
 }
 

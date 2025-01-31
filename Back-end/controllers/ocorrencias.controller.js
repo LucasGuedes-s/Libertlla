@@ -1,8 +1,8 @@
-const Cadrastrar = require("../services/ocorrencias.service");
+const  Ocorrencia = require("../services/ocorrencias.service");
 
 async function PostOcorrencias(req, res, next) {
     try {
-        const ocorrencias = await Cadrastrar.CadrastrarOcorrencias(req.body)
+        const ocorrencias = await  Ocorrencia.OcorrenciaOcorrencias(req.body)
         res.status(200).json({
             ocorrencias
         })
@@ -12,4 +12,16 @@ async function PostOcorrencias(req, res, next) {
         console.error('Erro no cadrastro da ocorrencia')
     }
 }
-module.exports = {PostOcorrencias};
+async function getProcesso(req, res, next) {
+    try {
+        const processo = await  Ocorrencia.getProcesso(req.params.email)
+        res.status(200).json({
+            processo
+        })
+        next()
+    } catch (error) {
+        console.error(error)
+        console.error('Erro ao receber processos do usuário')
+    }
+}
+module.exports = {PostOcorrencias, getProcesso};
