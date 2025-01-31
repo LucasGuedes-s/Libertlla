@@ -5,6 +5,6 @@ const controller = require('../controllers/ocorrencias.controller')
 
 router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
 
-router.get('/get/ocorrencias/:email', controller.getProcesso)
+router.get('/ocorrencia/processos/:email', controller.getProcesso)
 
 module.exports = router;

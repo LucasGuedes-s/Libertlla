@@ -24,7 +24,7 @@ async function getProcesso(req, res) {
             email: profissionalId // Filtra pelo ID do profissional
         },
         select: {
-            processos: true, // Inclui os dados da ocorrência associada
+            processos: true, // Inclui os dados dos processos associados
         }
     });
     return processos;
