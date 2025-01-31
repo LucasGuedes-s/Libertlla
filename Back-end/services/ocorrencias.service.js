@@ -19,4 +19,17 @@ async function CadrastrarOcorrencias(req, res) {
     return ocorrencias;
 }
 
-module.exports = {CadrastrarOcorrencias}
+async function GetOcorrencias() {
+    try {
+        const ocorrencias = await prisma.Ocorrencias.findMany({
+            where: { status: "Andamento" }, 
+            orderBy: { data_denuncia: "desc" } 
+        });
+        return ocorrencias;
+    } catch (error) {
+        console.error("Erro ao buscar ocorrências:", error);
+        throw new Error("Erro ao buscar ocorrências.");
+    }
+}
+
+module.exports = {CadrastrarOcorrencias, GetOcorrencias}
