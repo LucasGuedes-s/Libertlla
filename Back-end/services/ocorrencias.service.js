@@ -15,21 +15,19 @@ async function CadrastrarOcorrencias(req, res) {
             data_ocorrencia: req.ocorrencias.data_ocorrencia
         } 
     })
-    console.log(ocorrencias)
     return ocorrencias;
 }
-
-async function GetOcorrencias() {
-    try {
-        const ocorrencias = await prisma.Ocorrencias.findMany({
-            where: { status: "Andamento" }, 
-            orderBy: { data_denuncia: "desc" } 
-        });
-        return ocorrencias;
-    } catch (error) {
-        console.error("Erro ao buscar ocorrências:", error);
-        throw new Error("Erro ao buscar ocorrências.");
-    }
+async function getProcesso(req, res) {
+    const profissionalId = req
+    const processos = await prisma.Profissionais.findFirst({
+        where: {
+            email: profissionalId // Filtra pelo ID do profissional
+        },
+        select: {
+            processos: true, // Inclui os dados dos processos associados
+        }
+    });
+    return processos;
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencias}
+module.exports = {CadrastrarOcorrencias}

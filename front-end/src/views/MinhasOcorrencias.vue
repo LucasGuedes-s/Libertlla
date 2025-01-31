@@ -43,6 +43,7 @@ export default {
   },
   methods: {
     toggleSidebar() {
+      
       this.sidebarVisible = !this.sidebarVisible; 
     },
   },
@@ -55,7 +56,7 @@ export default {
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
   margin-top: 20px;
-  margin-left: 46px;
+  margin-left: 7px;
   color: #9B287B;
 }
 
@@ -65,7 +66,7 @@ label {
 }
 
 .ocorrencia {
-  margin-left: 260px;
+  margin-left: 290px;
   padding: 20px;
   border-radius: 100px;
 }
@@ -74,9 +75,9 @@ label {
   margin-top: 30px;
   border-color: #d3d3d3b6;
   border-style: solid;
-  width: 90%;
+  width: 96%;
   padding: 20px;
-  margin-left: 45px;
+  margin-left: 5px;
 }
 
 .form-group {

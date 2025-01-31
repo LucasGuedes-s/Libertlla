@@ -1,7 +1,8 @@
 <template>
-  <div class="dashboard d-flex">
+  <div class="dashboard">
+  <div class="d-flex">
     <SideBar />
-    <div class="dashboard container">
+    <div class="container">
       <section class="section_contagemdedenuncias">
         <div class="card_contagem">
           <h3>Total de Denúncias</h3>
@@ -45,20 +46,24 @@
             </div>
           </div>
         </div>
-        <div v-if="isChatActive" class="chat-container-admin-admin">
-          <h3>Chat Ativo</h3>
-          <div class="messages">
-            <div v-for="(message, index) in messages" :key="index" class="message">
-              {{ message.from }} {{ message.content }}
-            </div>
-          </div>
-          <input v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
-          <button @click="sendMessage">Enviar</button>
-
-        </div>
       </div>
     </div>
   </div>
+  <div class="chat-container">
+  <div v-if="isChatActive">
+      <h3>Chat Ativo</h3>
+      <div class="messages">
+        <div v-for="(message, index) in messages" :key="index" class="message">
+          {{ message.from }} {{ message.content }}
+        </div>
+      </div>
+      <div class="chat-input-container">
+      <input type="text" v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
+      <button @click="sendMessage">Enviar</button>
+    </div>
+    </div>
+  </div>
+</div>
 </template>
 
 <style scooped>
@@ -155,6 +160,79 @@
   font-size: 14px;
 }
 
+.chat-container {
+  height: 50%;
+  margin: 50px auto;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: rgb(255, 255, 255);
+  /* Fundo do contêiner principal */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  flex-direction: column;
+}
+
+.chat-container h3 {
+  background-color: #802062;
+  /* Fundo do cabeçalho */
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.messages {
+  border: 1px solid #ddd;
+  height: 300px;
+  overflow-y: scroll;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Input e botão de envio */
+.chat-input-container {
+  display: flex;
+  padding: 10px;
+  background-color: #F5F5F5;
+  align-items: center;
+}
+
+.chat-input-container input[type="text"] {
+  flex: 1;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 14px;
+  margin-right: 10px;
+  background-color: #fff;
+}
+
+.chat-input-container input::placeholder {
+  color: #bbb;
+}
+
+.chat-input-container button {
+  background-color: #802062;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 80px;
+}
+
+.chat-input-container button:hover {
+  background-color: #993374;
+}
+
 @media (max-width: 768px) {
   .dashboard {
     margin-left: 0;
@@ -173,47 +251,6 @@
   .card_contagem p {
     font-size: 24px;
   }
-}
-
-.chat-container-admin {
-  max-width: 80%;
-  height: 50%;
-  margin: 50px auto;
-  border-radius: 10px;
-  overflow: hidden;
-  background-color:rgb(255, 255, 255); /* Fundo do contêiner principal */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  flex-direction: column;
-}
-
-.chat-container-admin h2 {
-  background-color: #802062; /* Fundo do cabeçalho */
-  color: #fff;
-  text-align: center;
-  padding: 15px;
-  margin: 0;
-  font-size: 18px;
-  font-weight: bold;
-}
-.messages {
-  border: 1px solid #ddd;
-  height: 300px;
-  overflow-y: scroll;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
-.message {
-  margin-bottom: 10px;
-  padding: 5px;
-  border-bottom: 1px solid #eee;
-}
-
-input, button {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  margin-top: 10px;
 }
 </style>
 
