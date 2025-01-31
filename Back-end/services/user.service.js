@@ -5,7 +5,6 @@ var jwt = require('jsonwebtoken');
 const config= require('../config/app.config')
 
 async function LoginUser(req, res) {
-    console.log(req)
     const user = await prisma.Profissionais.findFirst({
         where:{
             email: req.usuario.email
