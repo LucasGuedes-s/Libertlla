@@ -58,10 +58,10 @@ model Permissoes {
   profissionais Profissionais[]
 }
 
-model Chat {
-  id         String   @id @default(uuid()) // ID único do chat
-  criadoEm   DateTime @default(now())     // Data de criação do chat
-  clienteId  String   // ID do cliente no socket
-  adminId    String?  // ID do administrador que aceitou o chat
-  mensagens  Json     // Armazena todas as mensagens como JSON
+model Conversa {
+  id        String   @id @default(uuid()) // UUID para gerar IDs únicos
+  clientId  String   // ID do cliente
+  adminId   String?  // ID do admin (pode ser nulo no início)
+  messages  Json     // JSONB no PostgreSQL para armazenar a conversa
+  createdAt DateTime @default(now()) // Data da criação
 }

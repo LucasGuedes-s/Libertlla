@@ -29,59 +29,66 @@
   </div>
 </template>
 
-
 <script>
 import { io } from "socket.io-client";
+import Swal from "sweetalert2";
 
 export default {
-  name: 'chat-user',
+  name: "chat-user",
   data() {
     return {
       socket: null,
       nome: "Anonimo",
       inputMessage: "",
-      messages: [], // Cada mensagem será um objeto com { from, content }
-      chatAceito: false
+      messages: [],
+      chatAceito: false,
+      waitingAlert: null,
     };
   },
   mounted() {
-    // Conecta ao servidor Socket.io
     this.socket = io("http://localhost:3000");
 
-    // Escuta quando o administrador aceita o chat
     this.socket.on("chat accepted", () => {
       this.chatAceito = true;
+      if (this.waitingAlert) {
+        this.waitingAlert.close();
+      }
     });
 
-    // Recebe mensagens do servidor
-    this.socket.on('chat message', (msg) => {
-    console.log('Mensagem recebida no cliente:', msg); // Para debug
-    if (msg && msg.content) {
-        console.log(msg)
-        this.messages.push(msg); // Adiciona à lista de mensagens
-        }
+    this.socket.on("chat message", (msg) => {
+      if (msg && msg.content) {
+        this.messages.push(msg);
+      }
     });
   },
   methods: {
     requestChat() {
       if (this.nome.trim()) {
-        // Envia solicitação de chat ao servidor
         this.socket.emit("request chat", this.nome);
+        
+        this.waitingAlert = Swal.fire({
+          title: "Aguardando aceitação...",
+          text: "Aguarde um administrador aceitar o chat.",
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willClose: () => {
+            this.waitingAlert = null;
+          }
+        });
       }
     },
     sendMessage() {
       if (this.inputMessage.trim()) {
-        // Envia a mensagem para o servidor
         const message = {
           from: this.nome,
-          content: this.inputMessage
+          content: this.inputMessage,
         };
         this.socket.emit("chat message", message);
-        this.messages.push(message); // Exibe a mensagem localmente
-        this.inputMessage = ""; // Limpa o campo de entrada
+        this.messages.push(message);
+        this.inputMessage = "";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

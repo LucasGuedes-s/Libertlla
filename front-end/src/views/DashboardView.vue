@@ -25,7 +25,7 @@
         <div class="ocorrencias_formulario">
           <h2>Ocorrências por Formulário</h2>
           <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
-            <p><strong>Denúncia:</strong> #{{ ocorrencia.id }} </p>
+            <p><strong>Denúncia:</strong> {{ ocorrencia.id }} </p>
             <p><strong>Data:</strong> {{ ocorrencia.data_denuncia }}</p>
             <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
             <div class="buttons">
@@ -51,6 +51,7 @@
   <div class="chat-container">
   <div v-if="isChatActive">
       <h3>Chat Ativo</h3>
+      <button class="close-chat" @click="endChat">&times;</button>
       <div class="messages">
         <div v-for="(message, index) in messages" :key="index" class="message">
           {{ message.from }} {{ message.content }}
@@ -66,6 +67,13 @@
 </template>
 
 <style scooped>
+.close-chat {
+  background: none;
+  border: none;
+  color: #8b2276;
+  font-size: 24px;
+  cursor: pointer;
+}
 .dashboard {
   margin-left: 250px;
   padding: 20px;
@@ -257,7 +265,8 @@
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { io } from "socket.io-client";
-
+import Swal from 'sweetalert2';
+   
 export default {
   data() {
     return {
@@ -302,12 +311,15 @@ export default {
 
     // Notifica o administrador se o chat terminar
     this.socket.on("chat ended", (reason) => {
-      alert(`Chat encerrado: ${reason}`);
+      Swal.fire({
+          icon: 'error',
+          title: 'Usuário foi desconectado',
+          timer: 4000,
+      })
       this.endChat();
     });
   },
   methods: {
-
     acceptChat(socketId) {
       // Aceita a solicitação de chat
       this.socket.emit("accept chat", socketId);
