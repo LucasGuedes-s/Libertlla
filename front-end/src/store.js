@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import Cookies from 'js-cookie';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
