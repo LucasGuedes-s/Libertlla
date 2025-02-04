@@ -2,7 +2,7 @@ const  Ocorrencia = require("../services/ocorrencias.service");
 
 async function PostOcorrencias(req, res, next) {
     try {
-        const ocorrencias = await  Ocorrencia.OcorrenciaOcorrencias(req.body)
+        const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body)
         res.status(200).json({
             ocorrencias
         })
@@ -14,7 +14,7 @@ async function PostOcorrencias(req, res, next) {
 }
 async function getProcessos(req, res, next) {
     try {
-        const processos = await  Ocorrencia.getProcesso(req.params.email)
+        const processos = await Ocorrencia.getProcesso(req.params.email)
         res.status(200).json({
             processos
         })
@@ -36,4 +36,16 @@ async function GetOcorrencias(req, res, next) {
         console.error('Erro ao receber ocorrencias')
     }
 }
-module.exports = {PostOcorrencias, GetOcorrencias, getProcessos};
+async function updateOcorrencia(req, res, next) {
+    try {
+        const ocorrencias = await Ocorrencia.updateOcorrencia(req)
+        res.status(200).json({
+            ocorrencias
+        })
+        next()
+    } catch (error) {
+        console.error(error)
+        console.error('Erro ao realizar alteração na ocorrencia/processo')
+    }
+}
+module.exports = {PostOcorrencias, GetOcorrencias, getProcessos, updateOcorrencia};

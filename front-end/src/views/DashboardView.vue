@@ -21,14 +21,13 @@
           <p>120</p>
         </div>
       </section>
-
       <div class="div_ocorrencias">
         <div class="ocorrencias_formulario">
           <h2>Ocorrências por Formulário</h2>
-          <div class="info_denuncia">
-            <p><strong>Denúncia:</strong></p>
-            <p><strong>Data:</strong></p>
-            <p><strong>Tipo de Denúncia:</strong></p>
+          <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+            <p><strong>Denúncia:</strong> #{{ ocorrencia.id }} </p>
+            <p><strong>Data:</strong> {{ ocorrencia.data_denuncia }}</p>
+            <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
             <div class="buttons">
               <button class="detalhar-btn">Detalhar</button>
               <button class="aceitar-btn">Aceitar</button>
@@ -256,11 +255,13 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
+import axios from 'axios';
 import { io } from "socket.io-client";
 
 export default {
   data() {
     return {
+      ocorrencias: [],
       socket: null,
       inputMessage: "",
       messages: [],
@@ -270,7 +271,15 @@ export default {
     };
   },
   mounted() {
-    // Conecta ao servidor Socket.io como admin
+    axios.get("http://localhost:3000/ocorrencias")
+    .then(response => {
+        this.ocorrencias = response.data.ocorrencias
+        console.log(response.data);  // Acessando os dados da resposta
+    })
+    .catch(error => {
+        console.error('Erro ao buscar ocorrências:', error);
+    });
+
     this.socket = io("http://localhost:3000");
 
     // Envia sinal de que é o admin
@@ -298,6 +307,7 @@ export default {
     });
   },
   methods: {
+
     acceptChat(socketId) {
       // Aceita a solicitação de chat
       this.socket.emit("accept chat", socketId);

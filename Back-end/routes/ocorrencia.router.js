@@ -9,4 +9,6 @@ router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
 
 router.get('/ocorrencia/processos/:email', controller.getProcessos)
 
+router.post('/aceitar/ocorrencia', controller.updateOcorrencia)
+
 module.exports = router;

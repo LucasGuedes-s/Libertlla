@@ -9,12 +9,12 @@
                 <div class="form-group">
                     <label for="">Tipo de Violência:</label>
                     <select name="tipodeviolencia" id="tipodeviolencia" v-model="tipodeviolencia">
-                        <option value="violencia_domestica">Violência Doméstica</option>
-                        <option value="agressão_fisica_ou_verbal">Agressão Física ou Verbal</option>
-                        <option value="assedio">Assédio</option>
-                        <option value="abuso_sexual">Abuso Sexual</option>
-                        <option value="ameaca_ou_intimidação">Ameaça ou Intimidação</option>
-                        <option value="perseguicao_ou_stalking">Perseguição ou Stalking</option>
+                        <option value="Violencia doméstica">Violência Doméstica</option>
+                        <option value="Agressão fisica ou verbal">Agressão Física ou Verbal</option>
+                        <option value="Assédio">Assédio</option>
+                        <option value="Abuso sexual">Abuso Sexual</option>
+                        <option value="Ameaça ou intimidação">Ameaça ou Intimidação</option>
+                        <option value="Perseguicao ou stalking">Perseguição ou Stalking</option>
                     </select>
                 </div>
 
@@ -168,6 +168,7 @@ h2 {
 </style>
 <script>
 import axios from 'axios';
+import Swal from 'sweetalert2'
 
 export default {
     name: 'FormularioDenuncia',
@@ -198,13 +199,26 @@ export default {
                     local: this.local_do_ocorrido,
                     data_ocorrencia: this.data_ocorrido
                 }
-            })
-                .then((response) => {
-                    console.log("Ocorrência cadastrada com sucesso:", response.data);
+            }).then(response =>{
+                console.log(response.status)
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Denuncia realizada com sucesso',
+                    text: `Denuncia realizada com sucesso ${response.data.ocorrencia}`,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
                 })
-                .catch((error) => {
-                    console.error("Erro ao cadastrar a ocorrência:", error);
-                });
+                this.tipodeviolencia = '',
+                this.tipodeviolencia = '',
+                this.relacao_agressor = ''
+                provas= [],
+                this.descricao = '',
+                this.local_do_ocorrido = '',
+                this.data_ocorrido = ''
+            }).catch(error =>{
+                console.log(error)
+            })
 
         },
     }

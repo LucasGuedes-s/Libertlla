@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 config = {
     jwtSecret: process.env.JWT_SECRET,
 }

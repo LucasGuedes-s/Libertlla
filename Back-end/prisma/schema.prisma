@@ -39,7 +39,6 @@ model Processo {
   status        String?
   ocorrencia    Int?
   registro      Int?
-  permissao     Int
   ocorrecia     Ocorrencias?    @relation(fields: [ocorrencia], references: [id])
   registros     Registro?       @relation(fields: [registro], references: [id])
   profissionais Profissionais[]
@@ -57,4 +56,12 @@ model Permissoes {
   id            Int             @id @default(autoincrement())
   descricao     String?
   profissionais Profissionais[]
+}
+
+model Chat {
+  id         String   @id @default(uuid()) // ID único do chat
+  criadoEm   DateTime @default(now())     // Data de criação do chat
+  clienteId  String   // ID do cliente no socket
+  adminId    String?  // ID do administrador que aceitou o chat
+  mensagens  Json     // Armazena todas as mensagens como JSON
 }
