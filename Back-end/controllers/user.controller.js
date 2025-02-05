@@ -1,4 +1,3 @@
-const { Router } = require('express');
 const LoginUser = require('../services/user.service');
 
 async function LoginUsuario(req, res, next) {
@@ -6,10 +5,9 @@ async function LoginUsuario(req, res, next) {
         const Login = await LoginUser.LoginUser(req.body);
         res.setHeader('Authorization', `Bearer ${Login.token}`);
         res.status(200).json({ 
-            message: "Login bem-sucedido", 
-            token: Login.token, 
-            usuario: Login.usuario
+            usuario: Login.user
         });
+        res.end()
     } catch (error) {
         console.error('Erro no login do usuário', error);
         next(error);

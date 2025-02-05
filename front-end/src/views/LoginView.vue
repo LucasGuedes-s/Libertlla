@@ -128,6 +128,7 @@ export default {
         return {
             email: '',
             senha: '',
+            token: null,
         }
     },
 methods:{
@@ -138,9 +139,12 @@ methods:{
                 senha: this.senha
             }
         }).then(response =>{
-          const token = response.headers.authorization
-          const user = response.data.usuario;
-          this.store.login(user, token);
+          const authStore = useAuthStore();
+
+          const token = response.headers.authorization.split(' ')[1];
+          const user = response.data;
+
+          authStore.login(user, token);
           router.push('/dashboard');
         }).catch(Error =>{
             console.log(Error);

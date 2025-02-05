@@ -14,7 +14,17 @@ app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type'],
+    exposedHeaders: ['Authorization']
+
 }));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Headers", "Authorization, content-type");
+    res.header("Access-Control-Expose-Headers", "Authorization, content-type");
+    next();
+  });
+
+  
 app.use(express.json());
 
 // Importar rotas
