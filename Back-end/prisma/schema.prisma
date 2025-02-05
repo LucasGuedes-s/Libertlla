@@ -16,8 +16,9 @@ model Profissionais {
   foto          String?    @db.VarChar(2048)
   especialidade String
   processo      Int?
+  ocorrencias   Ocorrencias[]
   permissao     Permissoes @relation(fields: [permissaoId], references: [id])
-  processos     Processo?  @relation(fields: [processo], references: [id])
+
 }
 
 model Ocorrencias {
@@ -31,17 +32,10 @@ model Ocorrencias {
   data_denuncia   DateTime?  @db.Date
   data_ocorrencia String
   status          String @default("Andamento") // Adicionando um valor padrão
-  ocorrencias     Processo[]
-}
-
-model Processo {
-  id            Int             @id @default(autoincrement())
-  status        String?
-  ocorrencia    Int?
-  registro      Int?
-  ocorrecia     Ocorrencias?    @relation(fields: [ocorrencia], references: [id])
-  registros     Registro?       @relation(fields: [registro], references: [id])
-  profissionais Profissionais[]
+  registro        Int?
+  registros       Registro?       @relation(fields: [registro], references: [id])
+  profisssional   Profissionais? @relation(fields: [profissional], references: [id])
+  profissional    Int?
 }
 
 model Registro {
@@ -49,7 +43,7 @@ model Registro {
   anexos     String[]   @db.VarChar(2048)
   descricoes String?
   data       String?
-  processos  Processo[]
+  processos  Ocorrencias[]
 }
 
 model Permissoes {

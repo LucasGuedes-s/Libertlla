@@ -7,7 +7,7 @@ router.get('/ocorrencias', controller.GetOcorrencias);
 
 router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
 
-router.get('/ocorrencia/processos/:email', controller.getProcessos)
+router.get('/ocorrencias/:email', controller.getOcorrenciasProfissional)
 
 router.post('/aceitar/ocorrencia', controller.updateOcorrencia)
 

@@ -12,9 +12,9 @@ async function PostOcorrencias(req, res, next) {
         console.error('Erro no cadrastro da ocorrencia')
     }
 }
-async function getProcessos(req, res, next) {
+async function getOcorrenciasProfissional(req, res, next) {
     try {
-        const processos = await Ocorrencia.getProcesso(req.params.email)
+        const processos = await Ocorrencia.getOcorrenciasProfissional(req.params.email)
         res.status(200).json({
             processos
         })
@@ -48,4 +48,4 @@ async function updateOcorrencia(req, res, next) {
         console.error('Erro ao realizar alteração na ocorrencia/processo')
     }
 }
-module.exports = {PostOcorrencias, GetOcorrencias, getProcessos, updateOcorrencia};
+module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, updateOcorrencia};
