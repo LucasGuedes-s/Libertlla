@@ -264,10 +264,17 @@
 <script>
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
+import { useAuthStore } from '@/store.js'
 import { io } from "socket.io-client";
 import Swal from 'sweetalert2';
    
 export default {
+  setup(){
+        const store = useAuthStore() 
+        return{
+            store
+        }
+    },
   data() {
     return {
       ocorrencias: [],
@@ -288,6 +295,8 @@ export default {
     .catch(error => {
         console.error('Erro ao buscar ocorrências:', error);
     });
+    const usuario = this.store.usuario
+    console.log(usuario)
 
     this.socket = io("http://localhost:3000");
 

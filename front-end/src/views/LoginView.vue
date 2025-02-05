@@ -114,9 +114,16 @@
 <script>
 import router from '@/router';
 import axios from 'axios';
+import { useAuthStore } from '@/store.js'
 import Swal from 'sweetalert2';
 
 export default {
+  setup(){
+        const store = useAuthStore() 
+        return{
+            store
+        }
+    },
     data() {
         return {
             email: '',
@@ -131,7 +138,9 @@ methods:{
                 senha: this.senha
             }
         }).then(response =>{
-          console.log(response.data)
+          const token = response.headers.authorization
+          const user = response.data.usuario;
+          this.store.login(user, token);
           router.push('/dashboard');
         }).catch(Error =>{
             console.log(Error);
