@@ -36,6 +36,16 @@ async function GetOcorrencias(req, res, next) {
         console.error('Erro ao receber ocorrencias')
     }
 }
+async function GetTodasOcorrencias(req, res, next) {
+    try {
+        const { totalOcorrencias } = await Ocorrencia.GetTodasOcorrencias();
+        res.status(200).json({ totalOcorrencias });
+        next();
+    } catch (error) {
+        console.error(error);
+        console.error('Erro ao receber todas as ocorrências');
+    }
+}
 async function updateOcorrencia(req, res, next) {
     try {
         const ocorrencias = await Ocorrencia.updateOcorrencia(req)
@@ -48,4 +58,4 @@ async function updateOcorrencia(req, res, next) {
         console.error('Erro ao realizar alteração na ocorrencia/processo')
     }
 }
-module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, updateOcorrencia};
+module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia};

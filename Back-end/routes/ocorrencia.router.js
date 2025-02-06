@@ -5,6 +5,8 @@ const controller = require('../controllers/ocorrencias.controller')
 
 router.get('/ocorrencias', controller.GetOcorrencias);
 
+router.get('/todasocorrencias', controller.GetTodasOcorrencias);
+
 router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
 
 router.get('/ocorrencias/:email', controller.getOcorrenciasProfissional)

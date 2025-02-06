@@ -40,6 +40,11 @@ async function GetOcorrencias() {
     return ocorrencias;
 }
 
+async function GetTodasOcorrencias() {
+    const totalOcorrencias = await prisma.Ocorrencias.count();
+    return { totalOcorrencias };
+}
+
 async function updateOcorrencia(req, res) {
     try {
         const { ocorrenciaId, profissionalEmail } = req.body;
@@ -70,4 +75,4 @@ async function updateOcorrencia(req, res) {
     }
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencias, getOcorrenciasProfissional, updateOcorrencia}
+module.exports = {CadrastrarOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia}
