@@ -2,7 +2,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 
 async function CadrastrarOcorrencias(req, res) {
-    console.log(req)
     const ocorrencias = await prisma.Ocorrencias.create({
         data:{
             tipo_denuncia: req.ocorrencias.tipo_denuncia,
@@ -32,11 +31,17 @@ async function getOcorrenciasProfissional(req, res) {
 }
 
 async function GetOcorrencias() {
-    const ocorrencias = await prisma.Ocorrencias.findMany({
+    const ocorrencia = await prisma.Ocorrencias.findMany({
         where: { status: "Andamento" }, 
         orderBy: { data_denuncia: "desc" }
     });
 
+    return ocorrencia;
+}
+async function GetOcorrencia(req) {
+    const ocorrencias = await prisma.Ocorrencias.findUnique({
+        where: { id: parseInt(req) }, 
+    });
     return ocorrencias;
 }
 
@@ -75,4 +80,4 @@ async function updateOcorrencia(req, res) {
     }
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia}
+module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia}

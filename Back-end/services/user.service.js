@@ -6,8 +6,6 @@ const config= require('../config/app.config')
 require('dotenv').config();
 
 async function LoginUser(req, res) {
-    //console.log("DATABASE_URL:", process.env.DATABASE_URL);
-
     const user = await prisma.Profissionais.findFirst({
         where:{
             email: req.usuario.email
@@ -17,7 +15,6 @@ async function LoginUser(req, res) {
         throw new Error('Usuário ou senha não encontrado')
     }
     const senhaValida = bcrypt.compare(req.usuario.senha, user.senha);
-    console.log(senhaValida)
 
     if(senhaValida){
         const token = jwt.sign(user, config.jwtSecret, {
