@@ -51,8 +51,8 @@ export default {
     };
   },
   mounted() {
-    //const email = this.store.usuario.usuario.email;
-    const email = 'samuel@gmail.com'
+    const user = this.store.usuario.usuario;
+    const email = user.email
     console.log(email)
     axios.get(`http://localhost:3000/ocorrencias/${email}`).then(response => {
         this.ocorrencias = response.data.processos;
