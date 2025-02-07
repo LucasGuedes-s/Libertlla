@@ -4,20 +4,20 @@
     <div class="ocorrencia container">
       <h1 class="titulo mb-4">Minhas Ocorrências:</h1>
 
-      <div class="ocorrencia-form border rounded p4 row">
+      <div class="ocorrencia-form border rounded p-4 row" v-for="ocorrencia in ocorrencias[0].ocorrencias" :key="ocorrencia.id">
         <div class="col-12 col-md-6">
-          <label for="data">Data:</label>
-          <input class="form-control" id="data" name="data" />
+          <label>Data:</label>
+          <p>{{    ocorrencia.data_denuncia }}</p> 
         </div>
 
         <div class="col-12 col-md-6">
-          <label for="tipo-denuncia">Tipo de denúncia:</label>
-          <input type="text" class="form-control" id="tipo-denuncia" name="tipo-denuncia" />
+          <label>Tipo de Denúncia:</label>
+          <p>{{ ocorrencia.tipo_denuncia }}</p>
         </div>
 
         <div class="col-12 mt-3">
-          <label for="descricao">Descrição:</label>
-          <input class="form-control" id="descricao" name="descricao" rows="4" />
+          <label>Descrição:</label> 
+          <p>{{ ocorrencia.descricao }}</p>
         </div>
 
         <div class="col-12 mt-3 d-flex flex-column flex-md-row justify-content-start gap-3">
@@ -31,24 +31,42 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
+import axios from 'axios';
+import { useAuthStore } from '@/store';
 
 export default {
   components: {
     SideBar,
   },
-  data() {
+  setup() {
+    const store = useAuthStore();
     return {
-      sidebarVisible: true, 
+      store,
     };
   },
-  methods: {
-    toggleSidebar() {
-      
-      this.sidebarVisible = !this.sidebarVisible; 
-    },
+  data() {
+    return {
+      sidebarVisible: true,
+      ocorrencias: [],
+    };
+  },
+  mounted() {
+    //const email = this.store.usuario.usuario.email;
+    const email = 'samuel@gmail.com'
+    console.log(email)
+    axios.get(`http://localhost:3000/ocorrencias/${email}`).then(response => {
+        this.ocorrencias = response.data.processos;
+        console.log(this.ocorrencias[0].ocorrencias);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar ocorrências:', error);
+      });
+
+    console.log(this.store.usuario);
   },
 };
 </script>
+
 
 <style scoped>
 .titulo {
@@ -60,9 +78,15 @@ export default {
   color: #9B287B;
 }
 
-label {
+p{
   color: rgba(152, 152, 152, 255);
   font-weight: 700;
+  border: 1px solid #d3d3d3b6; /* Adicionando a borda */
+  border-radius: 4px; /* Arredondando as bordas */
+}
+label{
+  font-family: "Montserrat", sans-serif;
+  color: rgba(152, 152, 152, 255);
 }
 
 .ocorrencia {
