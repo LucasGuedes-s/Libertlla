@@ -26,7 +26,7 @@
           <h2>Ocorrências por Formulário</h2>
           <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
             <p><strong>Denúncia:</strong> {{ ocorrencia.id }} </p>
-            <p><strong>Data:</strong> {{ ocorrencia.data_denuncia }}</p>
+            <p><strong>Data:</strong> {{ formatDate (ocorrencia.data_denuncia) }} </p>
             <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
             <div class="buttons">
               <button class="detalhar-btn">Detalhar</button>
@@ -266,6 +266,7 @@ import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store.js'
 import { io } from "socket.io-client";
+import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
    
 export default {
@@ -277,6 +278,7 @@ export default {
     },
   data() {
     return {
+      formatDate,
       ocorrencias: [],
       socket: null,
       inputMessage: "",
