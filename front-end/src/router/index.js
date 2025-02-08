@@ -47,7 +47,6 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import('../views/LoginView.vue')
   },
-
   {
     path: '/minhasocorrencias',
     name: 'minhasocorrencias',
@@ -55,6 +54,14 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: MinhasOcorrenciasView
+  },
+  {
+    path: '/ocorrencia',
+    name: 'ocorrencia',
+     // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('../views/OcorrenciaView.vue')
   }
 ];
 

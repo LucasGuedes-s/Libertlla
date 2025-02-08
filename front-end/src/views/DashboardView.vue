@@ -1,69 +1,69 @@
 <template>
   <div class="dashboard">
-  <div class="d-flex">
-    <SideBar />
-    <div class="container">
-      <section class="section_contagemdedenuncias">
-        <div class="card_contagem">
-          <h3>Total de Denúncias</h3>
-          <p>150</p>
-        </div>
-        <div class="card_contagem">
-          <h3>Formulário</h3>
-          <p>80</p>
-        </div>
-        <div class="card_contagem">
-          <h3>Chat</h3>
-          <p>70</p>
-        </div>
-        <div class="card_contagem">
-          <h3>Atendidas</h3>
-          <p>120</p>
-        </div>
-      </section>
-      <div class="div_ocorrencias">
-        <div class="ocorrencias_formulario">
-          <h2>Ocorrências por Formulário</h2>
-          <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
-            <p><strong>Denúncia:</strong> {{ ocorrencia.id }} </p>
-            <p><strong>Data:</strong> {{ formatDate (ocorrencia.data_denuncia) }} </p>
-            <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
-            <div class="buttons">
-              <button class="detalhar-btn">Detalhar</button>
-              <button class="aceitar-btn">Aceitar</button>
+    <div class="d-flex">
+      <SideBar />
+      <div class="container">
+        <section class="section_contagemdedenuncias">
+          <div class="card_contagem">
+            <h3>Total de Denúncias</h3>
+            <p>150</p>
+          </div>
+          <div class="card_contagem">
+            <h3>Formulário</h3>
+            <p>80</p>
+          </div>
+          <div class="card_contagem">
+            <h3>Chat</h3>
+            <p>70</p>
+          </div>
+          <div class="card_contagem">
+            <h3>Atendidas</h3>
+            <p>120</p>
+          </div>
+        </section>
+        <div class="div_ocorrencias">
+          <div class="ocorrencias_formulario">
+            <h2>Ocorrências por Formulário</h2>
+            <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+              <p><strong>Denúncia:</strong> {{ ocorrencia.id }} </p>
+              <p><strong>Data:</strong> {{ formatDate(ocorrencia.data_denuncia) }} </p>
+              <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
+              <div class="buttons">
+                <button class="detalhar-btn">Detalhar</button>
+                <button class="aceitar-btn" @click="aceitarDenuncia(ocorrencia.id)">Aceitar</button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="ocorrencias_chat">
-          <h2>Ocorrências por Chat</h2>
-          <div class="info_denuncia" v-for="(solicitacao, index) in solicitacoes" :key="index">
-            <p><strong>Denúncia: {{ solicitacao.username }} </strong></p>
-            <p><strong>Data:</strong></p>
-            <p><strong>Tipo de Denúncia:</strong></p>
-            <div class="buttons">
-              <button class="aceitar-btn" @click="acceptChat(solicitacao.socketId)">Aceitar</button>
+          <div class="ocorrencias_chat">
+            <h2>Ocorrências por Chat</h2>
+            <div class="info_denuncia" v-for="(solicitacao, index) in solicitacoes" :key="index">
+              <p><strong>Denúncia: {{ solicitacao.username }} </strong></p>
+              <p><strong>Data:</strong></p>
+              <p><strong>Tipo de Denúncia:</strong></p>
+              <div class="buttons">
+                <button class="aceitar-btn" @click="acceptChat(solicitacao.socketId)">Aceitar</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="chat-container">
-  <div v-if="isChatActive">
-      <h3>Chat Ativo</h3>
-      <button class="close-chat" @click="endChat">&times;</button>
-      <div class="messages">
-        <div v-for="(message, index) in messages" :key="index" class="message">
-          {{ message.from }} {{ message.content }}
+    <div class="chat-container">
+      <div v-if="isChatActive">
+        <h3>Chat Ativo</h3>
+        <button class="close-chat" @click="endChat">&times;</button>
+        <div class="messages">
+          <div v-for="(message, index) in messages" :key="index" class="message">
+            {{ message.from }} {{ message.content }}
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <input type="text" v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
+          <button @click="sendMessage">Enviar</button>
         </div>
       </div>
-      <div class="chat-input-container">
-      <input type="text" v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
-      <button @click="sendMessage">Enviar</button>
-    </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scooped>
@@ -74,6 +74,7 @@
   font-size: 24px;
   cursor: pointer;
 }
+
 .dashboard {
   margin-left: 250px;
   padding: 20px;
@@ -268,14 +269,14 @@ import { useAuthStore } from '@/store.js'
 import { io } from "socket.io-client";
 import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
-   
+
 export default {
-  setup(){
-        const store = useAuthStore() 
-        return{
-            store
-        }
-    },
+  setup() {
+    const store = useAuthStore()
+    return {
+      store
+    }
+  },
   data() {
     return {
       formatDate,
@@ -289,14 +290,8 @@ export default {
     };
   },
   mounted() {
-    axios.get("http://localhost:3000/ocorrencias")
-    .then(response => {
-        this.ocorrencias = response.data.ocorrencias
-        console.log(response.data);  // Acessando os dados da resposta
-    })
-    .catch(error => {
-        console.error('Erro ao buscar ocorrências:', error);
-    });
+    this.buscarOcorrencia();
+
     const usuario = this.store.usuario
     console.log(usuario)
 
@@ -323,14 +318,47 @@ export default {
     // Notifica o administrador se o chat terminar
     this.socket.on("chat ended", (reason) => {
       Swal.fire({
-          icon: 'error',
-          title: 'Usuário foi desconectado',
-          timer: 4000,
+        icon: 'error',
+        title: 'Usuário foi desconectado',
+        timer: 4000,
       })
       this.endChat();
     });
   },
   methods: {
+    async buscarOcorrencia() {
+      axios.get("http://localhost:3000/ocorrencias")
+        .then(response => {
+          this.ocorrencias = response.data.ocorrencias
+          console.log(response.data);  // Acessando os dados da resposta
+        })
+        .catch(error => {
+          console.error('Erro ao buscar ocorrências:', error);
+        });
+    },
+    async aceitarDenuncia(id) {
+      const user = this.store.usuario.usuario
+      const email = user.email
+      await axios.post("http://localhost:3000/aceitar/ocorrencia", {
+        ocorrenciaId: id,
+        profissionalEmail: email
+
+      }).then(response => {
+        this.buscarOcorrencia();
+        Swal.fire({
+          icon: 'success',
+          title: 'Ocorrência aceita com sucesso',
+          timer: 4000,
+        })
+      }).catch(Error => {
+        console.log(Error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao aceitar denúncia',
+          timer: 4000,
+        })
+      });
+    },
     acceptChat(socketId) {
       // Aceita a solicitação de chat
       this.socket.emit("accept chat", socketId);

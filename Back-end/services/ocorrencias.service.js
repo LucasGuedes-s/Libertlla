@@ -56,23 +56,21 @@ async function updateOcorrencia(req, res) {
         if (!ocorrenciaId || !profissionalEmail) {
             return res.status(400).json({ error: "ID da ocorrência e e-mail do profissional são obrigatórios." });
         }
-
         // Buscar o profissional pelo e-mail
         const profissional = await prisma.Profissionais.findUnique({
             where: { email: profissionalEmail },
             select: { id: true }
         });
-        console.log(profissional)
 
         // Atualizar a ocorrência para associar o profissional e mudar o status
         const ocorrenciaAtualizada = await prisma.ocorrencias.update({
             where: { id: ocorrenciaId },
             data: {
                 profissional: profissional.id, // Atualizando o ID do profissional na ocorrência
+                status: "Em progresso"
             }
         });
 
-        console.log("Ocorrência atualizada:", ocorrenciaAtualizada);
         return ocorrenciaAtualizada;
     } catch (error) {
         console.error("Erro ao atualizar ocorrência:", error);
