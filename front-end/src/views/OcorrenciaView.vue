@@ -4,7 +4,7 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
-import axios from 'axios';
+//import axios from 'axios';
 import { useAuthStore } from '@/store';
 
 export default {
@@ -20,19 +20,18 @@ export default {
     data() {
         return {
             sidebarVisible: true,
-            ocorrencias: [],
+            ocorrencia: [],
         };
     },
     mounted() {
-        axios.get(`http://localhost:3000/ocorrencias/${email}`).then(response => {
-            this.ocorrencias = response.data.processos;
-            console.log(this.ocorrencias[0].ocorrencias);
+        /*
+        axios.get(`http://localhost:3000/ocorrencias/${email}`)
+        .then(response => {
+            this.ocorrencia = response.data;
         })
-            .catch(error => {
-                console.error('Erro ao buscar ocorrências:', error);
-            });
-
-        console.log(this.store.usuario);
+        .catch(error => {
+            console.error('Erro ao buscar ocorrências:', error);
+        });*/
     },
 };
 </script>

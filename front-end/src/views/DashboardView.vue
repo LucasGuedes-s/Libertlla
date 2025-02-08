@@ -25,7 +25,7 @@
           <div class="ocorrencias_formulario">
             <h2>Ocorrências por Formulário</h2>
             <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
-              <p><strong>Denúncia:</strong> {{ ocorrencia.id }} </p>
+              <p><strong>Denúncia -  #{{ ocorrencia.id }}</strong></p>
               <p><strong>Data:</strong> {{ formatDate(ocorrencia.data_denuncia) }} </p>
               <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
               <div class="buttons">

@@ -92,7 +92,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
  :global(body) { 
   background-color: #4D1032; 
