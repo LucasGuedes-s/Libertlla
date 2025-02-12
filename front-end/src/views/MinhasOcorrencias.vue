@@ -108,6 +108,7 @@ p {
   /* Adicionando a borda */
   border-radius: 4px;
   /* Arredondando as bordas */
+  padding: 6px;
 }
 
 label {
