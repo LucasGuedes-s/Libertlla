@@ -103,11 +103,11 @@ export default {
 
 p {
   color: rgba(152, 152, 152, 255);
-  font-weight: 700;
   border: 1px solid #d3d3d3b6;
   /* Adicionando a borda */
   border-radius: 4px;
   /* Arredondando as bordas */
+  padding: 6px;
 }
 
 label {
