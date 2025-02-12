@@ -8,7 +8,7 @@
         :key="ocorrencia.id">
         <div class="col-12 col-md-6">
           <label>Data:</label>
-          <p>{{ ocorrencia.data_denuncia }}</p>
+          <p>{{    ocorrencia.data_denuncia }}</p> 
         </div>
 
         <div class="col-12 col-md-6">

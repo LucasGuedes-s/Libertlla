@@ -7,10 +7,14 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "buffer": "^6.0.3",
     "dayjs": "^1.11.13",
+    "dayjs-plugin-utc": "^0.1.2",
+    "dotenv": "^16.4.7",
     "pinia": "^2.3.1",
     "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.15.10",
