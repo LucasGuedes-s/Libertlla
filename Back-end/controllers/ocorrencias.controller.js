@@ -46,6 +46,27 @@ async function GetTodasOcorrencias(req, res, next) {
         console.error('Erro ao receber todas as ocorrências');
     }
 }
+
+async function GetOcorrenciaEspecifica(req, res, next) {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ error: "ID inválido." });
+        }
+
+        const ocorrencia = await Ocorrencia.GetOcorrenciaEspecifica(id);
+        if (!ocorrencia) {
+            return res.status(404).json({ error: "Ocorrência não encontrada." });
+        }
+
+        res.status(200).json({ ocorrencia });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erro ao buscar a ocorrência." });
+    }
+}
+
+
 async function updateOcorrencia(req, res, next) {
     try {
         const ocorrencias = await Ocorrencia.updateOcorrencia(req)
@@ -58,4 +79,4 @@ async function updateOcorrencia(req, res, next) {
         console.error('Erro ao realizar alteração na ocorrencia/processo')
     }
 }
-module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia};
+module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, updateOcorrencia};

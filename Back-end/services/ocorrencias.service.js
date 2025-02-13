@@ -50,6 +50,22 @@ async function GetTodasOcorrencias() {
     return { totalOcorrencias };
 }
 
+async function GetOcorrenciaEspecifica(id) {
+    console.log(id)
+    const ocorrencia = await prisma.ocorrencias.findUnique({
+        where: { id: id },
+        include: {
+            registros: {  // Certifique-se de que "registros" está correto de acordo com o seu modelo Prisma
+                include: {
+                    processos: true  // Inclui as ocorrências vinculadas ao registro, se necessário
+                }
+            }
+        }
+    });
+    console.log(ocorrencia)
+    return ocorrencia;
+}
+
 async function updateOcorrencia(req, res) {
     try {
         const { ocorrenciaId, profissionalEmail } = req.body;
@@ -78,4 +94,4 @@ async function updateOcorrencia(req, res) {
     }
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, updateOcorrencia}
+module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia}

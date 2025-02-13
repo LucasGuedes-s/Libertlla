@@ -33,9 +33,9 @@ model Ocorrencias {
   data_ocorrencia String
   status          String @default("Andamento") // Adicionando um valor padrão
   registro        Int?
-  registros       Registro?       @relation(fields: [registro], references: [id])
   profisssional   Profissionais? @relation(fields: [profissional], references: [id])
   profissional    Int?
+  registros  Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
 }
 
 model Registro {
@@ -43,7 +43,8 @@ model Registro {
   anexos     String[]   @db.VarChar(2048)
   descricoes String?
   data       String?
-  processos  Ocorrencias[]
+  ocorrenciaId Int?      //
+  ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) // ✅ Correta relação 1 para muitos
 }
 
 model Permissoes {
