@@ -164,6 +164,8 @@ label {
 }
 
 .ocorrencia-form {
+  display: flex;
+  flex-direction: column;
   margin-top: 30px;
   border-color: #d3d3d3b6;
   border-style: solid;
