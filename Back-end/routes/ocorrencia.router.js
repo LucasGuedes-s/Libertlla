@@ -5,7 +5,7 @@ const controller = require('../controllers/ocorrencias.controller')
 
 router.get('/ocorrencias', controller.GetOcorrencias);
 
-router.get('/ocorrencias/:id', controller.GetOcorrenciaEspecifica);
+router.get('/ocorrencia/:id', controller.GetOcorrenciaEspecifica);
 
 router.get('/todasocorrencias', controller.GetTodasOcorrencias);
 

@@ -18,7 +18,6 @@ async function CadrastrarOcorrencias(req, res) {
 }
 async function getOcorrenciasProfissional(req, res) {
     const profissionalId = req
-
     const ocorrencias = await prisma.Profissionais.findMany({
         where: {
             email: profissionalId // Filtra pelo ID do profissional
@@ -27,6 +26,7 @@ async function getOcorrenciasProfissional(req, res) {
             ocorrencias: true  // Assumindo que você tem uma relação chamada 'ocorrencias'
         }
     });
+    
     return ocorrencias;
 }
 
@@ -42,6 +42,7 @@ async function GetOcorrencia(req) {
     const ocorrencias = await prisma.Ocorrencias.findUnique({
         where: { id: parseInt(req) }, 
     });
+
     return ocorrencias;
 }
 
@@ -55,11 +56,7 @@ async function GetOcorrenciaEspecifica(id) {
     const ocorrencia = await prisma.ocorrencias.findUnique({
         where: { id: id },
         include: {
-            registros: {  // Certifique-se de que "registros" está correto de acordo com o seu modelo Prisma
-                include: {
-                    processos: true  // Inclui as ocorrências vinculadas ao registro, se necessário
-                }
-            }
+            registros: true
         }
     });
     console.log(ocorrencia)

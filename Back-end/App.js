@@ -29,8 +29,6 @@ app.use(function(req, res, next) {
     next();
   });
 
-  
-app.use(express.json());
 
 // Importar rotas
 const userRouter = require('../Back-end/routes/user.router');
@@ -40,6 +38,8 @@ const pdf = require('../Back-end/routes/pdfs.router');
 app.use(userRouter);
 app.use(ocorrencias);
 app.use(pdf);
+
+app.use(express.json());
 
 // Criar servidor HTTP e configurar Socket.io
 const PORT = 3000;
