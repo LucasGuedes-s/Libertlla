@@ -1,33 +1,55 @@
 <template>
-  <div class="minhasocorrencias d-flex">
-    <SideBar v-if="sidebarVisible" />
-    <div class="ocorrencia container">
-      <h1 class="titulo mb-4">Minhas Ocorrências:</h1>
+  <div>
+    <div class="minhasocorrencias d-flex">
+      <SideBar v-if="sidebarVisible" />
+      <div class="ocorrencia container">
+        <h1 class="titulo mb-4">Minhas Ocorrências:</h1>
 
-      <div class="ocorrencia-form border rounded p-4 row" v-for="ocorrencia in ocorrencias[0].ocorrencias"
-        :key="ocorrencia.id">
-        <div class="col-12 col-md-6">
-          <label>Data:</label>
-          <p>{{    ocorrencia.data_denuncia }}</p> 
-        </div>
+        <div class="ocorrencia-form border rounded p-4 row" v-for="ocorrencia in ocorrencias[0].ocorrencias"
+          :key="ocorrencia.id">
+          <div class="col-12 col-md-6">
+            <label>Data:</label>
+            <p>{{ ocorrencia.data_denuncia }}</p>
+          </div>
 
-        <div class="col-12 col-md-6">
-          <label>Tipo de Denúncia:</label>
-          <p>{{ ocorrencia.tipo_denuncia }}</p>
-        </div>
+          <div class="col-12 col-md-6">
+            <label>Tipo de Denúncia:</label>
+            <p>{{ ocorrencia.tipo_denuncia }}</p>
+          </div>
 
-        <div class="col-12 mt-3">
-          <label>Descrição:</label>
-          <p>{{ ocorrencia.descricao }}</p>
-        </div>
+          <div class="col-12 mt-3">
+            <label>Descrição:</label>
+            <p>{{ ocorrencia.descricao }}</p>
+          </div>
 
-        <div class="col-12 mt-3 d-flex flex-column flex-md-row justify-content-start gap-3">
-          <router-link :to="`/ocorrencia/${ocorrencia.id}`"
-            class="btn btn-custom-primary w-100 w-md-auto">Detalhar</router-link>
-          <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="gerarPDF(ocorrencia.id)"> Gerar PDF</button>
-          <button type="button" class="btn btn-custom-secondary w-100 w-md-auto">Adicionar
-            Progresso</button>
+          <div class="col-12 mt-3 d-flex flex-column flex-md-row justify-content-start gap-3">
+            <router-link :to="`/ocorrencia/${ocorrencia.id}`"
+              class="btn btn-custom-primary w-100 w-md-auto">Detalhar</router-link>
+            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="gerarPDF(ocorrencia.id)"> Gerar PDF</button>
+            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="abrirModal">Adicionar Progresso</button>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
+      <div class="modal-content">
+        <h1 class="titulo mb-4">Adicionar Progresso</h1>
+        <form @submit.prevent="adicionarProgresso">
+       <label for="data">  Data:</label>
+          <input type="date" v-model="data" id="data" required />
+        </br>
+          <label for="descricao">Descrição:</label>
+          <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição (opcional)"></textarea>
+
+            <label for="anexos">Anexos:</label>
+          <input type="file" id="anexos" multiple @change="FileUpload" />
+
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-custom-primary">Salvar</button>
+            <button type="button" class="btn btn-custom-secondary" @click="fecharModal">Cancelar</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -52,12 +74,18 @@ export default {
     return {
       sidebarVisible: true,
       ocorrencias: [],
+      modalVisible: false,
+      modalKey: 0, // Adicionando chave para resetar o modal
+      progresso: '',
+      descricao: '',
+      data: '',
+      anexos: [], // Para armazenar os arquivos anexados
     };
   },
   mounted() {
     const user = this.store.usuario.usuario;
-    const email = user.email
-    console.log(email)
+    const email = user.email;
+    console.log(email);
     axios.get(`http://localhost:3000/ocorrencias/${email}`).then(response => {
       this.ocorrencias = response.data.processos;
       console.log(this.ocorrencias[0].ocorrencias);
@@ -65,12 +93,10 @@ export default {
       .catch(error => {
         console.error('Erro ao buscar ocorrências:', error);
       });
-
-    console.log(this.store.usuario);
   },
   methods: {
     async gerarPDF(id) {
-      console.log("aqui")
+      console.log("aqui");
       const response = await axios({
         url: `http://localhost:3000/ocorrencia/pdf/${id}`,
         method: 'GET',
@@ -85,11 +111,27 @@ export default {
       document.body.appendChild(link);
       link.click();
       link.remove();
+    },
+    abrirModal() {
+      this.modalVisible = true;
+      this.modalKey++; 
+    },
+    fecharModal() {
+      this.modalVisible = false;
+      this.progresso = ''; // Limpar o campo de progresso quando fechar
+      this.descricao = ''; 
+      this.data = ''; 
+      this.anexos = []; 
+    },
+    FileUpload(event) {
+      const files = event.target.files;
+      this.anexos = Array.from(files);
+      
+      this.fecharModal();
     }
   }
 };
 </script>
-
 
 <style scoped>
 .titulo {
@@ -163,28 +205,53 @@ label {
   /* Mudando a cor da borda */
 }
 
-@media (max-width: 768px) {
-  .titulo {
-    margin-left: -11%;
-    color: #9B287B;
-  }
+/* Estilos do Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  .ocorrencia {
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-  .ocorrencia-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10%;
-  }
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #9B287B;
+}
+
+button {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 5px;
 }
 </style>
