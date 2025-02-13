@@ -4,12 +4,15 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
+const dotenv = require("dotenv");
+dotenv.config();
 
-// Inicializar o Prisma
-const prisma = new PrismaClient();
-
-// Configuração do Express
 const app = express();
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -17,6 +20,8 @@ app.use(cors({
     exposedHeaders: ['Authorization']
 
 }));
+// Inicializar o Prisma
+const prisma = new PrismaClient();
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Authorization, content-type");
@@ -153,6 +158,49 @@ io.on('connection', (socket) => {
     });
 });
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Configuração do Cliente S3 (Cloudflare R2)
+const s3 = new S3Client({
+  region: "auto",
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT, // Endpoint do seu R2
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY,
+  },
+});
+
+app.post("/upload", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("Nenhum arquivo enviado.");
+  }
+
+  const fileName = `${Date.now()}_${req.file.originalname}`; // Gerar um nome único para o arquivo
+  const fileContent = req.file.buffer;
+
+  // Configurações do upload para o Cloudflare R2
+  const params = {
+    Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+    Key: `uploads/${fileName}`, // Caminho do arquivo no R2
+    Body: fileContent,
+    ContentType: req.file.mimetype,
+    ACL: "public-read", // Permite que o arquivo seja acessado publicamente
+  };
+
+  try {
+    // Envia o arquivo para o Cloudflare R2
+    await s3.send(new PutObjectCommand(params));
+
+    // URL pública do arquivo-
+    const fileUrl = `${process.env.URL_PUBLICA}.r2.dev/uploads/${fileName}`;
+    console.log(fileUrl)
+    res.status(200).json({ fileUrl }); // Retorna a URL pública do arquivo
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao fazer upload do arquivo." });
+  }
+});
 // Iniciar o servidor
 server.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
