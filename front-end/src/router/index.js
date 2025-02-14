@@ -48,6 +48,14 @@ const routes = [
     component: () => import('../views/LoginView.vue')
   },
   {
+    path: '/cadastrarprofissional',
+    name: 'cadastrarprofissional',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('../views/CadastrarProfissionalView.vue')
+  },
+  {
     path: '/imagem',
     name: 'imagem',
     // route level code-splitting

@@ -135,7 +135,7 @@ export default {
 
 <style scoped>
 .titulo {
-  font-size: 150%;
+  font-size: 30px;
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
   margin-top: 20px;
