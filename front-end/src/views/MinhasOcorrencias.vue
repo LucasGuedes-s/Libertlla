@@ -7,17 +7,17 @@
 
         <div class="ocorrencia-form border rounded p-4 row" v-for="ocorrencia in ocorrencias[0].ocorrencias"
           :key="ocorrencia.id">
-          <div class="col-12 col-md-6">
+          <div class="col-12 mb-3">
             <label>Data:</label>
             <p>{{ ocorrencia.data_denuncia }}</p>
           </div>
 
-          <div class="col-12 col-md-6">
+          <div class="col-12 mb-3">
             <label>Tipo de Denúncia:</label>
             <p>{{ ocorrencia.tipo_denuncia }}</p>
           </div>
 
-          <div class="col-12 mt-3">
+          <div class="col-12 mb-3">
             <label>Descrição:</label>
             <p>{{ ocorrencia.descricao }}</p>
           </div>
@@ -25,8 +25,10 @@
           <div class="col-12 mt-3 d-flex flex-column flex-md-row justify-content-start gap-3">
             <router-link :to="`/ocorrencia/${ocorrencia.id}`"
               class="btn btn-custom-primary w-100 w-md-auto">Detalhar</router-link>
-            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="gerarPDF(ocorrencia.id)"> Gerar PDF</button>
-            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="abrirModal">Adicionar Progresso</button>
+            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="gerarPDF(ocorrencia.id)">
+              Gerar PDF</button>
+            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="abrirModal">Adicionar
+              Progresso</button>
           </div>
         </div>
       </div>
@@ -34,16 +36,23 @@
 
     <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
       <div class="modal-content">
-        <h1 class="titulo mb-4">Adicionar Progresso</h1>
+        <div class="quadrado">
+          <h1 class="titulo mb-4">Adicionar Progresso</h1>
+        </div>
         <form @submit.prevent="adicionarProgresso">
-       <label for="data">  Data:</label>
-          <input type="date" v-model="data" id="data" required />
-        </br>
           <label for="descricao">Descrição:</label>
-          <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição (opcional)"></textarea>
+          <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
+          <!-- <label for="anexos" class="btn-upload">Escolher Arquivos</label>
+          <input type="file" id="anexos" multiple @change="FileUpload" style="display: none;" />
 
-            <label for="anexos">Anexos:</label>
-          <input type="file" id="anexos" multiple @change="FileUpload" />
+          xibir o nome do arquivo selecionado -
+          <label v-if="selectedFileName">Arquivo selecionado: {{ selectedFileName }}</label>
+          <label v-else>Nenhum arquivo selecionado</label>  -->
+
+          <div class="form-group" id="adicionar_imagem">
+            <label for="imagem">Anexos:</label>
+            <input type="file" id="imagem" name="imagem" accept="image/*">
+          </div>
 
           <div class="modal-actions">
             <button type="submit" class="btn btn-custom-primary">Salvar</button>
@@ -75,11 +84,12 @@ export default {
       sidebarVisible: true,
       ocorrencias: [],
       modalVisible: false,
-      modalKey: 0, // Adicionando chave para resetar o modal
+      modalKey: 0, // Para resetar o modal
       progresso: '',
       descricao: '',
       data: '',
       anexos: [], // Para armazenar os arquivos anexados
+      selectedFileName: '',
     };
   },
   mounted() {
@@ -100,7 +110,7 @@ export default {
       const response = await axios({
         url: `http://localhost:3000/ocorrencia/pdf/${id}`,
         method: 'GET',
-        responseType: 'blob', // Para tratar a resposta como arquivo
+        responseType: 'blob',
       });
 
       // Cria e baixa o arquivo PDF
@@ -114,23 +124,26 @@ export default {
     },
     abrirModal() {
       this.modalVisible = true;
-      this.modalKey++; 
+      this.modalKey++;
+    },
+    FileUpload(event) {
+      const files = event.target.files;
+      if (files.length > 0) {
+        this.selectedFileName = files[0].name; // Salvar nome do arquivo
+        this.anexos = Array.from(files);
+      }
     },
     fecharModal() {
       this.modalVisible = false;
       this.progresso = ''; // Limpar o campo de progresso quando fechar
-      this.descricao = ''; 
-      this.data = ''; 
-      this.anexos = []; 
+      this.descricao = '';
+      this.data = '';
+      this.anexos = [];
+      this.selectedFileName = ''; // Limpar nome do arquivo
     },
-    FileUpload(event) {
-      const files = event.target.files;
-      this.anexos = Array.from(files);
-      
-      this.fecharModal();
-    }
   }
 };
+
 </script>
 
 <style scoped>
@@ -172,6 +185,7 @@ label {
   width: 96%;
   padding: 20px;
   margin-left: 5px;
+  margin-bottom: 20px;
 }
 
 .form-group {
@@ -227,9 +241,26 @@ label {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  width: 80%;
-  max-width: 500px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 50vw;
+  /* Ajuste para aumentar a largura (Ex: 50% da tela) */
+  max-width: 800px;
+  /* Define um tamanho máximo */
+  height: 60vh;
+  /* Ajuste para aumentar a altura (Ex: 60% da altura da tela) */
+  max-height: 80vh;
+  /* Define um tamanho máximo */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.modal-content form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Isso garante que o conteúdo do form seja distribuído entre a parte superior e inferior */
+  margin-top: 60px;
 }
 
 .modal-actions {
@@ -243,17 +274,61 @@ textarea {
   padding: 10px;
   margin-top: 10px;
   border-radius: 5px;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
+  resize: none;
+  /* Impede que o usuário redimensione a área de texto */
 }
 
-textarea:focus {
-  outline: none;
-  border-color: #9B287B;
+.quadrado {
+  background-color: #54123F;
+  /* Cor de fundo */
+  color: white;
+  /* Cor do texto */
+  width: 50vw;
+  /* Ocupa toda a largura da tela */
+  height: 60px;
+  /* Ajusta a altura conforme necessário */
+  top: 0px;
+  left: 0px;
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  /* Centraliza o conteúdo horizontalmente */
+}
+
+.quadrado .titulo {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+  padding: 0;
+  text-align: center;
+  padding-top: 20px;
+  font-family: "Montserrat", sans-serif;
+}
+
+input[type="file"] {
+  font-size: 14px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#adicionar_imagem {
+  grid-column: 1 / -1;
+  margin-top: 20px
+}
+#imagem {
+  margin-top: 10px; 
 }
 
 button {
   font-size: 14px;
-  padding: 8px 16px;
+  padding: 8px;
   border-radius: 5px;
+}
+.modal-actions button {
+  margin-top: -15px;  /* Ajuste a distância que deseja mover para cima */
 }
 </style>
