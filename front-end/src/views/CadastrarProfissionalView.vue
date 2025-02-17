@@ -2,17 +2,16 @@
     <div class="cadastro_profissional">
         <SideBar />
         <div class="container">
-        <h1>Cadastrar Profissional</h1>
-        <form>
-            <div class="form-group">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" required>
-            </div>
+            <h1>Cadastrar Profissional</h1>
+            <form @submit.prevent="cadastrarProfissional">
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" v-model="form.nome" required>
+                </div>
 
                 <div class="form-group">
                     <label for="especialidade">Especialidade:</label>
-                    <select id="especialide_profissional">
-                        <option value="atendimento_humanizado">Atendimento Humanizado e Apoio a Vítimas</option>
+                    <select id="especialide_profissional" v-model="form.especialidade">
                         <option value="delegada">Delegada</option>
                         <option value="pericia_criminal">Perícia Criminal</option>
                         <option value="policial">Policial</option>
@@ -22,25 +21,59 @@
 
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="text" id="email" name="email" required>
+                    <input type="email" id="email" v-model="form.email" required>
                 </div>
 
                 <div class="form-group">
                     <label for="senha">Senha:</label>
-                    <input type="text" id="senha" name="senha" required>
+                    <input type="password" id="senha" v-model="form.senha" required>
                 </div>
-
 
                 <div class="form-group" id="adicionar_imagem">
                     <label for="imagem">Adicionar Imagem:</label>
-                    <input type="file" id="imagem" name="imagem" accept="image/*">
+                    <input type="file" id="imagem" @change="handleFileUpload">
                 </div>
 
-                <button type="submit" click="" class="btn_cadastrarprofissional">Cadastrar Profissional</button>
-        </form>
+                <button type="submit" class="btn_cadastrarprofissional">Cadastrar Profissional</button>
+            </form>
         </div>
     </div>
 </template>
+
+<script>
+import SideBar from '@/components/SideBar.vue';
+
+export default {
+    components: {
+        SideBar,
+    },
+    data() {
+        return {
+            form: {
+                nome: '',
+                especialidade: '',
+                email: '',
+                senha: '',
+                imagem: null
+            }
+        };
+    },
+    methods: {
+        handleFileUpload(event) {
+            this.form.imagem = event.target.files[0];
+        },
+        cadastrarProfissional() {
+            console.log("Dados do profissional:", {
+                nome: this.form.nome,
+                especialidade: this.form.especialidade,
+                email: this.form.email,
+                senha: this.form.senha,
+                imagem: this.form.imagem ? this.form.imagem.name : "Nenhuma imagem selecionada"
+            });
+        }
+    }
+};
+</script>
 
 <style scoped>
 .cadastro_profissional {
@@ -72,7 +105,6 @@ form {
 
 .form-group label {
     margin-bottom: 10px;
-    /* Ajuste a margem se necessário */
 }
 
 .form-group input,
@@ -86,6 +118,7 @@ textarea {
     box-sizing: border-box;
     resize: none;
 }
+
 .btn_cadastrarprofissional {
     padding: 10px;
     background-color: #8b2276;
@@ -102,6 +135,7 @@ textarea {
 .btn_cadastrarprofissional:hover {
     background-color: #9B287B;
 }
+
 input[type="file"] {
     font-size: 14px; 
     padding: 8px; 
@@ -113,16 +147,19 @@ input[type="file"] {
 #adicionar_imagem {
     grid-column: 1 / -1;
 }
-</style>
+@media (max-width: 768px) {
+    .cadastro_profissional {
+        margin-left: 0;
+        padding: 15px;
+    }
 
-<script>
+    form {
+        grid-template-columns: 1fr; /* Um campo por vez em telas pequenas */
+    }
 
-import SideBar from '@/components/SideBar.vue';
-
-export default {
-    
-  components: {
-    SideBar,
-  },
+    .form-group {
+        width: 100%;
+    }
 }
-</script>
+
+</style>

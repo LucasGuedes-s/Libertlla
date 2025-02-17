@@ -10,33 +10,30 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="data" class="form-label">Data:</label>
-                            <input type="date" id="data" class="form-control" v-model="ocorrencia.data_denuncia" />
+                            <input type="date" id="data" class="form-control" v-model="ocorrencia.data_denuncia" readonly  />
                         </div>
                         <div class="col-md-6">
                             <label for="tipoDenuncia" class="form-label">Tipo de denúncia:</label>
-                            <input type="text" id="tipoDenuncia" class="form-control"
-                                v-model="ocorrencia.tipo_denuncia" />
+                            <input type="text" id="tipoDenuncia" class="form-control" v-model="ocorrencia.tipo_denuncia" readonly  />
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="relacaoDenunciado" class="form-label">Relação com a Pessoa Denunciada:</label>
-                            <input type="text" id="relacaoDenunciado" class="form-control"
-                                v-model="ocorrencia.agressor" />
+                            <input type="text" id="relacaoDenunciado" class="form-control" v-model="ocorrencia.agressor" readonly  />
                         </div>
                         <div class="col-md-6">
                             <label for="localOcorrido" class="form-label">Local do Ocorrido:</label>
-                            <input type="text" id="localOcorrido" class="form-control" v-model="ocorrencia.local" />
+                            <input type="text" id="localOcorrido" class="form-control" v-model="ocorrencia.local" readonly  />
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="descricao" class="form-label">Descrição:</label>
-                        <textarea id="descricao" class="form-control" rows="3"
-                            v-model="ocorrencia.descricao"></textarea>
+                        <textarea id="descricao" class="form-control" rows="3" v-model="ocorrencia.descricao" readonly ></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="provas" class="form-label">Provas:</label>
-                        <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas"></textarea>
+                        <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas" readonly ></textarea>
                     </div>
                 </div>
             </div>

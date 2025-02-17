@@ -132,29 +132,35 @@ export default {
         }
     },
 methods:{
-    async login(){
-        await axios.post("http://localhost:3000/login", {
-            usuario:{
-                email:this.email,
-                senha: this.senha
-            }
-        }).then(response =>{
-          const authStore = useAuthStore();
+  async login() {
+    await axios.post("http://localhost:3000/login", {
+        usuario: {
+            email: this.email,
+            senha: this.senha
+        }
+    }).then(response => {
+        const authStore = useAuthStore();
 
-          const token = response.headers.authorization.split(' ')[1];
-          const user = response.data;
+        const token = response.headers.authorization.split(' ')[1];
+        const user = response.data;
 
-          authStore.login(user, token);
-          router.push('/dashboard');
-        }).catch(Error =>{
-            console.log(Error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Usuario ou senha incorretos',
-                timer: 4000,
-            })
+        authStore.login(user, token);
+
+        // Verifique se o usuário já está na página '/dashboard'
+        if (this.$route.path !== '/dashboard') {
+            // Só navegue se o usuário não estiver já na rota '/dashboard'
+            router.push('/dashboard');
+        }
+    }).catch(Error => {
+        console.log(Error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Usuário ou senha incorretos',
+            timer: 4000,
         });
-    }
+    });
+}
+
 }
 }
 </script>
