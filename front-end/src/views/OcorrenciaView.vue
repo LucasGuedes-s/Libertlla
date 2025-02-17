@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="wrapper">
         <SideBar v-if="sidebarVisible" />
         <div class="container mt-4" style="margin-left: 250px;">
             <div class="card">
@@ -32,11 +32,11 @@
                     <div class="mb-3">
                         <label for="descricao" class="form-label">Descrição:</label>
                         <textarea id="descricao" class="form-control" rows="3"
-                            v-model="ocorrencia.descricao"></textarea>
+                            v-model="ocorrencia.descricao" readonly></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="provas" class="form-label">Provas:</label>
-                        <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas"></textarea>
+                        <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas" readonly></textarea>
                     </div>
                 </div>
             </div>
@@ -110,16 +110,23 @@ export default {
 
 
 <style scoped>
-/* Estilização geral da tela de denúncia */
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+}
 .container {
-    max-width: calc(100% - 250px);
+    width: 90%;
+    max-width: 1300px;
     background: #FFFFFF;
-    border: 1px solid #D9D9D9;
-    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
-    border-radius: 15px;
-    margin-left: 250px;
+    margin: 0 auto;
     padding: 20px;
-    overflow: auto;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
 }
 
 .card-header {
@@ -150,13 +157,7 @@ h5.text-primary {
 
 textarea.form-control {
     height: 111px;
-}
-
-/* Ícones da sidebar */
-.icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
+    resize: none;
 }
 
 /* Linha do tempo */
