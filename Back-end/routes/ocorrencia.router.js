@@ -5,7 +5,7 @@ const validarJWT = require('../middlewares/auth.js')
 
 router.get('/ocorrencias', [validarJWT], controller.GetOcorrencias);
 
-router.get('/ocorrencia/:id', [validarJWT], controller.GetOcorrenciaEspecifica);
+router.get('/ocorrencia/:id', controller.GetOcorrenciaEspecifica);
 
 router.get('/todasocorrencias', controller.GetTodasOcorrencias);
 
