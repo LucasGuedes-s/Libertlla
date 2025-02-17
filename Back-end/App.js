@@ -55,12 +55,12 @@ let activeChats = new Map();   // Mapeia cliente → admin
 let chatMessages = new Map();  // Armazena mensagens do chat antes de salvar
 
 io.on('connection', (socket) => {
-    console.log('Usuário conectado:', socket.id);
+    // console.log('Usuário conectado:', socket.id);
 
     // Quando um administrador se conecta
     socket.on('admin connect', () => {
         adminSockets.add(socket);
-        console.log('Admin conectado:', socket.id);
+        // console.log('Admin conectado:', socket.id);
     });
 
     // Cliente solicita iniciar um chat
@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
 
     // Quando um usuário se desconecta
     socket.on('disconnect', async () => {
-        console.log('Usuário desconectado:', socket.id);
+        // console.log('Usuário desconectado:', socket.id);
         adminSockets.delete(socket);
 
         if (activeChats.has(socket.id)) {

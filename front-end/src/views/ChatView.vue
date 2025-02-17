@@ -12,8 +12,6 @@
         >
           <strong v-if="message.from">{{ message.from }}:</strong> {{ message.content }}
         </div>
-
-
       </div>
 
       <div class="chat-input-container">

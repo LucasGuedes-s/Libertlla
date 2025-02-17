@@ -25,7 +25,7 @@
           <div class="ocorrencias_formulario">
             <h2>Ocorrências por Formulário</h2>
             <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
-              <p><strong>Denúncia -  #{{ ocorrencia.id }}</strong></p>
+              <p><strong>Denúncia - #{{ ocorrencia.id }}</strong></p>
               <p><strong>Data:</strong> {{ formatDate(ocorrencia.data_denuncia) }} </p>
               <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
               <div class="buttons">
@@ -269,6 +269,7 @@ import { useAuthStore } from '@/store.js'
 import { io } from "socket.io-client";
 import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
+import router from '@/router';
 
 export default {
   setup() {
@@ -327,22 +328,35 @@ export default {
   },
   methods: {
     async buscarOcorrencia() {
-      axios.get("http://localhost:3000/ocorrencias")
-        .then(response => {
-          this.ocorrencias = response.data.ocorrencias
-          console.log(response.data);  // Acessando os dados da resposta
-        })
-        .catch(error => {
-          console.error('Erro ao buscar ocorrências:', error);
-        });
+      const token = this.store.token
+
+      axios.get("http://localhost:3000/ocorrencias", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
+        this.ocorrencias = response.data.ocorrencias
+      }).catch(error => {
+        console.log(error.status)
+        if(error.status === 403 || error.status === 401){
+          router.push('/nao-autorizado')
+        }
+        console.error('Erro ao buscar ocorrências:', error);
+      });
     },
     async aceitarDenuncia(id) {
       const user = this.store.usuario.usuario
       const email = user.email
+      const token = this.store.token
+
       await axios.post("http://localhost:3000/aceitar/ocorrencia", {
         ocorrenciaId: id,
         profissionalEmail: email
-
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }).then(response => {
         this.buscarOcorrencia();
         Swal.fire({
@@ -350,8 +364,10 @@ export default {
           title: 'Ocorrência aceita com sucesso',
           timer: 4000,
         })
-      }).catch(Error => {
-        console.log(Error);
+      }).catch(error => {
+        if(error.status === 403 || error.status === 401){
+          router.push('/nao-autorizado')
+        }
         Swal.fire({
           icon: 'error',
           title: 'Erro ao aceitar denúncia',
