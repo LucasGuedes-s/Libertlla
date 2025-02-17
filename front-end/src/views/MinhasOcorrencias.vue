@@ -331,4 +331,18 @@ button {
 .modal-actions button {
   margin-top: -15px;  /* Ajuste a distância que deseja mover para cima */
 }
+
+@media (min-width: 2048px) {
+  .ocorrencia {
+    width: calc(100% - 300px); /* Reduzindo a largura para evitar sobreposição */
+    max-width: 1800px;
+    margin-left: 300px; /* Deixa espaço para a Sidebar */
+    padding: 20px;
+  }
+
+  .ocorrencia-form {
+    width: 97%;
+    max-width: 97%;
+  }
+}
 </style>
