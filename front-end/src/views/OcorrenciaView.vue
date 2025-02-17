@@ -58,6 +58,8 @@ export default {
     },
     setup(props) {
         const store = useAuthStore();
+        const token = this.store.token
+
         const sidebarVisible = ref(true);
         const ocorrencia = ref({
             data_denuncia: '',
@@ -74,8 +76,11 @@ export default {
         // Função que será chamada quando o componente for montado
         onMounted(async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/ocorrencia/${id.value}`);
-
+                const response = await axios.get(`http://localhost:3000/ocorrencia/${id.value}`,{
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 if (response.data.ocorrencia) {
                     // Preenche os dados da ocorrência nos campos
                     const dados = response.data.ocorrencia;

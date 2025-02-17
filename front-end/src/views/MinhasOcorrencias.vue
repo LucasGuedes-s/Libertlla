@@ -68,6 +68,7 @@
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store';
+import router from '@/router';
 
 export default {
   components: {
@@ -95,12 +96,18 @@ export default {
   mounted() {
     const user = this.store.usuario.usuario;
     const email = user.email;
-    console.log(email);
-    axios.get(`http://localhost:3000/ocorrencias/${email}`).then(response => {
+    const token = this.store.token
+    axios.get(`http://localhost:3000/ocorrencias/${email}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
       this.ocorrencias = response.data.processos;
-      console.log(this.ocorrencias[0].ocorrencias);
-    })
-      .catch(error => {
+
+    }).catch(error => {
+        if(error.status === 403 || error.status === 401){
+          router.push('/nao-autorizado')
+        }
         console.error('Erro ao buscar ocorrências:', error);
       });
   },
