@@ -68,13 +68,12 @@ async function GetTodasOcorrencias() {
 
 async function GetOcorrenciaEspecifica(id) {
     console.log(id)
-    const ocorrencia = await prisma.ocorrencias.findUnique({
+    const ocorrencia = await prisma.Ocorrencias.findUnique({
         where: { id: id },
         include: {
             registros: true
         }
     });
-    console.log(ocorrencia)
     return ocorrencia;
 }
 

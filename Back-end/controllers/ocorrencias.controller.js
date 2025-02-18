@@ -41,6 +41,7 @@ async function GetTodasOcorrencias(req, res, next) {
     try {
         const { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas } = await Ocorrencia.GetTodasOcorrencias();
         res.status(200).json({ totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas });
+
         next();
     } catch (error) {
         console.error(error);
@@ -57,7 +58,6 @@ async function GetOcorrenciaEspecifica(req, res, next) {
         if (isNaN(id)) {
             return res.status(400).json({ error: "ID inválido." });
         }
-
 
         const ocorrencia = await Ocorrencia.GetOcorrenciaEspecifica(id);
         if (!ocorrencia) {

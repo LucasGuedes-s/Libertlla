@@ -18,6 +18,11 @@
           </div>
 
           <div class="col-12 mb-3">
+            <label>Tipo de Violencia:</label>
+            <p>{{ ocorrencia.tipo_violencia }}</p>
+          </div>
+
+          <div class="col-12 mb-3">
             <label>Descrição:</label>
             <p>{{ ocorrencia.descricao }}</p>
           </div>
