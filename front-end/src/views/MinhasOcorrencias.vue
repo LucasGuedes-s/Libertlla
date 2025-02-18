@@ -140,26 +140,21 @@ export default {
     async uploadFile() {
       if (!this.file) {
         this.uploadStatus = "Por favor, selecione um arquivo.";
-        return;
+        return null;
       }
 
       const formData = new FormData();
       formData.append("file", this.file);
 
-      fetch("http://localhost:3000/upload", {
+      const response = await fetch("http://localhost:3000/upload", {
         method: "POST",
         body: formData,
-      })
-        .then(response => response.json())
-        .then(data => {
-          this.uploadStatus = "Arquivo enviado com sucesso!";
-          this.imageUrl = data.fileUrl; // Atualiza o URL da imagem carregada
-        })
-        .catch(error => {
-          console.error("Erro no upload:", error);
-          this.uploadStatus = "Erro ao enviar o arquivo.";
-        });
+      });
+      const data = await response.json();
+      this.uploadStatus = "Arquivo enviado com sucesso!";
+      return data.fileUrl;
     },
+
     fecharModal() {
       this.modalVisible = false;
       this.progresso = '';
@@ -181,8 +176,10 @@ export default {
       let anexos = [];
 
       if (this.file) {
-        await this.uploadFile(); // Faz upload do arquivo
-        anexos = [this.imageUrl]; // Adiciona a URL do arquivo ao array de anexos
+        const fileUrl = await this.uploadFile();
+        if (fileUrl) {
+          anexos.push(fileUrl);
+        }
       }
 
       axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
