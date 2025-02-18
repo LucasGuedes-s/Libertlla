@@ -27,7 +27,8 @@
               class="btn btn-custom-primary w-100 w-md-auto">Detalhar</router-link>
             <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="gerarPDF(ocorrencia.id)">
               Gerar PDF</button>
-            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto" @click="abrirModal">Adicionar
+            <button type="button" class="btn btn-custom-secondary w-100 w-md-auto"
+              @click="abrirModal(ocorrencia.id)">Adicionar
               Progresso</button>
           </div>
         </div>
@@ -42,16 +43,10 @@
         <form @submit.prevent="adicionarProgresso">
           <label for="descricao">Descrição:</label>
           <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
-          <!-- <label for="anexos" class="btn-upload">Escolher Arquivos</label>
-          <input type="file" id="anexos" multiple @change="FileUpload" style="display: none;" />
-
-          xibir o nome do arquivo selecionado -
-          <label v-if="selectedFileName">Arquivo selecionado: {{ selectedFileName }}</label>
-          <label v-else>Nenhum arquivo selecionado</label>  -->
 
           <div class="form-group" id="adicionar_imagem">
             <label for="imagem">Anexos:</label>
-            <input type="file" id="imagem" name="imagem" accept="image/*">
+            <input type="file" id="imagem" name="imagem" accept="image/*" @change="handleFileChange">
           </div>
 
           <div class="modal-actions">
@@ -69,6 +64,7 @@ import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store';
 import router from '@/router';
+import Swal from 'sweetalert2';
 
 export default {
   components: {
@@ -91,6 +87,10 @@ export default {
       data: '',
       anexos: [], // Para armazenar os arquivos anexados
       selectedFileName: '',
+      ocorrenciasId: null,
+      uploadStatus: "",
+      imageUrl: "",
+      file: null,  // Novo campo para armazenar o arquivo
     };
   },
   mounted() {
@@ -98,18 +98,18 @@ export default {
     const email = user.email;
     const token = this.store.token
     axios.get(`http://localhost:3000/ocorrencias/${email}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(response => {
       this.ocorrencias = response.data.processos;
 
     }).catch(error => {
-        if(error.status === 403 || error.status === 401){
-          router.push('/nao-autorizado')
-        }
-        console.error('Erro ao buscar ocorrências:', error);
-      });
+      if (error.status === 403 || error.status === 401) {
+        router.push('/nao-autorizado')
+      }
+      console.error('Erro ao buscar ocorrências:', error);
+    });
   },
   methods: {
     async gerarPDF(id) {
@@ -129,28 +129,85 @@ export default {
       link.click();
       link.remove();
     },
-    abrirModal() {
+    abrirModal(id) {
+      this.ocorrenciasId = id;  // Salva o ID da ocorrência
       this.modalVisible = true;
       this.modalKey++;
     },
-    FileUpload(event) {
-      const files = event.target.files;
-      if (files.length > 0) {
-        this.selectedFileName = files[0].name; // Salvar nome do arquivo
-        this.anexos = Array.from(files);
+    handleFileChange(event) {
+      this.file = event.target.files[0]; // Salvar o arquivo selecionado
+    },
+    async uploadFile() {
+      if (!this.file) {
+        this.uploadStatus = "Por favor, selecione um arquivo.";
+        return;
       }
+
+      const formData = new FormData();
+      formData.append("file", this.file);
+
+      fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          this.uploadStatus = "Arquivo enviado com sucesso!";
+          this.imageUrl = data.fileUrl; // Atualiza o URL da imagem carregada
+        })
+        .catch(error => {
+          console.error("Erro no upload:", error);
+          this.uploadStatus = "Erro ao enviar o arquivo.";
+        });
     },
     fecharModal() {
       this.modalVisible = false;
-      this.progresso = ''; // Limpar o campo de progresso quando fechar
+      this.progresso = '';
       this.descricao = '';
       this.data = '';
       this.anexos = [];
-      this.selectedFileName = ''; // Limpar nome do arquivo
+      this.selectedFileName = '';
     },
+    async adicionarProgresso() {
+      if (!this.descricao.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo obrigatório',
+          text: 'A descrição não pode estar vazia',
+        });
+        return;
+      }
+
+      let anexos = [];
+
+      if (this.file) {
+        await this.uploadFile(); // Faz upload do arquivo
+        anexos = [this.imageUrl]; // Adiciona a URL do arquivo ao array de anexos
+      }
+
+      axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
+        descricao: this.descricao,
+        anexos: anexos, // Envia os anexos se houver
+      })
+        .then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Progresso Adicionado!',
+            text: 'O progresso foi salvo com sucesso.',
+          });
+          this.fecharModal();
+        })
+        .catch(error => {
+          console.error('Erro ao adicionar progresso:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Houve um problema ao adicionar o progresso.',
+          });
+        });
+    }
   }
 };
-
 </script>
 
 <style scoped>
@@ -326,8 +383,9 @@ input[type="file"] {
   grid-column: 1 / -1;
   margin-top: 20px
 }
+
 #imagem {
-  margin-top: 10px; 
+  margin-top: 10px;
 }
 
 button {
@@ -335,15 +393,19 @@ button {
   padding: 8px;
   border-radius: 5px;
 }
+
 .modal-actions button {
-  margin-top: -15px;  /* Ajuste a distância que deseja mover para cima */
+  margin-top: -15px;
+  /* Ajuste a distância que deseja mover para cima */
 }
 
 @media (min-width: 2048px) {
   .ocorrencia {
-    width: calc(100% - 300px); /* Reduzindo a largura para evitar sobreposição */
+    width: calc(100% - 300px);
+    /* Reduzindo a largura para evitar sobreposição */
     max-width: 1800px;
-    margin-left: 300px; /* Deixa espaço para a Sidebar */
+    margin-left: 300px;
+    /* Deixa espaço para a Sidebar */
     padding: 20px;
   }
 

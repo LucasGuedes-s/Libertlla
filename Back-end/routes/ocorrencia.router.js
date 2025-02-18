@@ -15,4 +15,6 @@ router.get('/ocorrencias/:email',  [validarJWT], controller.getOcorrenciasProfis
 
 router.post('/aceitar/ocorrencia',  [validarJWT], controller.updateOcorrencia)
 
+router.post('/ocorrencia/:ocorrenciaId/progresso', controller.adicionarProgresso);
+
 module.exports = router;

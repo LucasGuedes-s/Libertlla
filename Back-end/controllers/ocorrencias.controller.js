@@ -79,4 +79,26 @@ async function updateOcorrencia(req, res, next) {
         console.error('Erro ao realizar alteração na ocorrencia/processo')
     }
 }
-module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, updateOcorrencia};
+
+async function adicionarProgresso(req, res) {
+    try {
+        console.log("ID da ocorrência recebido:", req.params.ocorrenciaId);
+        console.log("Dados recebidos no body:", req.body); // Verifica se a URL da imagem está chegando
+       
+        const { descricao, anexos } = req.body; // Extrai os valores corretamente
+        const ocorrenciaId = req.params.ocorrenciaId; // Garante que o ID está correto
+
+        const progresso = await Ocorrencia.adicionarProgresso(descricao, anexos, ocorrenciaId);
+
+        res.status(201).json({
+            message: 'Progresso adicionado com sucesso!',
+            registro: progresso
+        });
+
+    } catch (error) {
+        console.error('Erro ao adicionar progresso:', error);
+        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso.' });
+    }
+}
+
+module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, updateOcorrencia, adicionarProgresso};
