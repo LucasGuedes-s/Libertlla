@@ -1,7 +1,9 @@
 <template>
   <div class="dashboard">
+    
     <div class="d-flex">
       <SideBar />
+      <NavBarUser />
       <div class="container">
         <section class="section_contagemdedenuncias">
           <div class="card_contagem">
@@ -298,7 +300,7 @@ import { io } from "socket.io-client";
 import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
 import router from '@/router';
-
+import NavBarUser from '@/components/NavBarUser.vue';
 
 export default {
   setup() {
@@ -474,6 +476,7 @@ export default {
   },
   components: {
     SideBar,
+    NavBarUser
   },
 }
 </script>

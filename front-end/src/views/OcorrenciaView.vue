@@ -50,21 +50,22 @@
         <div class="container mt-5">
             <h5 class="linha">Linha do tempo</h5>
             <div class="timeline">
-        <div v-for="(registro, index) in ocorrencia.registros" :key="registro.id" class="timeline-item" :class="{ 'left': index % 2 === 0, 'right': index % 2 !== 0 }">
-    <div class="timeline-box">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ registro.ocorrenciaId }}</h5>
-                <p class="card-text">{{ registro.descricoes }}</p>
-                <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
+                <div v-for="(registro, index) in ocorrencia.registros" :key="registro.id" class="timeline-item"
+                    :class="{ 'left': index % 2 === 0, 'right': index % 2 !== 0 }">
+                    <div class="timeline-box">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ registro.anexos }}</h5>
+                                <p class="card-text">{{ registro.descricoes }}</p>
+                                <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
             </div>
         </div>
-    </div>
-    <div class="timeline-dot"></div>
-</div>
-
-</div>
-</div>
     </div>
 </template>
 
@@ -120,7 +121,7 @@ export default {
                 console.error('Erro ao buscar ocorrência:', error);
             }
         });
- 
+
         return {
             store,
             id,
@@ -181,9 +182,11 @@ textarea.form-control {
     height: 111px;
     resize: none;
 }
+
 .timeline {
     position: relative;
-    max-width: 800px; /* Limita a largura da linha do tempo */
+    max-width: 800px;
+    /* Limita a largura da linha do tempo */
     margin: auto;
     padding: 20px 0;
 }
@@ -198,18 +201,22 @@ textarea.form-control {
 }
 
 .timeline-box {
-    width: 48%; /* Ajustado para dar mais espaço aos itens */
-    margin: 0 10px; /* Espaçamento entre os itens */
+    width: 48%;
+    /* Ajustado para dar mais espaço aos itens */
+    margin: 0 10px;
+    /* Espaçamento entre os itens */
     box-sizing: border-box;
 }
 
 .left .timeline-box {
-    order: -1; /* Coloca os itens à esquerda */
+    order: -1;
+    /* Coloca os itens à esquerda */
     text-align: right;
 }
 
 .right .timeline-box {
-    order: 1; /* Coloca os itens à direita */
+    order: 1;
+    /* Coloca os itens à direita */
     text-align: left;
 }
 
@@ -232,7 +239,8 @@ textarea.form-control {
     left: 50%;
     margin-left: -1px;
 }
-.linha{
+
+.linha {
     color: #D9D9D9;
     display: flex;
     justify-content: center;
