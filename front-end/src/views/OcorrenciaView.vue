@@ -48,8 +48,8 @@
             </div>
         </div>
         <div class="container mt-5">
-    <h2 class="text-center mb-4 text-muted">Linha do tempo</h2>
-    <div class="timeline">
+            <h5 class="linha">Linha do tempo</h5>
+            <div class="timeline">
         <div v-for="(registro, index) in ocorrencia.registros" :key="registro.id" class="timeline-item" :class="{ 'left': index % 2 === 0, 'right': index % 2 !== 0 }">
     <div class="timeline-box">
         <div class="card">
@@ -232,5 +232,13 @@ textarea.form-control {
     left: 50%;
     margin-left: -1px;
 }
-
+.linha{
+    color: #D9D9D9;
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+}
 </style>
