@@ -6,19 +6,19 @@
         <section class="section_contagemdedenuncias">
           <div class="card_contagem">
             <h3>Total de Denúncias</h3>
-            <p>150</p>
+            <p>{{ totalDenuncias }}</p>
           </div>
           <div class="card_contagem">
             <h3>Formulário</h3>
-            <p>80</p>
+            <p>{{ totalOcorrencias }}</p>
           </div>
           <div class="card_contagem">
             <h3>Chat</h3>
-            <p>70</p>
+            <p>{{ totalConversas }}</p>
           </div>
           <div class="card_contagem">
             <h3>Atendidas</h3>
-            <p>120</p>
+            <p>{{ totalAtendidas }}</p>
           </div>
         </section>
         <div class="div_ocorrencias">
@@ -66,6 +66,7 @@
   </div>
 </template>
 
+
 <style scooped>
 .close-chat {
   background: none;
@@ -75,11 +76,13 @@
   cursor: pointer;
 }
 
+
 .dashboard {
   margin-left: 250px;
   padding: 20px;
   border-radius: 100px;
 }
+
 
 .section_contagemdedenuncias {
   display: grid;
@@ -87,6 +90,7 @@
   gap: 20px;
   margin-bottom: 40px;
 }
+
 
 .card_contagem {
   background-color: #fff;
@@ -96,11 +100,13 @@
   text-align: center;
 }
 
+
 .card_contagem h3 {
   font-size: 1.2em;
   margin-bottom: 10px;
   color: #8b2276;
 }
+
 
 .card_contagem p {
   font-size: 32px;
@@ -108,11 +114,13 @@
   color: #FF00AE;
 }
 
+
 .div_ocorrencias {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 }
+
 
 .ocorrencias_chat,
 .ocorrencias_formulario {
@@ -124,12 +132,14 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+
 .div_ocorrencias h2 {
   font-size: 20px;
   margin-bottom: 20px;
   color: #8b2276;
   font-weight: bold;
 }
+
 
 .info_denuncia {
   background-color: white;
@@ -139,14 +149,17 @@
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
+
 .info_denuncia h3 {
   margin-bottom: 10px;
 }
+
 
 .info_denuncia p {
   margin-bottom: 8px;
   color: #7E7E7E
 }
+
 
 .buttons {
   grid-column: 1 / -1;
@@ -154,6 +167,7 @@
   justify-content: space-between;
   gap: 10px;
 }
+
 
 .detalhar-btn,
 .aceitar-btn {
@@ -168,6 +182,7 @@
   font-size: 14px;
 }
 
+
 .chat-container {
   height: 50%;
   margin: 50px auto;
@@ -178,6 +193,7 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   flex-direction: column;
 }
+
 
 .chat-container h3 {
   background-color: #802062;
@@ -190,6 +206,7 @@
   font-weight: bold;
 }
 
+
 .messages {
   border: 1px solid #ddd;
   height: 300px;
@@ -198,11 +215,13 @@
   padding: 10px;
 }
 
+
 .message {
   margin-bottom: 10px;
   padding: 5px;
   border-bottom: 1px solid #eee;
 }
+
 
 /* Input e botão de envio */
 .chat-input-container {
@@ -211,6 +230,7 @@
   background-color: #F5F5F5;
   align-items: center;
 }
+
 
 .chat-input-container input[type="text"] {
   flex: 1;
@@ -222,9 +242,11 @@
   background-color: #fff;
 }
 
+
 .chat-input-container input::placeholder {
   color: #bbb;
 }
+
 
 .chat-input-container button {
   background-color: #802062;
@@ -237,9 +259,11 @@
   width: 80px;
 }
 
+
 .chat-input-container button:hover {
   background-color: #993374;
 }
+
 
 @media (max-width: 768px) {
   .dashboard {
@@ -247,20 +271,24 @@
     padding: 10px;
   }
 
+
   .section_contagemdedenuncias {
     grid-template-columns: repeat(2, 1fr);
   }
+
 
   .div_ocorrencias {
     flex-direction: column;
     gap: 15px;
   }
 
+
   .card_contagem p {
     font-size: 24px;
   }
 }
 </style>
+
 
 <script>
 import SideBar from '@/components/SideBar.vue';
@@ -270,6 +298,7 @@ import { io } from "socket.io-client";
 import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
 import router from '@/router';
+
 
 export default {
   setup() {
@@ -288,33 +317,45 @@ export default {
       solicitacoes: [],
       isChatActive: false,
       activeClient: null, // ID do cliente com o qual está interagindo
+      totalDenuncias: 0,
+      totalOcorrencias: 0,
+      totalConversas: 0,
+      totalAtendidas: 0,
     };
   },
   mounted() {
     this.buscarOcorrencia();
+    this.buscarTotalDenuncias();
+
 
     const usuario = this.store.usuario
     console.log(usuario)
 
+
     this.socket = io("http://localhost:3000");
+
 
     // Envia sinal de que é o admin
     this.socket.emit("admin connect");
+
 
     // Recebe solicitações de chat
     this.socket.on("chat request", (request) => {
       this.solicitacoes.push(request);
     });
 
+
     // Remove solicitações atendidas
     this.socket.on("chat taken", ({ clientSocketId }) => {
       this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
     });
 
+
     // Recebe mensagens do servidor
     this.socket.on("chat message", (msg) => {
       this.messages.push(msg);
     });
+
 
     // Notifica o administrador se o chat terminar
     this.socket.on("chat ended", (reason) => {
@@ -329,6 +370,7 @@ export default {
   methods: {
     async buscarOcorrencia() {
       const token = this.store.token
+
 
       axios.get("http://localhost:3000/ocorrencias", {
         headers: {
@@ -348,6 +390,7 @@ export default {
       const user = this.store.usuario.usuario
       const email = user.email
       const token = this.store.token
+
 
       await axios.post("http://localhost:3000/aceitar/ocorrencia", {
         ocorrenciaId: id,
@@ -374,6 +417,22 @@ export default {
           timer: 4000,
         })
       });
+    },
+    async buscarTotalDenuncias() {
+      const token = this.store.token;
+      try {
+        const response = await axios.get("http://localhost:3000/todasocorrencias", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        this.totalDenuncias = response.data.totalDenuncias; // Atualiza o estado
+        this.totalOcorrencias = response.data.totalOcorrencias; // Formulário
+        this.totalConversas = response.data.totalConversas; // Chat
+        this.totalAtendidas = response.data.totalAtendidas;
+      } catch (error) {
+        console.error("Erro ao buscar total de denúncias:", error);
+      }
     },
     acceptChat(socketId) {
       // Aceita a solicitação de chat
@@ -410,3 +469,4 @@ export default {
   },
 }
 </script>
+

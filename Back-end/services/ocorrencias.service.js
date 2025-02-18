@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 
+
 async function CadrastrarOcorrencias(req, res) {
     const ocorrencias = await prisma.Ocorrencias.create({
         data:{
@@ -12,7 +13,7 @@ async function CadrastrarOcorrencias(req, res) {
             local: req.ocorrencias.local,
             data_denuncia: new Date(),
             data_ocorrencia: req.ocorrencias.data_ocorrencia
-        } 
+        }
     })
     return ocorrencias;
 }
@@ -26,30 +27,44 @@ async function getOcorrenciasProfissional(req, res) {
             ocorrencias: true  // Assumindo que você tem uma relação chamada 'ocorrencias'
         }
     });
-    
+   
     return ocorrencias;
 }
 
+
 async function GetOcorrencias() {
     const ocorrencia = await prisma.Ocorrencias.findMany({
-        where: { status: "Andamento" }, 
+        where: { status: "Andamento" },
         orderBy: { data_denuncia: "desc" }
     });
+
 
     return ocorrencia;
 }
 async function GetOcorrencia(req) {
     const ocorrencias = await prisma.Ocorrencias.findUnique({
-        where: { id: parseInt(req) }, 
+        where: { id: parseInt(req) },
     });
+
 
     return ocorrencias;
 }
 
+
 async function GetTodasOcorrencias() {
     const totalOcorrencias = await prisma.Ocorrencias.count();
-    return { totalOcorrencias };
+    const totalConversas = await prisma.Conversa.count(); // Contagem das denúncias feitas pelo chat
+    const totalDenuncias = totalOcorrencias + totalConversas; // Soma os dois valores
+    const totalAtendidas = await prisma.ocorrencias.count({
+        where: {
+          status: "Atendida" // Ou o nome correto que você usa
+        }
+      });
+
+
+    return { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas };
 }
+
 
 async function GetOcorrenciaEspecifica(id) {
     console.log(id)
@@ -63,6 +78,7 @@ async function GetOcorrenciaEspecifica(id) {
     return ocorrencia;
 }
 
+
 async function updateOcorrencia(req, res) {
     try {
         const { ocorrenciaId, profissionalEmail } = req.body;
@@ -75,6 +91,7 @@ async function updateOcorrencia(req, res) {
             select: { id: true }
         });
 
+
         // Atualizar a ocorrência para associar o profissional e mudar o status
         const ocorrenciaAtualizada = await prisma.ocorrencias.update({
             where: { id: ocorrenciaId },
@@ -84,6 +101,7 @@ async function updateOcorrencia(req, res) {
             }
         });
 
+
         return ocorrenciaAtualizada;
     } catch (error) {
         console.error("Erro ao atualizar ocorrência:", error);
@@ -91,17 +109,6 @@ async function updateOcorrencia(req, res) {
     }
 }
 
-async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
-    const progresso = await prisma.Registro.create({
-       data: {
-          descricoes: descricao.toString(),
-          anexos: anexos,
-          data: new Date().toISOString(),
-          ocorrencia: { connect: { id: Number(ocorrenciaId) } }
-       }
-    });
 
-    return progresso;
-}
+module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia}
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, adicionarProgresso}
