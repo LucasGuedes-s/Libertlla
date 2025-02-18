@@ -109,6 +109,17 @@ async function updateOcorrencia(req, res) {
     }
 }
 
+async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
+    const progresso = await prisma.Registro.create({
+       data: {
+          descricoes: descricao.toString(),
+          anexos: anexos,
+          data: new Date().toISOString(),
+          ocorrencia: { connect: { id: Number(ocorrenciaId) } }
+       }
+    });
+    return progresso;
+}
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia}
+module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, adicionarProgresso}
 
