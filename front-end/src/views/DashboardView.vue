@@ -327,6 +327,10 @@ export default {
     this.buscarOcorrencia();
     this.buscarTotalDenuncias();
 
+    // Atualiza a lista de ocorrências automaticamente a cada 10 segundos
+    this.intervalId = setInterval(() => {
+      this.buscarOcorrencia();
+    }, 5000);
 
     const usuario = this.store.usuario
     console.log(usuario)
@@ -462,6 +466,10 @@ export default {
   beforeUnmount() {
     if (this.socket) {
       this.socket.disconnect();
+    }
+    // Limpa o intervalo ao desmontar o componente
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
     }
   },
   components: {
