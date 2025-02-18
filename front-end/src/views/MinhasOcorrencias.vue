@@ -350,7 +350,7 @@ textarea {
   /* Cor de fundo */
   color: white;
   /* Cor do texto */
-  width: 50vw;
+  width: 100%;
   /* Ocupa toda a largura da tela */
   height: 60px;
   /* Ajusta a altura conforme necessário */
@@ -369,7 +369,7 @@ textarea {
   color: white;
   padding: 0;
   text-align: center;
-  padding-top: 20px;
+  padding-top: 20px; 
   font-family: "Montserrat", sans-serif;
 }
 
@@ -414,6 +414,10 @@ button {
   .ocorrencia-form {
     width: 97%;
     max-width: 97%;
+  }
+  .modal-content {
+    width: min(70vw, 1000px);
+    height: min(70vh, 700px);
   }
 }
 </style>
