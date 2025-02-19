@@ -31,10 +31,10 @@
 
                 <div class="form-group" id="adicionar_imagem">
                     <label for="imagem">Adicionar Imagem:</label>
-                    <input type="file" id="imagem" @change="handleFileUpload">
+                    <input type="file" id="imagem" @change="handleFileChange">
                 </div>
 
-                <button type="submit" class="btn_cadastrarprofissional">Cadastrar Profissional</button>
+                <button type="submit" class="btn_cadastrarprofissional" @click="cadastrarProfissional">Cadastrar Profissional</button>
             </form>
         </div>
     </div>
@@ -42,7 +42,7 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
-
+import Axios  from 'axios';
 export default {
     components: {
         SideBar,
@@ -55,21 +55,52 @@ export default {
                 email: '',
                 senha: '',
                 imagem: null
-            }
+            },
+            uploadStatus: "",
+            imageUrl: "",
+            file: null,  // Novo campo para armazenar o arquivo
         };
     },
     methods: {
-        handleFileUpload(event) {
-            this.form.imagem = event.target.files[0];
+        handleFileChange(event) {
+            this.file = event.target.files[0]; // Salvar o arquivo selecionado
         },
-        cadastrarProfissional() {
-            console.log("Dados do profissional:", {
-                nome: this.form.nome,
-                especialidade: this.form.especialidade,
-                email: this.form.email,
-                senha: this.form.senha,
-                imagem: this.form.imagem ? this.form.imagem.name : "Nenhuma imagem selecionada"
+        async uploadFile() {
+            if (!this.file) {
+                this.uploadStatus = "Por favor, selecione um arquivo.";
+                return null;
+            }
+
+            const formData = new FormData();
+            formData.append("file", this.file);
+
+            const response = await fetch("http://localhost:3000/upload", {
+                method: "POST",
+                body: formData,
             });
+            const data = await response.json();
+            this.uploadStatus = "Arquivo enviado com sucesso!";
+            this.imageUrl = data.fileUrl;
+        },
+        async cadastrarProfissional() {
+            //const token = this.store.token
+            console.log("aqui")
+            try{
+                await Axios.post('http://localhost:3000/cadastrar/profissional', {
+                    usuario: {
+                        nome: this.nome,
+                        especialidade: this.especialidade,
+                        email: this.email,
+                        senha: this.senha,
+                        foto: this.imageUrl
+                    }
+                }
+
+                )
+            }catch(error){
+
+            }
+
         }
     }
 };

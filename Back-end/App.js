@@ -29,15 +29,17 @@ app.use(function(req, res, next) {
     next();
   });
 
-  app.use(express.json());
+app.use(express.json());
 // Importar rotas
 const userRouter = require('../Back-end/routes/user.router');
 const ocorrencias = require('../Back-end/routes/ocorrencia.router');
 const pdf = require('../Back-end/routes/pdfs.router');
+const profissionais = require('../Back-end/routes/profissionais.router');
 
 app.use(userRouter);
 app.use(ocorrencias);
 app.use(pdf);
+app.use(profissionais);
 
 // Criar servidor HTTP e configurar Socket.io
 const PORT = 3000;
