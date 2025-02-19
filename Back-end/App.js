@@ -30,6 +30,7 @@ app.use(function(req, res, next) {
   });
 
 app.use(express.json());
+
 // Importar rotas
 const userRouter = require('../Back-end/routes/user.router');
 const ocorrencias = require('../Back-end/routes/ocorrencia.router');

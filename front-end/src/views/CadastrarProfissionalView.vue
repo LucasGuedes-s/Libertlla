@@ -13,9 +13,9 @@
                     <label for="especialidade">Especialidade:</label>
                     <select id="especialide_profissional" v-model="form.especialidade">
                         <option value="delegada">Delegada</option>
-                        <option value="pericia_criminal">Perícia Criminal</option>
+                        <option value="pericia criminal">Perícia Criminal</option>
                         <option value="policial">Policial</option>
-                        <option value="policial_cibernetico">Policial Cibernética</option>
+                        <option value="policial cibernetico">Policial Cibernética</option>
                     </select>
                 </div>
 
@@ -34,7 +34,7 @@
                     <input type="file" id="imagem" @change="handleFileChange">
                 </div>
 
-                <button type="submit" class="btn_cadastrarprofissional" @click="cadastrarProfissional">Cadastrar Profissional</button>
+                <button type="submit" class="btn_cadastrarprofissional">Cadastrar Profissional</button>
             </form>
         </div>
     </div>
@@ -54,7 +54,6 @@ export default {
                 especialidade: '',
                 email: '',
                 senha: '',
-                imagem: null
             },
             uploadStatus: "",
             imageUrl: "",
@@ -73,11 +72,13 @@ export default {
 
             const formData = new FormData();
             formData.append("file", this.file);
+            console.log(FormData)
 
             const response = await fetch("http://localhost:3000/upload", {
                 method: "POST",
                 body: formData,
             });
+            console.log(response)
             const data = await response.json();
             this.uploadStatus = "Arquivo enviado com sucesso!";
             this.imageUrl = data.fileUrl;
@@ -85,18 +86,23 @@ export default {
         async cadastrarProfissional() {
             //const token = this.store.token
             console.log("aqui")
+            if (this.file) {
+                const fileUrl = await this.uploadFile();
+                if (fileUrl) {
+                anexos.push(fileUrl);
+                }
+            }
             try{
+                console.log(this.form.especialidade)
                 await Axios.post('http://localhost:3000/cadastrar/profissional', {
                     usuario: {
-                        nome: this.nome,
-                        especialidade: this.especialidade,
-                        email: this.email,
-                        senha: this.senha,
+                        nome: this.form.nome,
+                        especialidade: this.form.especialidade,
+                        email: this.form.email,
+                        senha: this.form.senha,
                         foto: this.imageUrl
                     }
-                }
-
-                )
+                })
             }catch(error){
 
             }

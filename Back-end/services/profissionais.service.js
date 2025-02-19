@@ -3,15 +3,15 @@ const prisma = new PrismaClient()
 const bcryptUtil = require("../utils/bcrypt.util");
 
 async function postProfissional(user){
-    console.log(user.usuario)
-    let senha_user = bcryptUtil.hash(user.senha);  
+    console.log(user.usuario.especialidade)
+    let senha_user = bcryptUtil.hash(user.usuario.senha, 10);  
     const cadastro = await prisma.Profissionais.create({
         data: {
-            nome: user.nome,
-            especialidade: user.especialidade,
-            email: user.email,
+            nome: user.usuario.nome,
+            especialidade: user.usuario.especialidade,
+            email: user.usuario.email,
             senha: senha_user,
-            foto: user.foto,
+            foto: user.usuario.foto,
             permissaoId: 1
         },
     });
