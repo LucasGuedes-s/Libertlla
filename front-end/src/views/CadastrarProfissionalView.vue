@@ -43,6 +43,8 @@
 <script>
 import SideBar from '@/components/SideBar.vue';
 import Axios  from 'axios';
+import Swal from 'sweetalert2';
+
 export default {
     components: {
         SideBar,
@@ -103,10 +105,30 @@ export default {
                         foto: this.imageUrl
                     }
                 })
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Profissional cadastrado com sucesso!',
+                    confirmButtonColor: '#9B287B',
+                });
             }catch(error){
-
+                let errorMessage = "Erro ao cadastrar profissional.";
+                if (error.response) {
+                    if (error.response.status === 400) {
+                        errorMessage = "Dados inválidos. Verifique e tente novamente.";
+                    } else if (error.response.status === 409) {
+                        errorMessage = "E-mail já cadastrado!";
+                    } else if (error.response.status === 500) {
+                        errorMessage = "Erro no servidor. Tente novamente mais tarde.";
+                    }
             }
-
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: errorMessage,
+                    confirmButtonColor: '#d33',
+                });
+            }
         }
     }
 };
