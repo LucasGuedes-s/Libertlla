@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard">
-    
     <div class="d-flex">
       <SideBar />
       <NavBarUser />
@@ -31,7 +30,7 @@
               <p><strong>Data:</strong> {{ formatDate(ocorrencia.data_denuncia) }} </p>
               <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
               <div class="buttons">
-                <button class="detalhar-btn">Detalhar</button>
+                <button type="button" class="detalhar-btn" @click="abrirModal(ocorrencia.id)">Detalhar</button>
                 <button class="aceitar-btn" @click="aceitarDenuncia(ocorrencia.id)">Aceitar</button>
               </div>
             </div>
@@ -50,19 +49,60 @@
         </div>
       </div>
     </div>
-    <div class="chat-container">
-      <div v-if="isChatActive">
-        <h3>Chat Ativo</h3>
-        <button class="close-chat" @click="endChat">&times;</button>
-        <div class="messages">
-          <div v-for="(message, index) in messages" :key="index" class="message">
-            {{ message.from }} {{ message.content }}
+
+    <!-- Modal -->
+    <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
+      <div class="modal-content">
+        <div class="quadrado">
+          <h1 class="titulo mb-4">Ocorrência - {{ ocorrencia.id }}</h1>
+        </div>
+
+        <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Data:</label>
+              <input class="form-control" v-model="ocorrencia.data_denuncia" readonly />
+            </div>
+            <div class="mb-3">
+              <label for="tipoDenuncia" class="form-label">Tipo de violência:</label>
+              <input type="text" id="tipoDenuncia" class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
+            </div>
+            <div class="mb-3">
+              <label for="relacaoDenunciado" class="form-label">Relação com a Pessoa Denunciada:</label>
+              <input type="text" id="relacaoDenunciado" class="form-control" v-model="ocorrencia.agressor" readonly />
+            </div>
+            <div class="mb-3">
+              <label for="localOcorrido" class="form-label">Local do Ocorrido:</label>
+              <input type="text" id="localOcorrido" class="form-control" v-model="ocorrencia.local" readonly />
+          </div>
+
+          <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição:</label>
+            <input id="descricao" class="form-control" rows="3" v-model="ocorrencia.descricao" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="provas" class="form-label">Provas:</label>
+            <input id="provas" class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
           </div>
         </div>
-        <div class="chat-input-container">
-          <input type="text" v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
-          <button @click="sendMessage">Enviar</button>
+
+        <div class="modal-actions">
+          <button class="abrirModal" @click="fecharModal">Fechar</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container" v-if="isChatActive">
+      <h3>Chat Ativo</h3>
+      <button class="close-chat" @click="endChat">&times;</button>
+      <div class="messages">
+        <div v-for="(message, index) in messages" :key="index" class="message">
+          {{ message.from }}: {{ message.content }}
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" v-model="inputMessage" @keyup.enter="sendMessage" placeholder="Digite sua mensagem..." />
+        <button @click="sendMessage">Enviar</button>
       </div>
     </div>
   </div>
@@ -70,15 +110,6 @@
 
 
 <style scooped>
-.close-chat {
-  background: none;
-  border: none;
-  color: #8b2276;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-
 .dashboard {
   margin-left: 250px;
   padding: 20px;
@@ -184,6 +215,17 @@
   font-size: 14px;
 }
 
+.abrirModal {
+  flex: 1;
+  padding: 10px 20px;
+  background-color: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  color: #7E7E7E;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+}
 
 .chat-container {
   height: 50%;
@@ -267,6 +309,110 @@
 }
 
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  font-family: 'Montserrat', sans-serif;
+  color: #7E7E7E;
+}
+
+.modal-content {
+  background: white !important;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90vw;
+  /* Ajuste para aumentar a largura (Ex: 50% da tela) */
+  max-width: 800px;
+  /* Define um tamanho máximo */
+  height: auto;
+  /* Ajuste para aumentar a altura (Ex: 60% da altura da tela) */
+  max-height: 90vh;
+  /* Define um tamanho máximo */
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 80px;
+}
+
+.modal-content form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Isso garante que o conteúdo do form seja distribuído entre a parte superior e inferior */
+  margin-top: 60px;
+}
+.card-body .form-control{
+  font-family: 'Montserrat', sans-serif;
+  color: rgba(152, 152, 152, 255);
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: none;
+  /* Impede que o usuário redimensione a área de texto */
+}
+
+.quadrado {
+  background-color: #54123F;
+  /* Cor de fundo */
+  color: white;
+  /* Cor do texto */
+  width: 100%;
+  /* Ocupa toda a largura da tela */
+  height: 60px;
+  /* Ajusta a altura conforme necessário */
+  top: 0px;
+  left: 0px;
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  /* Centraliza o conteúdo horizontalmente */
+}
+
+.quadrado .titulo {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+  padding: 0;
+  text-align: center;
+  padding-top: 20px;
+  font-family: "Montserrat", sans-serif;
+}
+
+button {
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.modal-actions button {
+  margin-top: -15px;
+  /* Ajuste a distância que deseja mover para cima */
+}
+
+
 @media (max-width: 768px) {
   .dashboard {
     margin-left: 0;
@@ -291,7 +437,6 @@
 }
 </style>
 
-
 <script>
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
@@ -304,15 +449,18 @@ import NavBarUser from '@/components/NavBarUser.vue';
 
 export default {
   setup() {
-    const store = useAuthStore()
+    const store = useAuthStore();
     return {
       store
-    }
+    };
   },
   data() {
     return {
       formatDate,
       ocorrencias: [],
+      ocorrencia: {}, // Armazena os detalhes da ocorrência selecionada
+      modalVisible: false,
+      modalkey: 0,
       socket: null,
       inputMessage: "",
       messages: [],
@@ -323,143 +471,149 @@ export default {
       totalOcorrencias: 0,
       totalConversas: 0,
       totalAtendidas: 0,
+      intervalId: null
     };
   },
   mounted() {
-    this.buscarOcorrencia();
+    this.buscarOcorrencias();
     this.buscarTotalDenuncias();
 
-    // Atualiza a lista de ocorrências automaticamente a cada 10 segundos
+    // Atualiza a lista de ocorrências automaticamente a cada 5 segundos
     this.intervalId = setInterval(() => {
-      this.buscarOcorrencia();
+      this.buscarOcorrencias();
     }, 5000);
-
-    const usuario = this.store.usuario
-    console.log(usuario)
-
 
     this.socket = io("http://localhost:3000");
 
-
     // Envia sinal de que é o admin
     this.socket.emit("admin connect");
-
 
     // Recebe solicitações de chat
     this.socket.on("chat request", (request) => {
       this.solicitacoes.push(request);
     });
 
-
     // Remove solicitações atendidas
     this.socket.on("chat taken", ({ clientSocketId }) => {
       this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
     });
-
 
     // Recebe mensagens do servidor
     this.socket.on("chat message", (msg) => {
       this.messages.push(msg);
     });
 
-
     // Notifica o administrador se o chat terminar
-    this.socket.on("chat ended", (reason) => {
+    this.socket.on("chat ended", () => {
       Swal.fire({
         icon: 'error',
         title: 'Usuário foi desconectado',
         timer: 4000,
-      })
+      });
       this.endChat();
     });
   },
   methods: {
-    async buscarOcorrencia() {
-      const token = this.store.token
+    async abrirModal(id) {
+      try {
+        const token = this.store.token;
+        const response = await axios.get(`http://localhost:3000/ocorrencia/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
+        if (response.data && response.data.ocorrencia) {
+          this.ocorrencia = response.data.ocorrencia;
+          this.ocorrencia.id = id; // Salva o ID corretamente
+        } else {
+          console.warn("Nenhuma ocorrência encontrada para o ID:", id);
+        }
 
-      axios.get("http://localhost:3000/ocorrencias", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
-        this.ocorrencias = response.data.ocorrencias
-      }).catch(error => {
-        console.log(error.status)
-        if(error.status === 403 || error.status === 401){
-          router.push('/nao-autorizado')
-        }
+        this.modalVisible = true;
+        this.modalkey++;
+      } catch (error) {
+        console.error('Erro ao buscar ocorrência:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao carregar detalhes da ocorrência',
+          text: 'Tente novamente mais tarde.',
+        });
+      }
+    },
+    fecharModal() {
+      this.modalVisible = false;
+      this.ocorrencia = {};
+    },
+    async buscarOcorrencias() {
+      try {
+        const token = this.store.token;
+        const response = await axios.get("http://localhost:3000/ocorrencias", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.ocorrencias = response.data.ocorrencias;
+      } catch (error) {
         console.error('Erro ao buscar ocorrências:', error);
-      });
+        if (error.response && (error.response.status === 403 || error.response.status === 401)) {
+          router.push('/nao-autorizado');
+        }
+      }
     },
     async aceitarDenuncia(id) {
-      const user = this.store.usuario.usuario
-      const email = user.email
-      const token = this.store.token
+      try {
+        const user = this.store.usuario.usuario;
+        const email = user.email;
+        const token = this.store.token;
 
+        await axios.post("http://localhost:3000/aceitar/ocorrencia", {
+          ocorrenciaId: id,
+          profissionalEmail: email
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-      await axios.post("http://localhost:3000/aceitar/ocorrencia", {
-        ocorrenciaId: id,
-        profissionalEmail: email
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
-        this.buscarOcorrencia();
+        this.buscarOcorrencias();
         Swal.fire({
           icon: 'success',
           title: 'Ocorrência aceita com sucesso',
           timer: 4000,
-        })
-      }).catch(error => {
-        if(error.status === 403 || error.status === 401){
-          router.push('/nao-autorizado')
-        }
+        });
+      } catch (error) {
+        console.error('Erro ao aceitar denúncia:', error);
         Swal.fire({
           icon: 'error',
           title: 'Erro ao aceitar denúncia',
-          timer: 4000,
-        })
-      });
+          text: 'Tente novamente mais tarde.',
+        });
+      }
     },
     async buscarTotalDenuncias() {
-      const token = this.store.token;
       try {
+        const token = this.store.token;
         const response = await axios.get("http://localhost:3000/todasocorrencias", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        this.totalDenuncias = response.data.totalDenuncias; // Atualiza o estado
-        this.totalOcorrencias = response.data.totalOcorrencias; // Formulário
-        this.totalConversas = response.data.totalConversas; // Chat
+        this.totalDenuncias = response.data.totalDenuncias;
+        this.totalOcorrencias = response.data.totalOcorrencias;
+        this.totalConversas = response.data.totalConversas;
         this.totalAtendidas = response.data.totalAtendidas;
       } catch (error) {
         console.error("Erro ao buscar total de denúncias:", error);
       }
     },
     acceptChat(socketId) {
-      // Aceita a solicitação de chat
       this.socket.emit("accept chat", socketId);
       this.isChatActive = true;
-      this.activeClient = socketId; // Armazena o ID do cliente
-      this.requests = []; // Limpa as solicitações
+      this.activeClient = socketId;
+      this.requests = [];
     },
     sendMessage() {
       if (this.inputMessage.trim()) {
-        const message = {
-          from: 'Admin',
-          content: this.inputMessage
-        };
-        this.socket.emit("chat message", message); // Envia para o servidor
-        this.messages.push(message); // Adiciona localmente no admin
-        this.inputMessage = ""; // Limpa o campo de entrada
+        const message = { from: 'Admin', content: this.inputMessage };
+        this.socket.emit("chat message", message);
+        this.messages.push(message);
+        this.inputMessage = "";
       }
     },
     endChat() {
-      // Encerra o chat ativo
       this.isChatActive = false;
       this.activeClient = null;
       this.messages = [];
@@ -469,7 +623,6 @@ export default {
     if (this.socket) {
       this.socket.disconnect();
     }
-    // Limpa o intervalo ao desmontar o componente
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
@@ -478,5 +631,5 @@ export default {
     SideBar,
     NavBarUser
   },
-}
+};
 </script>
