@@ -43,6 +43,9 @@
                             <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas"
                                 readonly></textarea>
                         </div>
+                        <div class="button">
+                            <button class="apertarBotao" @click="fecharModal">Arquivar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -146,6 +149,23 @@ export default {
     padding: 20px;
 }
 
+.apertarBotao {
+  flex: 1;
+  padding: 10px 20px;
+  background-color: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  color: #7E7E7E;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+}
+
+.button {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 @media (min-width: 1024px) {
     .container {
         max-width: 90%;
