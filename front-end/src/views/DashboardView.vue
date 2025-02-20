@@ -63,29 +63,29 @@
               <input class="form-control" v-model="ocorrencia.data_denuncia" readonly />
             </div>
             <div class="mb-3">
-              <label for="tipoDenuncia" class="form-label">Tipo de violência:</label>
-              <input type="text" id="tipoDenuncia" class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
+              <label class="form-label">Tipo de violência:</label>
+              <input class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
             </div>
             <div class="mb-3">
-              <label for="relacaoDenunciado" class="form-label">Relação com a Pessoa Denunciada:</label>
-              <input type="text" id="relacaoDenunciado" class="form-control" v-model="ocorrencia.agressor" readonly />
+              <label class="form-label">Relação com a Pessoa Denunciada:</label>
+              <input class="form-control" v-model="ocorrencia.agressor" readonly />
             </div>
             <div class="mb-3">
-              <label for="localOcorrido" class="form-label">Local do Ocorrido:</label>
-              <input type="text" id="localOcorrido" class="form-control" v-model="ocorrencia.local" readonly />
+              <label class="form-label">Local do Ocorrido:</label>
+              <input class="form-control" v-model="ocorrencia.local" readonly />
           </div>
 
           <div class="mb-3">
-            <label for="descricao" class="form-label">Descrição:</label>
-            <input id="descricao" class="form-control" rows="3" v-model="ocorrencia.descricao" readonly>
+            <label class="form-label">Descrição:</label>
+            <input class="form-control" rows="3" v-model="ocorrencia.descricao" readonly>
           </div>
           <div class="mb-3">
-            <label for="provas" class="form-label">Provas:</label>
-            <input id="provas" class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
+            <label  class="form-label">Provas:</label>
+            <input class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
           </div>
         </div>
 
-        <div class="modal-actions">
+        <div class="modal-button">
           <button class="abrirModal" @click="fecharModal">Fechar</button>
         </div>
       </div>
@@ -215,33 +215,19 @@
   font-size: 14px;
 }
 
-.abrirModal {
-  flex: 1;
-  padding: 10px 20px;
-  background-color: #F5F5F5;
-  border: 1px solid #D9D9D9;
-  color: #7E7E7E;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-}
-
 .chat-container {
   height: 50%;
   margin: 50px auto;
   border-radius: 10px;
   overflow: hidden;
-  background-color: rgb(255, 255, 255);
-  /* Fundo do contêiner principal */
+  background-color: rgb(255, 255, 255); /* Fundo do contêiner principal */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   flex-direction: column;
 }
 
 
 .chat-container h3 {
-  background-color: #802062;
-  /* Fundo do cabeçalho */
+  background-color: #802062; /* Fundo do cabeçalho */
   color: #fff;
   text-align: center;
   padding: 15px;
@@ -266,8 +252,6 @@
   border-bottom: 1px solid #eee;
 }
 
-
-/* Input e botão de envio */
 .chat-input-container {
   display: flex;
   padding: 10px;
@@ -331,13 +315,9 @@
   padding: 20px;
   border-radius: 8px;
   width: 90vw;
-  /* Ajuste para aumentar a largura (Ex: 50% da tela) */
   max-width: 800px;
-  /* Define um tamanho máximo */
   height: auto;
-  /* Ajuste para aumentar a altura (Ex: 60% da altura da tela) */
   max-height: 90vh;
-  /* Define um tamanho máximo */
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -350,45 +330,43 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* Isso garante que o conteúdo do form seja distribuído entre a parte superior e inferior */
   margin-top: 60px;
 }
+
 .card-body .form-control{
   font-family: 'Montserrat', sans-serif;
   color: rgba(152, 152, 152, 255);
 }
-.modal-actions {
+
+.abrirModal {
+  flex: 1;
+  padding: 10px 20px;
+  background-color: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  color: #7E7E7E;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+}
+
+.modal-button {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  resize: none;
-  /* Impede que o usuário redimensione a área de texto */
-}
-
 .quadrado {
   background-color: #54123F;
-  /* Cor de fundo */
   color: white;
-  /* Cor do texto */
   width: 100%;
-  /* Ocupa toda a largura da tela */
   height: 60px;
-  /* Ajusta a altura conforme necessário */
   top: 0px;
   left: 0px;
   display: flex;
   position: absolute;
   align-items: center;
   justify-content: center;
-  /* Centraliza o conteúdo horizontalmente */
 }
 
 .quadrado .titulo {
@@ -399,17 +377,6 @@ textarea {
   text-align: center;
   padding-top: 20px;
   font-family: "Montserrat", sans-serif;
-}
-
-button {
-  font-size: 14px;
-  padding: 8px;
-  border-radius: 5px;
-}
-
-.modal-actions button {
-  margin-top: -15px;
-  /* Ajuste a distância que deseja mover para cima */
 }
 
 
