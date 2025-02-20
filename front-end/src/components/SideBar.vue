@@ -38,7 +38,7 @@
             </svg>
             Relatórios
         </a>
-        <button class="logout-button">
+        <button class="logout-button" @click="logout">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin"
                 viewBox="0 0 16 16">
                 <path fill-rule="evenodd"
@@ -53,8 +53,16 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/store.js';
+import router from '@/router';
+
 export default {
     name: "SideBar",
+    setup() {
+        const authStore = useAuthStore(); // 🔥 Inicializa a store corretamente
+
+        return { authStore }; // Retorna para ser usado no template e métodos
+    },
     data() {
         return {
             sidebarVisible: true,
@@ -63,6 +71,12 @@ export default {
     methods: {
         toggleSidebar() {
             this.sidebarVisible = !this.sidebarVisible;
+        },
+        logout() {
+            window.location.href = '/login';
+
+            //router.push('/login'); // Redireciona para a tela de login
+
         },
     },
 };

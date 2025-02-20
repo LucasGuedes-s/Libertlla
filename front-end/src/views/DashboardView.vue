@@ -442,8 +442,13 @@ export default {
     };
   },
   mounted() {
-    this.buscarOcorrencias();
-    this.buscarTotalDenuncias();
+    if(this.store.token == null){
+      window.location.href = '/nao-autorizado';
+    }
+    else{
+      this.buscarOcorrencias();
+      this.buscarTotalDenuncias();
+    }
 
     // Atualiza a lista de ocorrências automaticamente a cada 5 segundos
     this.intervalId = setInterval(() => {
@@ -513,15 +518,22 @@ export default {
     async buscarOcorrencias() {
       try {
         const token = this.store.token;
+        if (!token) {
+          this.$router.push('/nao-autorizado');
+          return;
+        }
         const response = await axios.get("http://localhost:3000/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` }
         });
         this.ocorrencias = response.data.ocorrencias;
       } catch (error) {
         console.error('Erro ao buscar ocorrências:', error);
-        if (error.response && (error.response.status === 403 || error.response.status === 401)) {
-          router.push('/nao-autorizado');
+        // Se a requisição falhar devido a falta de permissão (403), redireciona
+        if (error.response && error.response.status === 403) {
+          this.$router.push('/nao-autorizado');
         }
+            //router.push('/nao-autorizado');
+        
       }
     },
     async aceitarDenuncia(id) {

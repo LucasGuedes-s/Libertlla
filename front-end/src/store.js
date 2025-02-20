@@ -31,6 +31,7 @@ export const useAuthStore = defineStore('auth', {
       this.setAuthData(user, token);
     },
     logout() {
+      console.log("Aqui")
       this.clearAuthData();
     },
     carregarDados() {

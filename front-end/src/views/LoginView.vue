@@ -1,23 +1,22 @@
 <template>
-    <div class="container_login">
-        <div class="image_section">
-          <div class="image"></div>
-        </div>
-        <div class="login_section">
-            <h1><span class="nome">LIBERTLLA</span></h1>
-            <form  class="login_form" @submit.prevent="login">
-                <label for="email"> E-mail</label>
-                <input type="text" name="email" placeholder="Digite o seu e-mail" v-model="email">
-                <label for="senha">Senha</label>
-                <input type="password" name="senha" placeholder="Digite a sua senha" v-model="senha">
-                <button type="submit" class="bnt_entrar" @click="login">Entrar</button>
-            </form>
-        </div>
+  <div class="container_login">
+    <div class="image_section">
+      <div class="image"></div>
     </div>
+    <div class="login_section">
+      <h1><span class="nome">LIBERTLLA</span></h1>
+      <form class="login_form" @submit.prevent="login">
+        <label for="email"> E-mail</label>
+        <input type="text" name="email" placeholder="Digite o seu e-mail" v-model="email">
+        <label for="senha">Senha</label>
+        <input type="password" name="senha" placeholder="Digite a sua senha" v-model="senha">
+        <button type="submit" class="bnt_entrar" @click="login">Entrar</button>
+      </form>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-
 .container_login {
   display: flex;
   height: 100vh;
@@ -27,8 +26,9 @@
   flex: 1;
   background: url("../assets/stoplogin.png");
   background-size: cover;
-  background-color: #54123F; 
-  background-blend-mode: multiply; /* transparencia em cima da imagem */
+  background-color: #54123F;
+  background-blend-mode: multiply;
+  /* transparencia em cima da imagem */
 }
 
 .login_section {
@@ -43,7 +43,7 @@
 
 .login_section h1 {
   font-size: 450%;
-  font-family:  "Montserrat", sans-serif ;
+  font-family: "Montserrat", sans-serif;
   font-weight: bold;
   margin-bottom: 1rem;
   color: #ffffff;
@@ -55,13 +55,15 @@
   width: 70%;
   max-width: 1000px;
 }
+
 .login_form label {
-  font-family:  "Montserrat", sans-serif ;
+  font-family: "Montserrat", sans-serif;
   font-size: 1rem;
   margin-bottom: 0.60rem;
   color: #ffffff;
   margin-top: 1rem;
 }
+
 .login_form input {
   padding: 0.75rem;
   font-size: 1rem;
@@ -71,6 +73,7 @@
   background-color: #4D10;
   color: #ffffff;
 }
+
 .login_form input::placeholder {
   color: #ffffff;
 }
@@ -83,7 +86,7 @@
   background-color: #9B287B;
   border: none;
   border-radius: 10px;
-  font-family:  "Montserrat", sans-serif ;
+  font-family: "Montserrat", sans-serif;
   margin-top: 1.5rem;
 }
 
@@ -108,7 +111,6 @@
     width: 90%;
   }
 }
-
 </style>
 
 <script>
@@ -118,27 +120,31 @@ import { useAuthStore } from '@/store.js'
 import Swal from 'sweetalert2';
 
 export default {
-  setup(){
-        const store = useAuthStore() 
-        return{
-            store
-        }
-    },
-    data() {
-        return {
-            email: '',
-            senha: '',
-            token: null,
-        }
-    },
-methods:{
-  async login() {
-    await axios.post("http://localhost:3000/login", {
+  setup() {
+    const store = useAuthStore()
+    return {
+      store
+    }
+  },
+  data() {
+    return {
+      email: '',
+      senha: '',
+      token: null,
+    }
+  },
+  mounted(){
+    this.store.logout()
+    
+  },
+  methods: {
+    async login() {
+      await axios.post("http://localhost:3000/login", {
         usuario: {
-            email: this.email,
-            senha: this.senha
+          email: this.email,
+          senha: this.senha
         }
-    }).then(response => {
+      }).then(response => {
         const authStore = useAuthStore();
 
         const token = response.headers.authorization.split(' ')[1];
@@ -148,19 +154,19 @@ methods:{
 
         // Verifique se o usuário já está na página '/dashboard'
         if (this.$route.path !== '/dashboard') {
-            // Só navegue se o usuário não estiver já na rota '/dashboard'
-            router.push('/dashboard');
+          // Só navegue se o usuário não estiver já na rota '/dashboard'
+          router.push('/dashboard');
         }
-    }).catch(Error => {
+      }).catch(Error => {
         console.log(Error);
         Swal.fire({
-            icon: 'error',
-            title: 'Usuário ou senha incorretos',
-            timer: 4000,
+          icon: 'error',
+          title: 'Usuário ou senha incorretos',
+          timer: 4000,
         });
-    });
-}
+      });
+    }
 
-}
+  }
 }
 </script>
