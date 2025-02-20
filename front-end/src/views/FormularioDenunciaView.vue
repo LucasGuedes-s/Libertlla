@@ -79,6 +79,7 @@ h1 {
     margin-bottom: 20px;
     font-family: "Montserrat", sans-serif;
     font-weight: bold;
+    font-size: 32px;
 }
 
 .form-container {
@@ -164,6 +165,17 @@ h2 {
 .btn_realizardenuncia:hover {
     background-color: #FF00AE;
     /* Cor alterada quando o mouse passa por cima (exemplo: verde mais escuro) */
+}
+@media (max-width: 768px) {
+    h1 {
+        font-size: 25px;
+    }
+    form {
+        grid-template-columns: 1fr;
+    }
+    .btn_realizardenuncia {
+        padding: 10px;
+    }
 }
 </style>
 <script>
