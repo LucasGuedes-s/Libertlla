@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 async function CadrastrarOcorrencias(req, res) {
     const ocorrencias = await prisma.Ocorrencias.create({
         data:{
-            tipo_denuncia: req.ocorrencias.tipo_denuncia,
+            tipo_denuncia: 'Fomulário',
             tipo_violencia: req.ocorrencias.tipo_violencia,
             agressor: req.ocorrencias.agressor,
             provas: req.ocorrencias.provas,
@@ -21,7 +21,7 @@ async function getOcorrenciasProfissional(req, res) {
     const profissionalId = req
     const ocorrencias = await prisma.Profissionais.findMany({
         where: {
-            email: profissionalId // Filtra pelo ID do profissional
+            email: profissionalId,
         },
         include: {
             ocorrencias: true  // Assumindo que você tem uma relação chamada 'ocorrencias'
@@ -46,7 +46,6 @@ async function GetOcorrencia(req) {
         where: { id: parseInt(req) },
     });
 
-
     return ocorrencias;
 }
 
@@ -57,7 +56,7 @@ async function GetTodasOcorrencias() {
     const totalDenuncias = totalOcorrencias + totalConversas; // Soma os dois valores
     const totalAtendidas = await prisma.ocorrencias.count({
         where: {
-          status: "Atendida" // Ou o nome correto que você usa
+            status: "Em progresso" // Ou o nome correto que você usa
         }
       });
 
@@ -99,7 +98,6 @@ async function updateOcorrencia(req, res) {
                 status: "Em progresso"
             }
         });
-
 
         return ocorrenciaAtualizada;
     } catch (error) {

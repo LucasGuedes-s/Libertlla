@@ -1,18 +1,19 @@
 const  Ocorrencia = require("../services/ocorrencias.service");
 
-
-async function PostOcorrencias(req, res, next) {
+// Registrar uma nova ocorrência
+async function PostOcorrencias(req, res){
     try {
         const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body)
-        res.status(200).json({
-            ocorrencias
-        })
-        next()
+
+        req.io.emit('nova_ocorrencia', ocorrencias);
+
+        res.status(200).json({ message: 'Ocorrência registrada com sucesso', ocorrencia: ocorrencias });
     } catch (error) {
-        console.error(error)
-        console.error('Erro no cadrastro da ocorrencia')
+        console.error('Erro ao registrar ocorrência:', error);
+        res.status(500).json({ message: 'Erro ao registrar ocorrência' });
     }
-}
+};
+
 async function getOcorrenciasProfissional(req, res, next) {
     try {
         const processos = await Ocorrencia.getOcorrenciasProfissional(req.params.email)
@@ -48,9 +49,6 @@ async function GetTodasOcorrencias(req, res, next) {
         res.status(500).json({ message: 'Erro ao buscar total de denúncias' });
     }
 }
-
-
-
 
 async function GetOcorrenciaEspecifica(req, res, next) {
     try {

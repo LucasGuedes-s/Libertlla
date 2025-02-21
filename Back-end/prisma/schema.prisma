@@ -17,6 +17,7 @@ model Profissionais {
   especialidade String
   processo      Int?
   ocorrencias   Ocorrencias[]
+  ocorrencias_chat   Conversa[]
   permissao     Permissoes @relation(fields: [permissaoId], references: [id])
 
 }
@@ -58,5 +59,7 @@ model Conversa {
   clientId  String   // ID do cliente
   adminId   String?  // ID do admin (pode ser nulo no início)
   messages  Json     // JSONB no PostgreSQL para armazenar a conversa
+  profisssional     Profissionais? @relation(fields: [profissional], references: [id])
+  profissional      Int?
   createdAt DateTime @default(now()) // Data da criação
 }

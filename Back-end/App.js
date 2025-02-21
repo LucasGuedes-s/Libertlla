@@ -29,15 +29,11 @@ app.use(function(req, res, next) {
     next();
   });
 
-  app.use(express.json());
+app.use(express.json());
 // Importar rotas
 const userRouter = require('../Back-end/routes/user.router');
 const ocorrencias = require('../Back-end/routes/ocorrencia.router');
 const pdf = require('../Back-end/routes/pdfs.router');
-
-app.use(userRouter);
-app.use(ocorrencias);
-app.use(pdf);
 
 // Criar servidor HTTP e configurar Socket.io
 const PORT = 3000;
@@ -53,14 +49,25 @@ const io = new Server(server, {
 let adminSockets = new Set();  // Conjunto de admins conectados
 let activeChats = new Map();   // Mapeia cliente → admin
 let chatMessages = new Map();  // Armazena mensagens do chat antes de salvar
+let adminEmails = new Map(); // Armazena o email do admin por socket.id
+
+
+// 🔹 Adiciona o `io` no `req` para acessar no controller
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
+app.use(userRouter);
+app.use(ocorrencias);
+app.use(pdf);
 
 io.on('connection', (socket) => {
-    // console.log('Usuário conectado:', socket.id);
-
     // Quando um administrador se conecta
-    socket.on('admin connect', () => {
+    socket.on('admin connect', (email) => {
         adminSockets.add(socket);
-        // console.log('Admin conectado:', socket.id);
+        console.log(email)
+        adminEmails.set(socket.id, email); // Armazena o email do admin
     });
 
     // Cliente solicita iniciar um chat
@@ -115,11 +122,20 @@ io.on('connection', (socket) => {
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
             const messages = chatMessages.get(socket.id) || [];
+            console.log(adminSocketId)
+            const adminEmail = adminEmails.get(adminSocketId) || null; // Obtém o email
+            console.log(adminEmail)
+
+            const profissional = await prisma.Profissionais.findUnique({
+                where: { email: adminEmail },
+                select: { id: true }
+            });
 
             await prisma.conversa.create({
                 data: {
                     clientId: socket.id,
                     adminId: adminSocketId || null,
+                    profissional: profissional.id,
                     messages: messages,
                 },
             });
@@ -140,11 +156,20 @@ io.on('connection', (socket) => {
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
             const messages = chatMessages.get(socket.id) || [];
+            console.log(adminSocketId)
+            const adminEmail = adminEmails.get(adminSocketId) || null; // Obtém o email
+            console.log(adminEmail)
+
+            const profissional = await prisma.Profissionais.findUnique({
+                where: { email: adminEmail },
+                select: { id: true }
+            });
 
             await prisma.conversa.create({
                 data: {
                     clientId: socket.id,
                     adminId: adminSocketId || null,
+                    profissional: profissional.id,
                     messages: messages,
                 },
             });
