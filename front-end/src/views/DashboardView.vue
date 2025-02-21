@@ -457,8 +457,9 @@ export default {
 
     this.socket = io("http://localhost:3000");
 
+    const adminEmail = this.store.usuario.usuario.email
     // Envia sinal de que é o admin
-    this.socket.emit("admin connect");
+    this.socket.emit('admin connect', adminEmail);
 
     // Recebe solicitações de chat
     this.socket.on("chat request", (request) => {

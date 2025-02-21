@@ -4,6 +4,7 @@ const bcryptUtil = require("../utils/bcrypt.util");
 
 async function postProfissional(user){
     console.log(user.usuario.especialidade)
+
     let senha_user = bcryptUtil.hash(user.usuario.senha, 10);  
     const cadastro = await prisma.Profissionais.create({
         data: {
