@@ -108,6 +108,16 @@ export default {
     }).then(response => {
       this.ocorrencias = response.data.processos;
 
+      this.ocorrencias.forEach(processo => {
+        processo.ocorrencias.sort((a, b) => {
+          const dateA = new Date(a.data_denuncia);
+          const dateB = new Date(b.data_denuncia);
+          return dateA - dateB; 
+        });
+        processo.ocorrencias.reverse();
+      });
+
+
     }).catch(error => {
       if (error.status === 403 || error.status === 401) {
         router.push('/nao-autorizado')
