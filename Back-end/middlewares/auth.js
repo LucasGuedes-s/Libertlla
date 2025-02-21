@@ -11,6 +11,7 @@ function validarJWT(req, res, next){
 
     //extrai o token do header
     const jwt_token = req.headers.authorization.split(' ')[1];
+
     jwt.verify(jwt_token, config.jwtSecret, (err, userInfo) =>{
 
         if(err){

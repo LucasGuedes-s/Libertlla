@@ -70,9 +70,6 @@ async function GetOcorrenciaEspecifica(req, res, next) {
     }
 }
 
-
-
-
 async function updateOcorrencia(req, res, next) {
     try {
         const ocorrencias = await Ocorrencia.updateOcorrencia(req)
@@ -83,6 +80,21 @@ async function updateOcorrencia(req, res, next) {
     } catch (error) {
         console.error(error)
         console.error('Erro ao realizar alteração na ocorrencia/processo')
+    }
+}
+
+async function arquivarOcorrencia(req, res, next) {
+    try {
+        const { ocorrenciaId } = req.body; // Acessando o ID da ocorrência do corpo da requisição
+        const ocorrencias = await Ocorrencia.arquivarOcorrencia(ocorrenciaId); // Passando o ID para o serviço
+        res.status(200).json({
+            ocorrencias
+        });
+        next();
+    } catch (error) {
+        console.error(error);
+        console.error("Erro ao arquivar ocorrência");
+        res.status(500).json({ error: "Erro ao arquivar ocorrência." });
     }
 }
 
@@ -104,7 +116,7 @@ async function adicionarProgresso(req, res) {
     }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, updateOcorrencia, adicionarProgresso};
+module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
 
 
 

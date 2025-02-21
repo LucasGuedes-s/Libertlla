@@ -34,6 +34,7 @@ app.use(express.json());
 const userRouter = require('../Back-end/routes/user.router');
 const ocorrencias = require('../Back-end/routes/ocorrencia.router');
 const pdf = require('../Back-end/routes/pdfs.router');
+const profissionais = require('../Back-end/routes/profissionais.router');
 
 // Criar servidor HTTP e configurar Socket.io
 const PORT = 3000;

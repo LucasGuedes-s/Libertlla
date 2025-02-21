@@ -53,12 +53,11 @@
             <label for="imagem">Anexos:</label>
             <input type="file" id="imagem" name="imagem" accept="image/*" @change="handleFileChange">
           </div>
-
-          <div class="modal-actions">
+        </form>
+        <div class="modal-actions">
             <button type="submit" class="btn btn-custom-primary">Salvar</button>
             <button type="button" class="btn btn-custom-secondary" @click="fecharModal">Cancelar</button>
           </div>
-        </form>
       </div>
     </div>
   </div>
@@ -307,14 +306,15 @@ label {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  width: 50vw;
+  width: 90vw;
   /* Ajuste para aumentar a largura (Ex: 50% da tela) */
-  max-width: 800px;
+  max-width: 600px;
   /* Define um tamanho máximo */
-  height: 60vh;
+  height: auto;
   /* Ajuste para aumentar a altura (Ex: 60% da altura da tela) */
-  max-height: 80vh;
+  max-height: 90vh;
   /* Define um tamanho máximo */
+  overflow: auto; 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -414,10 +414,6 @@ button {
   .ocorrencia-form {
     width: 97%;
     max-width: 97%;
-  }
-  .modal-content {
-    width: min(70vw, 1000px);
-    height: min(70vh, 700px);
   }
 }
 </style>

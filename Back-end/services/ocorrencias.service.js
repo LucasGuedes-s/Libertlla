@@ -106,6 +106,26 @@ async function updateOcorrencia(req, res) {
     }
 }
 
+async function arquivarOcorrencia(ocorrenciaId) {
+    try {
+        if (!ocorrenciaId) {
+            throw new Error("ID da ocorrência é obrigatório.");
+        }
+        
+        const ocorrenciaArquivada = await prisma.ocorrencias.update({
+            where: { id: ocorrenciaId },
+            data: {
+                status: "Arquivada"
+            }
+        });
+
+        return ocorrenciaArquivada;
+    } catch (error) {
+        console.error("Erro ao arquivar ocorrência:", error);
+        throw new Error("Erro ao arquivar ocorrência.");
+    }
+}
+
 async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
     const progresso = await prisma.Registro.create({
        data: {
@@ -118,5 +138,5 @@ async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
     return progresso;
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, adicionarProgresso}
+module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia,adicionarProgresso}
 

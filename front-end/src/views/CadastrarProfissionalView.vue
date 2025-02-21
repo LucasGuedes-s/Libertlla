@@ -13,9 +13,9 @@
                     <label for="especialidade">Especialidade:</label>
                     <select id="especialide_profissional" v-model="form.especialidade">
                         <option value="delegada">Delegada</option>
-                        <option value="pericia_criminal">Perícia Criminal</option>
+                        <option value="pericia criminal">Perícia Criminal</option>
                         <option value="policial">Policial</option>
-                        <option value="policial_cibernetico">Policial Cibernética</option>
+                        <option value="policial cibernetico">Policial Cibernética</option>
                     </select>
                 </div>
 
@@ -31,7 +31,7 @@
 
                 <div class="form-group" id="adicionar_imagem">
                     <label for="imagem">Adicionar Imagem:</label>
-                    <input type="file" id="imagem" @change="handleFileUpload">
+                    <input type="file" id="imagem" @change="handleFileChange">
                 </div>
 
                 <button type="submit" class="btn_cadastrarprofissional">Cadastrar Profissional</button>
@@ -42,6 +42,8 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
+import Axios  from 'axios';
+import Swal from 'sweetalert2';
 
 export default {
     components: {
@@ -54,22 +56,79 @@ export default {
                 especialidade: '',
                 email: '',
                 senha: '',
-                imagem: null
-            }
+            },
+            uploadStatus: "",
+            imageUrl: "",
+            file: null,  // Novo campo para armazenar o arquivo
         };
     },
     methods: {
-        handleFileUpload(event) {
-            this.form.imagem = event.target.files[0];
+        handleFileChange(event) {
+            this.file = event.target.files[0]; // Salvar o arquivo selecionado
         },
-        cadastrarProfissional() {
-            console.log("Dados do profissional:", {
-                nome: this.form.nome,
-                especialidade: this.form.especialidade,
-                email: this.form.email,
-                senha: this.form.senha,
-                imagem: this.form.imagem ? this.form.imagem.name : "Nenhuma imagem selecionada"
+        async uploadFile() {
+            if (!this.file) {
+                this.uploadStatus = "Por favor, selecione um arquivo.";
+                return null;
+            }
+
+            const formData = new FormData();
+            formData.append("file", this.file);
+            console.log(FormData)
+
+            const response = await fetch("http://localhost:3000/upload", {
+                method: "POST",
+                body: formData,
             });
+            console.log(response)
+            const data = await response.json();
+            this.uploadStatus = "Arquivo enviado com sucesso!";
+            this.imageUrl = data.fileUrl;
+        },
+        async cadastrarProfissional() {
+            //const token = this.store.token
+            console.log("aqui")
+            if (this.file) {
+                const fileUrl = await this.uploadFile();
+                if (fileUrl) {
+                anexos.push(fileUrl);
+                }
+            }
+            try{
+                console.log(this.form.especialidade)
+                await Axios.post('http://localhost:3000/cadastrar/profissional', {
+                    usuario: {
+                        nome: this.form.nome,
+                        especialidade: this.form.especialidade,
+                        email: this.form.email,
+                        senha: this.form.senha,
+                        foto: this.imageUrl
+                    }
+                })
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Profissional cadastrado com sucesso!',
+                    confirmButtonColor: '#9B287B',
+                });
+            }catch(error){
+                let errorMessage = "Erro ao cadastrar profissional.";
+                if (error.response) {
+                    if (error.response.status === 400) {
+                        errorMessage = "Dados inválidos. Verifique e tente novamente.";
+                    } else if (error.response.status === 409) {
+                        errorMessage = "E-mail já cadastrado!";
+                    } else if (error.response.status === 500) {
+                        errorMessage = "Erro no servidor. Tente novamente mais tarde.";
+                    }
+            }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: errorMessage,
+                    confirmButtonColor: '#d33',
+                });
+            }
         }
     }
 };
