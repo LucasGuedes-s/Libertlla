@@ -60,6 +60,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  background-color: #450d2c;
 }
 
 nav {
@@ -80,6 +81,7 @@ nav {
   background-blend-mode: multiply;
   background-size: cover;
   background-position: center;
+  
 }
 
 .div-content {

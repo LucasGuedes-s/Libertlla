@@ -40,7 +40,7 @@ body {
   font-family: Arial, sans-serif;
 }
 .navbar{
-  background-color: #4D1032;
+  background-color: #450d2c;
   height: 70px;
 }
 .navbar-brand{
@@ -70,6 +70,7 @@ body {
   text-align: center;
   margin-right: 50px;
   border-radius: 50px;
-  background: linear-gradient(45deg, #9B287B, #9B287B);
+  background: linear-gradient(45deg, #801d65, #801d65);
 }
+
 </style>

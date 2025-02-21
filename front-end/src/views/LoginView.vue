@@ -68,7 +68,7 @@
   padding: 0.75rem;
   font-size: 1rem;
   border: 1px solid #9B287B;
-  border-radius: 10px;
+  border-radius: 4px;
   margin-bottom: 1rem;
   background-color: #4D10;
   color: #ffffff;
@@ -85,7 +85,7 @@
   color: #ffffff;
   background-color: #9B287B;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   font-family: "Montserrat", sans-serif;
   margin-top: 1.5rem;
 }
