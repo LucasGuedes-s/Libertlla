@@ -18,9 +18,6 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Acompanhe a sua denúncia</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link login" href="/login">Login</a>
           </li>
         </ul>
@@ -43,8 +40,8 @@ body {
   font-family: Arial, sans-serif;
 }
 .navbar{
-  background-color: #4D1032;
-  height: 90px;
+  background-color: #450d2c;
+  height: 70px;
 }
 .navbar-brand{
   color:#ffff;
@@ -68,12 +65,12 @@ body {
 }
 .login{
   font-family: "Montserrat", sans-serif;
-  width: 100px;
+  width: 150px;
+  padding: 5px;
   text-align: center;
   margin-right: 50px;
-  border: 2px solid #9B287B; 
-  padding: 10px 60px; 
   border-radius: 50px;
-  background-color: #9B287B; 
+  background: linear-gradient(45deg, #801d65, #801d65);
 }
+
 </style>

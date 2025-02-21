@@ -12,7 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.744.0",
     "@aws-sdk/s3-request-presigner": "^3.744.0",
-    "@prisma/client": "^6.0.1",
+    "@prisma/client": "^6.4.1",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -27,6 +27,6 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "prisma": "^6.0.1"
+    "prisma": "^6.4.1"
   }
 }
