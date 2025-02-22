@@ -57,7 +57,6 @@
               <button type="submit" class="btn-salvar">Salvar</button>
               <button type="button" class="btn-cancelar" @click="fecharModal">Cancelar</button>
             </div>
-
           </form>
         </div>
       </div>
