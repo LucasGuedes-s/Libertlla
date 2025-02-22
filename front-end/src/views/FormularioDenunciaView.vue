@@ -43,7 +43,7 @@
 
                 <div class="form-group" id="anexo_provas">
                     <label for="anexo_provas">Anexar Provas:</label>
-                    <input type="file" id="anexo_provas" name="anexo_provas" accept="image/*">
+                    <input type="file" id="anexo_provas" name="anexo_provas" accept="image/*" @change="handleFileChange">
                 </div>
 
                 <div class="form-group" id="local_do_ocorrido">
@@ -190,7 +190,11 @@ export default {
             local_do_ocorrido: '',
             relacao_agressor: '',
             data_ocorrido: '',
-            descricao: ''
+            descricao: '',
+            uploadStatus: "",
+            imageUrl: "",
+            file: null,  // Novo campo para armazenar o arquivo
+            provas: []
         }
     },
     mounted() {
@@ -200,13 +204,42 @@ export default {
         document.body.style.backgroundColor = ""; // Reseta a cor ao sair da página
     },
     methods: {
+        handleFileChange(event) {
+            this.file = event.target.files[0]; // Salvar o arquivo selecionado
+        },
+        async uploadFile() {
+            if (!this.file) {
+                this.uploadStatus = "Por favor, selecione um arquivo.";
+                return null;
+            }
+
+            const formData = new FormData();
+            formData.append("file", this.file);
+            console.log(FormData)
+
+            const response = await fetch("http://localhost:3000/upload", {
+                method: "POST",
+                body: formData,
+            });
+            console.log(response)
+            const data = await response.json();
+            this.uploadStatus = "Arquivo enviado com sucesso!";
+            this.imageUrl = data.fileUrl;
+        },
         async realizarDenuncia() {
+            console.log("aqui")
+            if (this.file) {
+                const fileUrl = await this.uploadFile();
+                if (fileUrl) {
+                this.provas.push(fileUrl);
+                }
+            }
             await axios.post("http://localhost:3000/cadastrar/ocorrencia", {
                 ocorrencias: {
                     tipo_denuncia: this.tipodeviolencia,
                     tipo_violencia: this.tipodeviolencia,
                     agressor: this.relacao_agressor,
-                    provas: [],
+                    provas: this.provas,
                     descricao: this.descricao,
                     local: this.local_do_ocorrido,
                     data_ocorrencia: this.data_ocorrido
@@ -224,7 +257,7 @@ export default {
                 this.tipodeviolencia = '',
                 this.tipodeviolencia = '',
                 this.relacao_agressor = ''
-                provas= [],
+                this.provas = [],
                 this.descricao = '',
                 this.local_do_ocorrido = '',
                 this.data_ocorrido = ''
