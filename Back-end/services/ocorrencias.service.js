@@ -24,7 +24,7 @@ async function getOcorrenciasProfissional(req, res) {
             email: profissionalId,
         },
         include: {
-            ocorrencias: true  // Assumindo que você tem uma relação chamada 'ocorrencias'
+            ocorrencias: true // Assumindo que você tem uma relação chamada 'ocorrencias'
         }
     });
    
@@ -113,7 +113,9 @@ async function arquivarOcorrencia(ocorrenciaId) {
         }
         
         const ocorrenciaArquivada = await prisma.ocorrencias.update({
-            where: { id: ocorrenciaId },
+            where: {
+                id: Number(ocorrenciaId)  // Converta o id para número
+            },
             data: {
                 status: "Arquivada"
             }

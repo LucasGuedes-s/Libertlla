@@ -44,7 +44,7 @@
                                 readonly></textarea>
                         </div>
                         <div class="button">
-                            <button class="apertarBotao" @click="fecharModal">Arquivar</button>
+                            <button class="apertarBotao" @click="arquivarOcorrencia">Arquivar</button>
                         </div>
                     </div>
                 </div>
@@ -77,6 +77,8 @@ import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/store';
+import Swal from 'sweetalert2';
+import router from '@/router';
 
 export default {
     components: { SideBar },
@@ -88,6 +90,7 @@ export default {
     },
     setup(props) {
         const store = useAuthStore();
+        //const router = useRouter();  // Inicializando o router
         const sidebarVisible = ref(true);
         const ocorrencia = ref({
             data_denuncia: '',
@@ -104,8 +107,7 @@ export default {
         onMounted(async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/ocorrencia/${id.value}`);
-                console.log(response.data.ocorrencia)
-                //const eventos = response.data.ocorrencia
+                console.log(response.data.ocorrencia);
                 if (response.data && response.data.ocorrencia) {
                     const dados = response.data.ocorrencia;
                     ocorrencia.value = {
@@ -125,15 +127,50 @@ export default {
             }
         });
 
+        const arquivarOcorrencia = async () => {
+            try {
+                const token = store.getToken;
+
+                const response = await axios.put(`http://localhost:3000/ocorrencias/arquivar`, {
+                    ocorrenciaId: id.value
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`  // Passe o token de autenticação no cabeçalho
+                    }
+                });
+
+                // Se a resposta for bem-sucedida, mostramos o SweetAlert2
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'A ocorrência foi arquivada com sucesso.',
+                    icon: 'success',
+                    confirmButtonText: 'Ok'
+                }).then(() => {
+                    // Só navegue se o usuário não estiver já na rota '/dashboard'
+                    router.push('/minhasocorrencias');
+                });
+            } catch (error) {
+                console.error('Erro ao arquivar ocorrência:', error);
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Não foi possível arquivar a ocorrência. Tente novamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+            }
+        };
+
         return {
             store,
             id,
             sidebarVisible,
-            ocorrencia
+            ocorrencia,
+            arquivarOcorrencia
         };
     }
 };
 </script>
+
 
 <style scoped>
 .wrapper {
@@ -150,22 +187,23 @@ export default {
 }
 
 .apertarBotao {
-  flex: 1;
-  padding: 10px 20px;
-  background-color: #F5F5F5;
-  border: 1px solid #D9D9D9;
-  color: #7E7E7E;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+    flex: 1;
+    padding: 10px 20px;
+    background-color: #F5F5F5;
+    border: 1px solid #D9D9D9;
+    color: #7E7E7E;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
 }
 
 .button {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
+
 @media (min-width: 1024px) {
     .container {
         max-width: 90%;

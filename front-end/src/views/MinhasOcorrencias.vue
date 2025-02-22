@@ -264,15 +264,17 @@ textarea {
 
 input[type="file"] {
   font-size: 14px;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   overflow: hidden;
+  width: 100%;
 }
 
 #adicionar_imagem {
   grid-column: 1 / -1;
-  margin-top: 20px
+  margin-top: 20px;
+  margin-bottom: 20px; 
 }
 
 #imagem {
@@ -322,7 +324,7 @@ button {
 <script>
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
-import { useAuthStore } from '@/store.js'
+import { useAuthStore } from '@/store.js';
 import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
 import router from '@/router';
@@ -338,7 +340,7 @@ export default {
     return {
       formatDate,
       sidebarVisible: true,
-      ocorrencias: [],
+      ocorrencias: [],  // Lista de ocorrências filtradas
       modalVisible: false,
       modalKey: 0, // Para resetar o modal
       progresso: '',
@@ -361,8 +363,16 @@ export default {
         Authorization: `Bearer ${token}`
       }
     }).then(response => {
-      this.ocorrencias = response.data.processos;
+      // Filtrando as ocorrências com status "em andamento" ou "em progresso"
+      this.ocorrencias = response.data.processos.map(processo => {
+        return {
+          ...processo,
+          ocorrencias: processo.ocorrencias.filter(ocorrencia => 
+            ocorrencia.status === 'Andamento' || ocorrencia.status === 'Em progresso')
+        };
+      });
 
+      // Ordena as ocorrências por data de denúncia (mais recentes primeiro)
       this.ocorrencias.forEach(processo => {
         processo.ocorrencias.sort((a, b) => {
           const dateA = new Date(a.data_denuncia);
@@ -373,21 +383,19 @@ export default {
       });
     }).catch(error => {
       if (error.status === 403 || error.status === 401) {
-        router.push('/nao-autorizado')
+        router.push('/nao-autorizado');
       }
       console.error('Erro ao buscar ocorrências:', error);
     });
   },
   methods: {
     async gerarPDF(id) {
-      console.log("aqui");
       const response = await axios({
         url: `http://localhost:3000/ocorrencia/pdf/${id}`,
         method: 'GET',
         responseType: 'blob',
       });
 
-      // Cria e baixa o arquivo PDF
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -431,9 +439,6 @@ export default {
       this.selectedFileName = '';
     },
     async adicionarProgresso() {
-      console.log("ID da ocorrência:", this.ocorrenciasId);
-      console.log("Descrição:", this.descricao);
-      console.log("Arquivo:", this.file);
       if (!this.descricao.trim()) {
         Swal.fire({
           icon: 'warning',
