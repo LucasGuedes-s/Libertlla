@@ -29,7 +29,7 @@
                         <option value="colega_trabalho">Colega de trabalho</option>
                     </select>
                 </div>
-
+                
                 <div class="form-group" id="descricao">
                     <label for="descricao">Descrição:</label>
                     <textarea id="descricao" name="descricao" rows="8" v-model="descricao"></textarea>
@@ -40,10 +40,10 @@
                     <input type="date" id="data" name="data" v-model="data_ocorrido">
                 </div>
 
-
                 <div class="form-group" id="anexo_provas">
                     <label for="anexo_provas">Anexar Provas:</label>
-                    <input type="file" id="anexo_provas" name="anexo_provas" accept="image/*" @change="handleFileChange">
+                    <input type="file" id="anexo_provas" name="anexo_provas" accept="image/*"
+                        @change="handleFileChange">
                 </div>
 
                 <div class="form-group" id="local_do_ocorrido">
@@ -59,6 +59,7 @@
     </div>
 </template>
 
+
 <style scoped>
 body {
     background-color: #4D1032 !important;
@@ -67,12 +68,14 @@ body {
     padding: 0;
 }
 
+
 header img {
     width: 100%;
     /* Imagem vai ocupar toda a largura disponível */
     height: auto;
     /* Manter a proporção da imagem */
 }
+
 
 h1 {
     margin-top: 10px;
@@ -99,15 +102,18 @@ form {
     align-items: start;
 }
 
+
 .form-group {
     display: flex;
     flex-direction: column;
 }
 
+
 .form-group label {
     margin-bottom: 10px;
     /* Ajuste a margem se necessário */
 }
+
 
 .form-group input,
 select,
@@ -131,9 +137,7 @@ textarea {
 
 select option:hover {
     background-color: #ffcc00;
-    /* Cor de fundo da opção ao passar o mouse */
     color: white;
-    /* Cor do texto da opção ao passar o mouse */
 }
 
 #descricao,
@@ -144,9 +148,11 @@ select option:hover {
     grid-column: 1 / -1;
 }
 
+
 h2 {
     margin-bottom: 10px;
 }
+
 
 .btn_realizardenuncia {
     grid-column: 1 / -1;
@@ -162,17 +168,21 @@ h2 {
     margin-top: 10px;
 }
 
+
 .btn_realizardenuncia:hover {
     background-color: #FF00AE;
     /* Cor alterada quando o mouse passa por cima (exemplo: verde mais escuro) */
 }
+
 @media (max-width: 768px) {
     h1 {
         font-size: 25px;
     }
+
     form {
         grid-template-columns: 1fr;
     }
+
     .btn_realizardenuncia {
         padding: 10px;
     }
@@ -180,7 +190,8 @@ h2 {
 </style>
 <script>
 import axios from 'axios';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
+
 
 export default {
     name: 'FormularioDenuncia',
@@ -191,81 +202,115 @@ export default {
             relacao_agressor: '',
             data_ocorrido: '',
             descricao: '',
-            uploadStatus: "",
-            imageUrl: "",
-            file: null,  // Novo campo para armazenar o arquivo
+            file: null,
             provas: []
-        }
+        };
     },
     mounted() {
-        document.body.style.backgroundColor = "#4D1032"; // Define a cor específica para esta página
+        document.body.style.backgroundColor = "#4D1032";
     },
     beforeUnmount() {
-        document.body.style.backgroundColor = ""; // Reseta a cor ao sair da página
+        document.body.style.backgroundColor = "";
     },
     methods: {
         handleFileChange(event) {
-            this.file = event.target.files[0]; // Salvar o arquivo selecionado
+            this.file = event.target.files[0];
         },
+
         async uploadFile() {
             if (!this.file) {
-                this.uploadStatus = "Por favor, selecione um arquivo.";
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Erro',
+                    text: 'Por favor, selecione um arquivo antes de enviar!',
+                });
                 return null;
             }
 
             const formData = new FormData();
             formData.append("file", this.file);
-            console.log(FormData)
 
-            const response = await fetch("http://localhost:3000/upload", {
-                method: "POST",
-                body: formData,
-            });
-            console.log(response)
-            const data = await response.json();
-            this.uploadStatus = "Arquivo enviado com sucesso!";
-            this.imageUrl = data.fileUrl;
-        },
-        async realizarDenuncia() {
-            console.log("aqui")
-            if (this.file) {
-                const fileUrl = await this.uploadFile();
-                if (fileUrl) {
-                this.provas.push(fileUrl);
+            try {
+                const response = await fetch("http://localhost:3000/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar o arquivo');
                 }
+
+
+                const data = await response.json();
+                return data.fileUrl; // Retorna a URL da imagem enviada
+
+
+            } catch (error) {
+                console.error('Erro no upload:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no Upload',
+                    text: 'Houve um problema ao enviar a imagem.',
+                });
+                return null;
             }
-            await axios.post("http://localhost:3000/cadastrar/ocorrencia", {
-                ocorrencias: {
-                    tipo_denuncia: this.tipodeviolencia,
-                    tipo_violencia: this.tipodeviolencia,
-                    agressor: this.relacao_agressor,
-                    provas: this.provas,
-                    descricao: this.descricao,
-                    local: this.local_do_ocorrido,
-                    data_ocorrencia: this.data_ocorrido
+        },
+
+        async realizarDenuncia() {
+            try {
+                let fileUrl = null;
+                if (this.file) {
+                    fileUrl = await this.uploadFile();
+                    if (fileUrl) {
+                        this.provas.push(fileUrl);
+                    }
                 }
-            }).then(response =>{
-                console.log(response.status)
+
+                const response = await axios.post("http://localhost:3000/cadastrar/ocorrencia", {
+                    ocorrencias: {
+                        tipo_denuncia: this.tipodeviolencia,
+                        tipo_violencia: this.tipodeviolencia,
+                        agressor: this.relacao_agressor,
+                        provas: this.provas,
+                        descricao: this.descricao,
+                        local: this.local_do_ocorrido,
+                        data_ocorrencia: this.data_ocorrido
+                    }
+                });
+
                 Swal.fire({
                     icon: 'success',
-                    title: 'Denuncia realizada com sucesso',
-                    text: `Denuncia realizada com sucesso ${response.data.ocorrencia}`,
+                    title: 'Denúncia realizada com sucesso',
+                    text: `Denúncia ID: ${response.data.ocorrencia}`,
                     timer: 2000,
                     timerProgressBar: true,
                     showConfirmButton: false
-                })
-                this.tipodeviolencia = '',
-                this.tipodeviolencia = '',
-                this.relacao_agressor = ''
-                this.provas = [],
-                this.descricao = '',
-                this.local_do_ocorrido = '',
-                this.data_ocorrido = ''
-            }).catch(error =>{
-                console.log(error)
-            })
+                });
 
-        },
+
+                // Resetando os campos após o envio
+                this.tipodeviolencia = '';
+                this.relacao_agressor = '';
+                this.provas = [];
+                this.descricao = '';
+                this.local_do_ocorrido = '';
+                this.data_ocorrido = '';
+                this.file = null;
+
+                // Resetando input file
+                document.getElementById("anexo_provas").value = "";
+
+
+            } catch (error) {
+                console.error('Erro ao enviar denúncia:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Não foi possível enviar a denúncia.',
+                });
+            }
+        }
     }
 }
 </script>
