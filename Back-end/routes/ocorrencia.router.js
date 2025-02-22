@@ -15,6 +15,8 @@ router.get('/ocorrencias/:email',  [validarJWT], controller.getOcorrenciasProfis
 
 router.post('/aceitar/ocorrencia',  [validarJWT], controller.updateOcorrencia)
 
+router.post('/ocorrencia/:ocorrenciaId/progresso', controller.adicionarProgresso);
+
 router.put("/ocorrencias/arquivar", [validarJWT], controller.arquivarOcorrencia);
 
 module.exports = router;
