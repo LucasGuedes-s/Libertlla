@@ -37,7 +37,7 @@
           </div>
           <div class="ocorrencias_chat">
             <h2>Ocorrências por Chat</h2>
-            <div class="info_denuncia" v-for="(solicitacao, index) in solicitacoes" :key="index">
+            <div class="info_denuncia" v-for="solicitacao in solicitacoes" :key="solicitacao.socketId">
               <p><strong>Denúncia: {{ solicitacao.username }} </strong></p>
               <p><strong>Data:</strong></p>
               <p><strong>Tipo de Denúncia:</strong></p>
@@ -58,21 +58,21 @@
         </div>
 
         <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">Data:</label>
-              <input class="form-control" v-model="ocorrencia.data_denuncia" readonly />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Tipo de violência:</label>
-              <input class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Relação com a Pessoa Denunciada:</label>
-              <input class="form-control" v-model="ocorrencia.agressor" readonly />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Local do Ocorrido:</label>
-              <input class="form-control" v-model="ocorrencia.local" readonly />
+          <div class="mb-3">
+            <label class="form-label">Data:</label>
+            <input class="form-control" v-model="ocorrencia.data_denuncia" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo de violência:</label>
+            <input class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Relação com a Pessoa Denunciada:</label>
+            <input class="form-control" v-model="ocorrencia.agressor" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Local do Ocorrido:</label>
+            <input class="form-control" v-model="ocorrencia.local" readonly />
           </div>
 
           <div class="mb-3">
@@ -80,7 +80,7 @@
             <input class="form-control" rows="3" v-model="ocorrencia.descricao" readonly>
           </div>
           <div class="mb-3">
-            <label  class="form-label">Provas:</label>
+            <label class="form-label">Provas:</label>
             <input class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
           </div>
         </div>
@@ -220,14 +220,16 @@
   margin: 50px auto;
   border-radius: 10px;
   overflow: hidden;
-  background-color: rgb(255, 255, 255); /* Fundo do contêiner principal */
+  background-color: rgb(255, 255, 255);
+  /* Fundo do contêiner principal */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   flex-direction: column;
 }
 
 
 .chat-container h3 {
-  background-color: #802062; /* Fundo do cabeçalho */
+  background-color: #802062;
+  /* Fundo do cabeçalho */
   color: #fff;
   text-align: center;
   padding: 15px;
@@ -333,7 +335,7 @@
   margin-top: 60px;
 }
 
-.card-body .form-control{
+.card-body .form-control {
   font-family: 'Montserrat', sans-serif;
   color: rgba(152, 152, 152, 255);
 }
@@ -427,6 +429,7 @@ export default {
       ocorrencias: [],
       ocorrencia: {}, // Armazena os detalhes da ocorrência selecionada
       modalVisible: false,
+      chatAtivo: false,
       modalkey: 0,
       socket: null,
       inputMessage: "",
@@ -442,20 +445,19 @@ export default {
     };
   },
   mounted() {
-    if(this.store.token == null){
+    if (this.store.token == null) {
       window.location.href = '/nao-autorizado';
     }
-    else{
+    else {
       this.buscarOcorrencias();
       this.buscarTotalDenuncias();
     }
 
-    // Atualiza a lista de ocorrências automaticamente a cada 5 segundos
-    this.intervalId = setInterval(() => {
-      this.buscarOcorrencias();
-    }, 5000);
-
     this.socket = io("http://localhost:3000");
+
+    this.socket.on("nova_ocorrencia", () => {
+      this.buscarOcorrencias(); // Atualiza a lista
+    });
 
     const adminEmail = this.store.usuario.usuario.email
     // Envia sinal de que é o admin
@@ -477,14 +479,18 @@ export default {
     });
 
     // Notifica o administrador se o chat terminar
-    this.socket.on("chat ended", () => {
+    this.socket.on("chat ended", ({ clientSocketId }) => {
+      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
+      console.log(this.solicitacoes)
       Swal.fire({
         icon: 'error',
         title: 'Usuário foi desconectado',
         timer: 4000,
       });
+
       this.endChat();
     });
+
   },
   methods: {
     async abrirModal(id) {
@@ -533,8 +539,8 @@ export default {
         if (error.response && error.response.status === 403) {
           this.$router.push('/nao-autorizado');
         }
-            //router.push('/nao-autorizado');
-        
+        //router.push('/nao-autorizado');
+
       }
     },
     async aceitarDenuncia(id) {
@@ -580,10 +586,19 @@ export default {
       }
     },
     acceptChat(socketId) {
-      this.socket.emit("accept chat", socketId);
-      this.isChatActive = true;
-      this.activeClient = socketId;
-      this.requests = [];
+      if (this.chatAtivo) {
+        Swal.fire({
+          icon: "warning",
+          title: "Você já está em um atendimento!",
+          text: "Termine o chat atual antes de aceitar outro.",
+        });
+      } else {
+        this.socket.emit("accept chat", socketId);
+        this.isChatActive = true;
+        this.chatAtivo = true; // Marca como ocupado
+        this.activeClient = socketId;
+        this.requests = [];
+      }
     },
     sendMessage() {
       if (this.inputMessage.trim()) {
@@ -593,8 +608,10 @@ export default {
         this.inputMessage = "";
       }
     },
-    endChat() {
+    endChat(socketId) {
       this.isChatActive = false;
+      this.socket.emit("disconnect", socketId);
+
       this.activeClient = null;
       this.messages = [];
     }

@@ -23,11 +23,11 @@ app.use(cors({
 // Inicializar o Prisma
 const prisma = new PrismaClient();
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Authorization, content-type");
     res.header("Access-Control-Expose-Headers", "Authorization, content-type");
     next();
-  });
+});
 
 app.use(express.json());
 // Importar rotas
@@ -124,9 +124,7 @@ io.on('connection', (socket) => {
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
             const messages = chatMessages.get(socket.id) || [];
-            console.log(adminSocketId)
-            const adminEmail = adminEmails.get(adminSocketId) || null; // Obtém o email
-            console.log(adminEmail)
+            const adminEmail = adminEmails.get(adminSocketId) || null;
 
             const profissional = await prisma.Profissionais.findUnique({
                 where: { email: adminEmail },
@@ -137,13 +135,15 @@ io.on('connection', (socket) => {
                 data: {
                     clientId: socket.id,
                     adminId: adminSocketId || null,
-                    profissional: profissional.id,
+                    profissional: profissional?.id || null,
                     messages: messages,
                 },
             });
 
-            io.to(adminSocketId).emit('chat ended', 'Chat encerrado.');
-            io.to(socket.id).emit('chat ended', 'Chat encerrado.');
+            // Enviar o ID do cliente desconectado para o frontend
+            io.to(adminSocketId).emit('chat ended', { clientSocketId: socket.id });
+
+            io.to(socket.id).emit('chat ended', { clientSocketId: socket.id });
 
             activeChats.delete(socket.id);
             chatMessages.delete(socket.id);
@@ -152,15 +152,12 @@ io.on('connection', (socket) => {
 
     // Quando um usuário se desconecta
     socket.on('disconnect', async () => {
-        // console.log('Usuário desconectado:', socket.id);
         adminSockets.delete(socket);
 
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
             const messages = chatMessages.get(socket.id) || [];
-            console.log(adminSocketId)
-            const adminEmail = adminEmails.get(adminSocketId) || null; // Obtém o email
-            console.log(adminEmail)
+            const adminEmail = adminEmails.get(adminSocketId) || null;
 
             const profissional = await prisma.Profissionais.findUnique({
                 where: { email: adminEmail },
@@ -171,16 +168,19 @@ io.on('connection', (socket) => {
                 data: {
                     clientId: socket.id,
                     adminId: adminSocketId || null,
-                    profissional: profissional.id,
+                    profissional: profissional?.id || null,
                     messages: messages,
                 },
             });
 
-            io.to(adminSocketId).emit('chat ended', 'Usuário desconectado.');
+            // Enviar o ID do cliente desconectado para o frontend
+            io.to(adminSocketId).emit('chat ended', { clientSocketId: socket.id });
+
             activeChats.delete(socket.id);
             chatMessages.delete(socket.id);
         }
     });
+
 });
 
 const storage = multer.memoryStorage();
@@ -188,43 +188,43 @@ const upload = multer({ storage });
 
 // Configuração do Cliente S3 (Cloudflare R2)
 const s3 = new S3Client({
-  region: "auto",
-  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT, // Endpoint do seu R2
-  credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY,
-  },
+    region: "auto",
+    endpoint: process.env.CLOUDFLARE_R2_ENDPOINT, // Endpoint do seu R2
+    credentials: {
+        accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
+        secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY,
+    },
 });
 
 app.post("/upload", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("Nenhum arquivo enviado.");
-  }
+    if (!req.file) {
+        return res.status(400).send("Nenhum arquivo enviado.");
+    }
 
-  const fileName = `${Date.now()}_${req.file.originalname}`; // Gerar um nome único para o arquivo
-  const fileContent = req.file.buffer;
+    const fileName = `${Date.now()}_${req.file.originalname}`; // Gerar um nome único para o arquivo
+    const fileContent = req.file.buffer;
 
-  // Configurações do upload para o Cloudflare R2
-  const params = {
-    Bucket: process.env.CLOUDFLARE_R2_BUCKET,
-    Key: `uploads/${fileName}`, // Caminho do arquivo no R2
-    Body: fileContent,
-    ContentType: req.file.mimetype,
-    ACL: "public-read", // Permite que o arquivo seja acessado publicamente
-  };
+    // Configurações do upload para o Cloudflare R2
+    const params = {
+        Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+        Key: `uploads/${fileName}`, // Caminho do arquivo no R2
+        Body: fileContent,
+        ContentType: req.file.mimetype,
+        ACL: "public-read", // Permite que o arquivo seja acessado publicamente
+    };
 
-  try {
-    // Envia o arquivo para o Cloudflare R2
-    await s3.send(new PutObjectCommand(params));
+    try {
+        // Envia o arquivo para o Cloudflare R2
+        await s3.send(new PutObjectCommand(params));
 
-    // URL pública do arquivo-
-    const fileUrl = `${process.env.URL_PUBLICA}.r2.dev/uploads/${fileName}`;
-    console.log(fileUrl)
-    res.status(200).json({ fileUrl }); // Retorna a URL pública do arquivo
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao fazer upload do arquivo." });
-  }
+        // URL pública do arquivo-
+        const fileUrl = `${process.env.URL_PUBLICA}.r2.dev/uploads/${fileName}`;
+        console.log(fileUrl)
+        res.status(200).json({ fileUrl }); // Retorna a URL pública do arquivo
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erro ao fazer upload do arquivo." });
+    }
 });
 // Iniciar o servidor
 server.listen(PORT, () => {

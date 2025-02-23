@@ -87,7 +87,15 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import('../views/NaoAutorizadoView.vue')
-  }
+  },
+  {
+    path: '/relatorios',
+    name: 'relatorios',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('../views/RelatoriosView.vue')
+  },
 ];
 
 const router = new VueRouter({
