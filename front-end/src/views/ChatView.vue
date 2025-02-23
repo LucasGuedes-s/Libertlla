@@ -58,6 +58,18 @@ export default {
         this.messages.push(msg);
       }
     });
+    
+    this.socket.on("admin disconnected", (data) => {
+      Swal.fire({
+        title: "Profissional desconectado!",
+        text: data.message,
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+
+      this.chatAceito = false;
+      this.messages = []; // Limpa o chat
+    });
   },
   methods: {
     requestChat() {

@@ -92,7 +92,7 @@
     </div>
 
     <!-- Chat Container -->
-    <div class="chat-container" v-if="isChatActive">
+    <div class="chat-container" v-if="isChatActive" ref="chatContainer">
       <h3>Chat Ativo</h3>
       <button class="close-chat" @click="endChat">&times;</button>
       <div class="messages">
@@ -620,6 +620,7 @@ export default {
         this.chatAtivo = true; // Marca como ocupado
         this.activeClient = socketId;
         this.requests = [];
+        this.scrollToChat();
       }
     },
     sendMessage() {
@@ -630,16 +631,25 @@ export default {
         this.inputMessage = "";
       }
     },
-    endChat(socketId) {
+    endChat() {
       this.isChatActive = false;
-      this.socket.emit("disconnect", socketId);
-
+      //this.socket.emit("disconnect", socketId);
+      this.chatAtivo = false; // Marca como ocupado
       this.activeClient = null;
       this.messages = [];
     }
   },
+  scrollToChat() {
+    this.$nextTick(() => {
+      const chatContainer = this.$refs.chatContainer;
+      if (chatContainer) {
+        chatContainer.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  },
   beforeUnmount() {
     if (this.socket) {
+      this.socket.emit("end chat");
       this.socket.disconnect();
     }
     if (this.intervalId) {

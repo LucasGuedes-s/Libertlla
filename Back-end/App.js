@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
     // Quando um administrador se conecta
     socket.on('admin connect', (email) => {
         adminSockets.add(socket);
-        console.log(email)
+        //console.log(email)
         adminEmails.set(socket.id, email); // Armazena o email do admin
     });
 
@@ -152,8 +152,28 @@ io.on('connection', (socket) => {
 
     // Quando um usuário se desconecta
     socket.on('disconnect', async () => {
+    // Verifica se o socket desconectado é um administrador
+    if ([...adminSockets].includes(socket)) {
         adminSockets.delete(socket);
 
+        // Identificar os clientes que estavam conversando com esse admin
+        for (let [clientSocketId, adminSocketId] of activeChats.entries()) {
+            if (adminSocketId === socket.id) {
+                // Notificar o cliente que o admin saiu
+                io.to(clientSocketId).emit('admin disconnected', {
+                    message: "O profissional saiu do chat. Aguarde um novo atendimento."
+                });
+
+                // Remover o chat ativo e as mensagens armazenadas
+                activeChats.delete(clientSocketId);
+                chatMessages.delete(clientSocketId);
+            }
+        }
+
+        // Remover o email do admin da lista
+        adminEmails.delete(socket.id);
+    } else {
+        // Caso contrário, é um cliente que se desconectou
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
             const messages = chatMessages.get(socket.id) || [];
@@ -179,7 +199,8 @@ io.on('connection', (socket) => {
             activeChats.delete(socket.id);
             chatMessages.delete(socket.id);
         }
-    });
+    }
+});
 
 });
 
