@@ -14,9 +14,9 @@ img:focus {
   outline: none;
 }
 
-
 body{
   margin: 0;
+  overflow: hidden; /* Evitar rolagem horizontal */
   font-family: 'Montserrat', sans-serif; 
 }
 

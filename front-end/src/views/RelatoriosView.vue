@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <section>
     <SideBar />
     <div class="container">
       <div class="titulo-principal">Relatórios</div>
@@ -12,7 +12,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -153,8 +153,7 @@ export default {
 .charts-container {
   display: flex;
   justify-content: space-between;
-  gap: 0px; /* Para dar espaço entre os gráficos */
-  width: 100%; /* Garantir que o contêiner ocupe toda a largura disponível */
+  width: 90%; /* Garantir que o contêiner ocupe toda a largura disponível */
   overflow: hidden; /* Evitar rolagem horizontal */
 }
 
@@ -180,7 +179,6 @@ export default {
 
 @media (max-width: 900px) {
   .container {
-    max-width: 90%;
     margin-left: 0px;
     padding: 20px;
   }
