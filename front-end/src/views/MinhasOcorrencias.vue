@@ -117,19 +117,15 @@ label {
 
 .denuncia {
   margin-bottom: 15px;
-  /* Ajuste conforme necessário */
 }
 
 .denuncia label {
   display: block;
-  /* Garante que o label fique acima do p */
   margin-bottom: 5px;
-  /* Adiciona um pequeno espaço abaixo do label */
 }
 
 .denuncia p {
   margin-top: 5px;
-  /* Adiciona espaço acima do texto */
   color: #7E7E7E;
   padding: 5px;
 }
@@ -171,11 +167,9 @@ label {
   font-family: "Montserrat", sans-serif;
   font-weight: 500;
   flex: 1;
-  /* Faz com que todos os botões tenham a mesma largura */
   text-align: center;
 }
 
-/* Estilos do Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -196,13 +190,9 @@ label {
   padding: 20px;
   border-radius: 8px;
   width: 90vw;
-  /* Ajuste para aumentar a largura (Ex: 50% da tela) */
   max-width: 600px;
-  /* Define um tamanho máximo */
   height: auto;
-  /* Ajuste para aumentar a altura (Ex: 60% da altura da tela) */
   max-height: 90vh;
-  /* Define um tamanho máximo */
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -214,7 +204,6 @@ label {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* Isso garante que o conteúdo do form seja distribuído entre a parte superior e inferior */
   margin-top: 60px;
 }
 
@@ -231,25 +220,19 @@ textarea {
   border-radius: 5px;
   border: 1px solid #ccc;
   resize: none;
-  /* Impede que o usuário redimensione a área de texto */
 }
 
 .quadrado {
   background-color: #54123F;
-  /* Cor de fundo */
   color: white;
-  /* Cor do texto */
   width: 100%;
-  /* Ocupa toda a largura da tela */
   height: 60px;
-  /* Ajusta a altura conforme necessário */
   top: 0px;
   left: 0px;
   display: flex;
   position: absolute;
   align-items: center;
   justify-content: center;
-  /* Centraliza o conteúdo horizontalmente */
 }
 
 .quadrado .titulo {
@@ -289,8 +272,8 @@ button {
 
 .modal-actions button {
   margin-top: -15px;
-  /* Ajuste a distância que deseja mover para cima */
 }
+
 .btn-salvar, .btn-cancelar {
   background-color: rgba(245, 245, 245, 255);
   color: rgba(152, 152, 152, 255);
@@ -342,16 +325,16 @@ export default {
       sidebarVisible: true,
       ocorrencias: [],  // Lista de ocorrências filtradas
       modalVisible: false,
-      modalKey: 0, // Para resetar o modal
+      modalKey: 0, // Resetar o modal
       progresso: '',
       descricao: '',
       data: '',
-      anexos: [], // Para armazenar os arquivos anexados
+      anexos: [], 
       selectedFileName: '',
       ocorrenciasId: null,
       uploadStatus: "",
       imageUrl: "",
-      file: null,  // Novo campo para armazenar o arquivo
+      file: null, 
     };
   },
   mounted() {
@@ -363,7 +346,7 @@ export default {
         Authorization: `Bearer ${token}`
       }
     }).then(response => {
-      // Filtrando as ocorrências com status "em andamento" ou "em progresso"
+      // Filtrando as ocorrências 
       this.ocorrencias = response.data.processos.map(processo => {
         return {
           ...processo,
@@ -405,12 +388,12 @@ export default {
       link.remove();
     },
     abrirModal(id) {
-      this.ocorrenciasId = id;  // Salva o ID da ocorrência
+      this.ocorrenciasId = id;  
       this.modalVisible = true;
       this.modalKey++;
     },
     handleFileChange(event) {
-      this.file = event.target.files[0]; // Salvar o arquivo selecionado
+      this.file = event.target.files[0]; 
     },
     async uploadFile() {
       if (!this.file) {
@@ -459,7 +442,7 @@ export default {
 
       axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
         descricao: this.descricao,
-        anexos: anexos, // Envia os anexos se houver
+        anexos: anexos, 
       })
         .then(() => {
           Swal.fire({

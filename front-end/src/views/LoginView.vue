@@ -28,7 +28,6 @@
   background-size: cover;
   background-color: #54123F;
   background-blend-mode: multiply;
-  /* transparencia em cima da imagem */
 }
 
 .login_section {

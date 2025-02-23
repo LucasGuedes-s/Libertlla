@@ -1,6 +1,6 @@
 const  Ocorrencia = require("../services/ocorrencias.service");
 
-// Registrar uma nova ocorrência
+// Registrar uma ocorrência
 async function PostOcorrencias(req, res){
     try {
         const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body)
@@ -85,8 +85,8 @@ async function updateOcorrencia(req, res, next) {
 
 async function arquivarOcorrencia(req, res, next) {
     try {
-        const { ocorrenciaId } = req.body; // Acessando o ID da ocorrência do corpo da requisição
-        const ocorrencias = await Ocorrencia.arquivarOcorrencia(ocorrenciaId); // Passando o ID para o serviço
+        const { ocorrenciaId } = req.body; 
+        const ocorrencias = await Ocorrencia.arquivarOcorrencia(ocorrenciaId); 
         res.status(200).json({
             ocorrencias
         });
@@ -101,10 +101,10 @@ async function arquivarOcorrencia(req, res, next) {
 async function adicionarProgresso(req, res) {
     try {
         console.log("ID da ocorrência recebido:", req.params.ocorrenciaId);
-        console.log("Dados recebidos no body:", req.body); // Verifica se a URL da imagem está chegando
+        console.log("Dados recebidos no body:", req.body); 
        
-        const { descricao, anexos } = req.body; // Extrai os valores corretamente
-        const ocorrenciaId = req.params.ocorrenciaId; // Garante que o ID está correto
+        const { descricao, anexos } = req.body; 
+        const ocorrenciaId = req.params.ocorrenciaId; 
         const progresso = await Ocorrencia.adicionarProgresso(descricao, anexos, ocorrenciaId);
         res.status(201).json({
             message: 'Progresso adicionado com sucesso!',

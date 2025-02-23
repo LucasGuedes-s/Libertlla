@@ -24,7 +24,7 @@ async function getOcorrenciasProfissional(req, res) {
             email: profissionalId,
         },
         include: {
-            ocorrencias: true // Assumindo que você tem uma relação chamada 'ocorrencias'
+            ocorrencias: true
         }
     });
    
@@ -56,7 +56,7 @@ async function GetTodasOcorrencias() {
     const totalDenuncias = totalOcorrencias + totalConversas; // Soma os dois valores
     const totalAtendidas = await prisma.ocorrencias.count({
         where: {
-            status: "Em progresso" // Ou o nome correto que você usa
+            status: "Em progresso" 
         }
       });
 
@@ -114,7 +114,7 @@ async function arquivarOcorrencia(ocorrenciaId) {
         
         const ocorrenciaArquivada = await prisma.ocorrencias.update({
             where: {
-                id: Number(ocorrenciaId)  // Converta o id para número
+                id: Number(ocorrenciaId)  
             },
             data: {
                 status: "Arquivada"

@@ -17,7 +17,7 @@ const uploadFile = async () => {
     return;
   }
 
-  // Criando um FormData para enviar o arquivo
+  //FormData para enviar o arquivo
   const formData = new FormData();
   formData.append("file", file.value);
 

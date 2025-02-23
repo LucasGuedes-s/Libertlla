@@ -75,78 +75,78 @@
 <script>
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
-import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/store';
 import Swal from 'sweetalert2';
 import router from '@/router';
 
 export default {
-    components: { SideBar },
     props: {
         id: {
             type: String,
             required: true
         }
     },
-    setup(props) {
+    setup(){
         const store = useAuthStore();
-        //const router = useRouter();  // Inicializando o router
-        const sidebarVisible = ref(true);
-        const ocorrencia = ref({
-            data_denuncia: '',
-            tipo_violencia: '',
-            agressor: '',
-            provas: '',
-            descricao: '',
-            local: '',
-            registros: []
-        });
-
-        const id = computed(() => props.id);
-
-        onMounted(async () => {
+        return {
+            store
+        };
+    },
+    data() {
+        return {
+            sidebarVisible: true,
+            ocorrencia: {
+                data_denuncia: '',
+                tipo_violencia: '',
+                agressor: '',
+                provas: '',
+                descricao: '',
+                local: '',
+                registros: []
+            }
+        };
+    },
+    mounted() {
+        this.carregarOcorrencia();
+    },
+    methods: {
+        async carregarOcorrencia() {
             try {
-                const response = await axios.get(`http://localhost:3000/ocorrencia/${id.value}`);
-                console.log(response.data.ocorrencia);
+                const response = await axios.get(`http://localhost:3000/ocorrencia/${this.id}`);
                 if (response.data && response.data.ocorrencia) {
                     const dados = response.data.ocorrencia;
-                    ocorrencia.value = {
+                    this.ocorrencia = { 
                         data_denuncia: dados.data_denuncia?.slice(0, 10) || '',
                         tipo_violencia: dados.tipo_violencia || '',
                         agressor: dados.agressor || '',
                         provas: Array.isArray(dados.provas) ? dados.provas.join(', ') : '',
                         descricao: dados.descricao || '',
                         local: dados.local || '',
-                        registros: response.data.ocorrencia.registros || [] // <-- Garante que registros são preenchidos
+                        registros: dados.registros || [] 
                     };
-                } else {
-                    console.warn("Nenhuma ocorrência encontrada para o ID:", id.value);
                 }
             } catch (error) {
                 console.error('Erro ao buscar ocorrência:', error);
             }
-        });
-
-        const arquivarOcorrencia = async () => {
+        },
+        async arquivarOcorrencia() {
             try {
-                const token = store.getToken;
+                const token = this.store.getToken; 
 
                 const response = await axios.put(`http://localhost:3000/ocorrencias/arquivar`, {
-                    ocorrenciaId: id.value
+                    ocorrenciaId: this.id
                 }, {
                     headers: {
-                        Authorization: `Bearer ${token}`  // Passe o token de autenticação no cabeçalho
+                        Authorization: `Bearer ${token}`  
                     }
                 });
 
-                // Se a resposta for bem-sucedida, mostramos o SweetAlert2
                 Swal.fire({
                     title: 'Sucesso!',
                     text: 'A ocorrência foi arquivada com sucesso.',
                     icon: 'success',
                     confirmButtonText: 'Ok'
                 }).then(() => {
-                    // Só navegue se o usuário não estiver já na rota '/dashboard'
                     router.push('/minhasocorrencias');
                 });
             } catch (error) {
@@ -158,15 +158,10 @@ export default {
                     confirmButtonText: 'Ok'
                 });
             }
-        };
-
-        return {
-            store,
-            id,
-            sidebarVisible,
-            ocorrencia,
-            arquivarOcorrencia
-        };
+        }
+    },
+    components: {
+        SideBar
     }
 };
 </script>
@@ -244,7 +239,6 @@ textarea.form-control {
 .timeline {
     position: relative;
     max-width: 800px;
-    /* Limita a largura da linha do tempo */
     margin: auto;
     padding: 20px 0;
 }
@@ -260,22 +254,18 @@ textarea.form-control {
 
 .timeline-box {
     width: 48%;
-    /* Ajustado para dar mais espaço aos itens */
     margin: 0 10px;
-    /* Espaçamento entre os itens */
     box-sizing: border-box;
 }
 
 .left .timeline-box {
     order: -1;
-    /* Coloca os itens à esquerda */
-    text-align: right;
+    text-align: right;  /* Coloca os itens à esquerda */
 }
 
 .right .timeline-box {
     order: 1;
-    /* Coloca os itens à direita */
-    text-align: left;
+    text-align: left;    /* Coloca os itens à direita */
 }
 
 .timeline-item .card {
