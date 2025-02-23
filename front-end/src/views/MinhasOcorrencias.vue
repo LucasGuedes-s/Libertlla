@@ -296,11 +296,51 @@ button {
     padding: 10px;
   }
 
+  .titulo-principal {
+    font-size: 24px;
+  }
+
   .div_ocorrencias {
+    gap: 10px;
     flex-direction: column;
+    align-items: center;
+  }
+
+  .formulario {
+    width: 100%;
+    min-width: unset;
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+  }
+
+  .modal-content {
+    width: 90%;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    align-items: center;
     gap: 15px;
   }
 
+  .btn-salvar,
+  .btn-cancelar {
+    width: 100%;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .detalhar-btn,
+  .pdf-btn,
+  .btn-modal {
+    width: 100%;
+  }
 }
 </style>
 
