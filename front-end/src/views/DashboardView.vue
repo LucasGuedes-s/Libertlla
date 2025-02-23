@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard">
+    <NavBarUser />
     <div class="d-flex">
       <SideBar />
-      <NavBarUser />
       <div class="container">
         <section class="section_contagemdedenuncias">
           <div class="card_contagem">
@@ -110,20 +110,42 @@
 
 
 <style scooped>
-.dashboard {
-  margin-left: 250px;
-  padding: 20px;
-  border-radius: 100px;
+.navbaruse {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #54123F;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
+.navbaruse .titulo {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+}
+
+.dashboard {
+  margin-left: 250px;
+  margin-top: 30px; 
+  padding: 20px;
+  border-radius: 10px;
+}
 
 .section_contagemdedenuncias {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  margin-top: 20px;
   margin-bottom: 40px;
 }
-
 
 .card_contagem {
   background-color: #fff;

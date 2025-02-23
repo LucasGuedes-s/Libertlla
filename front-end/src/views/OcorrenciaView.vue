@@ -86,7 +86,7 @@ export default {
             required: true
         }
     },
-    setup(){
+    setup() {
         const store = useAuthStore();
         return {
             store
@@ -115,14 +115,14 @@ export default {
                 const response = await axios.get(`http://localhost:3000/ocorrencia/${this.id}`);
                 if (response.data && response.data.ocorrencia) {
                     const dados = response.data.ocorrencia;
-                    this.ocorrencia = { 
+                    this.ocorrencia = {
                         data_denuncia: dados.data_denuncia?.slice(0, 10) || '',
                         tipo_violencia: dados.tipo_violencia || '',
                         agressor: dados.agressor || '',
                         provas: Array.isArray(dados.provas) ? dados.provas.join(', ') : '',
                         descricao: dados.descricao || '',
                         local: dados.local || '',
-                        registros: dados.registros || [] 
+                        registros: dados.registros || []
                     };
                 }
             } catch (error) {
@@ -131,13 +131,13 @@ export default {
         },
         async arquivarOcorrencia() {
             try {
-                const token = this.store.getToken; 
+                const token = this.store.getToken;
 
                 const response = await axios.put(`http://localhost:3000/ocorrencias/arquivar`, {
                     ocorrenciaId: this.id
                 }, {
                     headers: {
-                        Authorization: `Bearer ${token}`  
+                        Authorization: `Bearer ${token}`
                     }
                 });
 
@@ -260,12 +260,14 @@ textarea.form-control {
 
 .left .timeline-box {
     order: -1;
-    text-align: right;  /* Coloca os itens à esquerda */
+    text-align: right;
+    /* Coloca os itens à esquerda */
 }
 
 .right .timeline-box {
     order: 1;
-    text-align: left;    /* Coloca os itens à direita */
+    text-align: left;
+    /* Coloca os itens à direita */
 }
 
 .timeline-item .card {

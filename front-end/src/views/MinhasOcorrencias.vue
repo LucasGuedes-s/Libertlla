@@ -76,7 +76,7 @@
   font-size: 30px;
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
-  margin-top: 20px;
+  margin-top: -17px;
   margin-left: 7px;
   color: #9B287B;
 }
