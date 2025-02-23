@@ -19,4 +19,6 @@ router.post('/ocorrencia/:ocorrenciaId/progresso', controller.adicionarProgresso
 
 router.put("/ocorrencias/arquivar", [validarJWT], controller.arquivarOcorrencia);
 
+router.get("/todas/ocorrencias", controller.GetOcorrenciasTotais);
+
 module.exports = router;

@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 async function CadrastrarOcorrencias(req, res) {
     const ocorrencias = await prisma.Ocorrencias.create({
-        data:{
+        data: {
             tipo_denuncia: 'Fomulário',
             tipo_violencia: req.ocorrencias.tipo_violencia,
             agressor: req.ocorrencias.agressor,
@@ -27,7 +27,7 @@ async function getOcorrenciasProfissional(req, res) {
             ocorrencias: true
         }
     });
-   
+
     return ocorrencias;
 }
 
@@ -41,6 +41,20 @@ async function GetOcorrencias() {
 
     return ocorrencia;
 }
+async function GetOcorrenciaTotais() {
+    const ocorrencias = await prisma.Ocorrencias.groupBy({
+        by: ['tipo_violencia'],
+        _count: {
+            tipo_violencia: true,
+        },
+    });
+
+    return ocorrencias.map(o => ({
+        tipo: o.tipo_violencia,
+        quantidade: o._count.tipo_violencia,
+    }));
+};
+
 async function GetOcorrencia(req) {
     const ocorrencias = await prisma.Ocorrencias.findUnique({
         where: { id: parseInt(req) },
@@ -56,9 +70,9 @@ async function GetTodasOcorrencias() {
     const totalDenuncias = totalOcorrencias + totalConversas; // Soma os dois valores
     const totalAtendidas = await prisma.ocorrencias.count({
         where: {
-            status: "Em progresso" 
+            status: "Em progresso"
         }
-      });
+    });
 
 
     return { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas };
@@ -111,10 +125,10 @@ async function arquivarOcorrencia(ocorrenciaId) {
         if (!ocorrenciaId) {
             throw new Error("ID da ocorrência é obrigatório.");
         }
-        
+
         const ocorrenciaArquivada = await prisma.ocorrencias.update({
             where: {
-                id: Number(ocorrenciaId)  
+                id: Number(ocorrenciaId)
             },
             data: {
                 status: "Arquivada"
@@ -130,15 +144,15 @@ async function arquivarOcorrencia(ocorrenciaId) {
 
 async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
     const progresso = await prisma.Registro.create({
-       data: {
-          descricoes: descricao.toString(),
-          anexos: anexos,
-          data: new Date().toISOString(),
-          ocorrencia: { connect: { id: Number(ocorrenciaId) } }
-       }
+        data: {
+            descricoes: descricao.toString(),
+            anexos: anexos,
+            data: new Date().toISOString(),
+            ocorrencia: { connect: { id: Number(ocorrenciaId) } }
+        }
     });
     return progresso;
 }
 
-module.exports = {CadrastrarOcorrencias, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia,adicionarProgresso}
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgresso }
 

@@ -38,6 +38,18 @@ async function GetOcorrencias(req, res, next) {
         console.error('Erro ao receber ocorrencias')
     }
 }
+async function GetOcorrenciasTotais(req, res, next) {
+    try {
+        const ocorrencias = await Ocorrencia.GetOcorrenciaTotais()
+        res.status(200).json({
+            ocorrencias
+        })
+        next()
+    } catch (error) {
+        console.error(error)
+        console.error('Erro ao receber ocorrencias')
+    }
+}
 async function GetTodasOcorrencias(req, res, next) {
     try {
         const { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas } = await Ocorrencia.GetTodasOcorrencias();
@@ -116,7 +128,7 @@ async function adicionarProgresso(req, res) {
     }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
+module.exports = {PostOcorrencias, GetOcorrencias, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
 
 
 
