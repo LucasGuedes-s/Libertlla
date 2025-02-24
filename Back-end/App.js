@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
             });
 
             // Enviar o ID do cliente desconectado para o frontend
-            io.to(adminSocketId).emit('chat ended', { clientSocketId: socket.id });
+            //io.to(adminSocketId).emit('chat ended', { clientSocketId: socket.id });
 
             io.to(socket.id).emit('chat ended', { clientSocketId: socket.id });
 

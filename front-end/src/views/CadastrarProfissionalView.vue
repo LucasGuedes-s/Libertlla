@@ -42,7 +42,7 @@
 
 <script>
 import SideBar from '@/components/SideBar.vue';
-import Axios  from 'axios';
+import Axios from 'axios';
 import Swal from 'sweetalert2';
 
 export default {
@@ -67,34 +67,37 @@ export default {
             this.file = event.target.files[0]; // Salvar o arquivo selecionado
         },
         async uploadFile() {
-            if (!this.file) {
-                this.uploadStatus = "Por favor, selecione um arquivo.";
-                return null;
+            try {
+                if (!this.file) {
+                    this.uploadStatus = "Por favor, selecione um arquivo.";
+                    return null;
+                }
+
+                const formData = new FormData();
+                formData.append("file", this.file);
+                console.log(FormData)
+
+                const response = await fetch("http://localhost:3000/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                this.uploadStatus = "Arquivo enviado com sucesso!";
+                this.imageUrl = data.fileUrl;
+            } catch (error) {
+                this.imageUrl = 'https://pub-7033c876e51c4727bbbad298adf1917c.r2.dev/uploads/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black-thumbnail.png'
             }
 
-            const formData = new FormData();
-            formData.append("file", this.file);
-            console.log(FormData)
-
-            const response = await fetch("http://localhost:3000/upload", {
-                method: "POST",
-                body: formData,
-            });
-            console.log(response)
-            const data = await response.json();
-            this.uploadStatus = "Arquivo enviado com sucesso!";
-            this.imageUrl = data.fileUrl;
         },
         async cadastrarProfissional() {
             //const token = this.store.token
-            console.log("aqui")
             if (this.file) {
                 const fileUrl = await this.uploadFile();
                 if (fileUrl) {
-                anexos.push(fileUrl);
+                    anexos.push(fileUrl);
                 }
             }
-            try{
+            try {
                 console.log(this.form.especialidade)
                 await Axios.post('http://localhost:3000/cadastrar/profissional', {
                     usuario: {
@@ -111,7 +114,7 @@ export default {
                     text: 'Profissional cadastrado com sucesso!',
                     confirmButtonColor: '#9B287B',
                 });
-            }catch(error){
+            } catch (error) {
                 let errorMessage = "Erro ao cadastrar profissional.";
                 if (error.response) {
                     if (error.response.status === 400) {
@@ -121,7 +124,7 @@ export default {
                     } else if (error.response.status === 500) {
                         errorMessage = "Erro no servidor. Tente novamente mais tarde.";
                     }
-            }
+                }
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro!',
@@ -142,12 +145,12 @@ export default {
 }
 
 h1 {
-  font-size: 30px;
-  font-family: "Montserrat", sans-serif;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-left: 7px;
-  color: #9B287B;
+    font-size: 30px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-left: 7px;
+    color: #9B287B;
 }
 
 form {
@@ -196,8 +199,8 @@ textarea {
 }
 
 input[type="file"] {
-    font-size: 14px; 
-    padding: 8px; 
+    font-size: 14px;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
     overflow: hidden;
@@ -206,6 +209,7 @@ input[type="file"] {
 #adicionar_imagem {
     grid-column: 1 / -1;
 }
+
 @media (max-width: 768px) {
     .cadastro_profissional {
         margin-left: 0;
@@ -213,12 +217,12 @@ input[type="file"] {
     }
 
     form {
-        grid-template-columns: 1fr; /* Um campo por vez em telas pequenas */
+        grid-template-columns: 1fr;
+        /* Um campo por vez em telas pequenas */
     }
 
     .form-group {
         width: 100%;
     }
 }
-
 </style>
