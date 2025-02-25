@@ -72,5 +72,32 @@ body {
   border-radius: 50px;
   background: linear-gradient(45deg, #801d65, #801d65);
 }
+@media (max-width: 780px) {
+  .navbar {
+    height: auto;
+    padding: 8px 15px;
+  }
 
+  .navbar-toggler {
+    padding: 2px 5px;
+    margin-right: 0px;
+  }
+
+  .navbar-toggler .navbar-toggler-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .navbar-brand {
+    font-size: 16px;
+    margin-left: 0;
+  }
+
+  .login {
+    width: 100%;
+    font-size: 13px;
+    padding: 4px 8px;
+    margin-right: 0;
+  }
+}
 </style>
