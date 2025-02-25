@@ -154,5 +154,19 @@ async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
     return progresso;
 }
 
+// async function permissoes() {
+//     await prisma.permissoes.createMany({
+//         data: [
+//           { descricao: "Administrador" },
+//           { descricao: "Policial" },
+//           { descricao: "Investigador" },
+//           { descricao: "Agente de Segurança" },
+//           { descricao: "Delegado" }
+//         ],
+//         skipDuplicates: true // Evita duplicatas
+//       });
+// }
+// permissoes()
+
 module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgresso }
 

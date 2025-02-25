@@ -152,6 +152,7 @@ export default {
 
 .charts-container {
   display: flex;
+  margin-top: 80px;
   justify-content: space-between;
   width: 90%; /* Garantir que o contêiner ocupe toda a largura disponível */
   overflow: hidden; /* Evitar rolagem horizontal */
