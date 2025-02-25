@@ -44,8 +44,16 @@
 import SideBar from '@/components/SideBar.vue';
 import Axios from 'axios';
 import Swal from 'sweetalert2';
+import { useAuthStore } from '@/store.js'
+
 
 export default {
+    setup() {
+    const store = useAuthStore();
+    return {
+      store
+    };
+    },
     components: {
         SideBar,
     },
@@ -90,7 +98,7 @@ export default {
 
         },
         async cadastrarProfissional() {
-            //const token = this.store.token
+            const token = this.store.token
             if (this.file) {
                 const fileUrl = await this.uploadFile();
                 if (fileUrl) {
@@ -107,7 +115,11 @@ export default {
                         senha: this.form.senha,
                         foto: this.imageUrl
                     }
-                })
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            )
                 Swal.fire({
                     icon: 'success',
                     title: 'Sucesso!',

@@ -58,7 +58,7 @@
                     <div class="timeline-box">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">{{ registro.anexos }}</h5>
+                                <a class="card-title" :href="registro.anexos">Anexo</a>
                                 <p class="card-text">{{ registro.descricoes }}</p>
                                 <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
                             </div>
