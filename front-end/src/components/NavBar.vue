@@ -98,6 +98,7 @@ body {
     font-size: 13px;
     padding: 4px 8px;
     margin-right: 0;
+    margin-bottom: 10px;
   }
 }
 </style>
