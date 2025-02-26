@@ -52,7 +52,7 @@
 
               <div class="conversa">
                 <label>Tipo de denuncia:</label>
-                <p> chat </p>
+                <p> Chat </p>
               </div>
 
               <div class="buttons">
@@ -61,7 +61,7 @@
                 <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar
                   Progresso</button>
 
-              </div>
+              </div>   
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ async function getConversasProfissional(profissionalEmail) {
       },
     });
   
-    return conversas;
+    return conversas
 }
 
 async function GetOcorrencias() {

@@ -5,46 +5,26 @@
             <div class="container mt-4" style="margin-left: 250px;">
                 <div class="card">
                     <div class="card-header bg-light">
-                        <h5 class="text-primary">Denúncia </h5>
+                        <h5 class="text-primary">Conversa</h5>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label for="data" class="form-label">Data:</label>
-                                <input type="date" id="data" class="form-control" v-model="ocorrencia.data_denuncia"
-                                    readonly />
-                            </div>
-                            <div class="col-md-6">
-                                <label for="tipoDenuncia" class="form-label">Tipo de violência:</label>
-                                <input type="text" id="tipoDenuncia" class="form-control"
-                                    v-model="ocorrencia.tipo_violencia" readonly />
+                                <input id="data" class="form-control" :value="formatDate(conversa.createdAt)" readonly />
                             </div>
                         </div>
+
                         <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="relacaoDenunciado" class="form-label">Relação com a Pessoa
-                                    Denunciada:</label>
-                                <input type="text" id="relacaoDenunciado" class="form-control"
-                                    v-model="ocorrencia.agressor" readonly />
-                            </div>
-                            <div class="col-md-6">
-                                <label for="localOcorrido" class="form-label">Local do Ocorrido:</label>
-                                <input type="text" id="localOcorrido" class="form-control" v-model="ocorrencia.local"
-                                    readonly />
+                            <div class="col-md-12">
+                                <label for="messages" class="form-label">Mensagens:</label>
+                                <textarea id="messages" class="form-control" rows="5" :value="formatarMensagens()"
+                                    readonly></textarea>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label">Descrição:</label>
-                            <textarea id="descricao" class="form-control" rows="3" v-model="ocorrencia.descricao"
-                                readonly></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="provas" class="form-label">Provas:</label>
-                            <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas"
-                                readonly></textarea>
-                        </div>
+
                         <div class="button">
-                            <button class="apertarBotao" @click="arquivarOcorrencia">Arquivar</button>
+                            <button class="apertarBotao" @click="arquivarConversa">Arquivar</button>
                         </div>
                     </div>
                 </div>
@@ -53,7 +33,7 @@
         <div class="container mt-5">
             <h5 class="linha">Linha do tempo</h5>
             <div class="timeline">
-                <div v-for="(registro, index) in ocorrencia.registros" :key="registro.id" class="timeline-item"
+                <div v-for="(registro, index) in conversa.registros" :key="registro.id" class="timeline-item"
                     :class="{ 'left': index % 2 === 0, 'right': index % 2 !== 0 }">
                     <div class="timeline-box">
                         <div class="card">
@@ -66,7 +46,6 @@
                     </div>
                     <div class="timeline-dot"></div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -76,6 +55,7 @@
 import SideBar from '@/components/SideBar.vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store';
+import { formatDate } from '@/utils/dataformatar';
 import Swal from 'sweetalert2';
 import router from '@/router';
 
@@ -94,66 +74,90 @@ export default {
     },
     data() {
         return {
+            formatDate,
             sidebarVisible: true,
-            ocorrencia: {
-                data_denuncia: '',
-                tipo_violencia: '',
-                agressor: '',
-                provas: '',
-                descricao: '',
-                local: '',
+            conversa: {
+                createdAt: '',
+                messages: '',
                 registros: []
             }
         };
     },
     mounted() {
-        this.carregarOcorrencia();
+        console.log("Registros:", this.conversa.registros); // Verificar o que está sendo retornado
+        this.getConversas();
     },
     methods: {
-        async carregarOcorrencia() {
-            try {
-                const response = await axios.get(`http://localhost:3000/ocorrencia/${this.id}`);
-                if (response.data && response.data.ocorrencia) {
-                    const dados = response.data.ocorrencia;
-                    this.ocorrencia = {
-                        data_denuncia: dados.data_denuncia?.slice(0, 10) || '',
-                        tipo_violencia: dados.tipo_violencia || '',
-                        agressor: dados.agressor || '',
-                        provas: Array.isArray(dados.provas) ? dados.provas.join(', ') : '',
-                        descricao: dados.descricao || '',
-                        local: dados.local || '',
-                        registros: dados.registros || []
-                    };
-                }
-            } catch (error) {
-                console.error('Erro ao buscar ocorrência:', error);
+        async getConversas() {
+    try {
+        const user = this.store.usuario.usuario;
+        const email = user.email;
+        const token = this.store.token;
+
+        const response = await axios.get(`http://localhost:3000/conversas/${email}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        },
-        async arquivarOcorrencia() {
+        });
+
+        if (response.data && response.data.conversas) {
+            const conversas = response.data.conversas;
+
+            console.log("Todas as conversas recebidas:", conversas);
+
+            if (conversas.length > 0) {
+                // Seleção correta da conversa
+                this.conversa = conversas.find(conversa => conversa.id === this.id) || conversas[0];
+
+                console.log("Conversa selecionada:", this.conversa);
+
+                // Se você já tem mensagens dentro da conversa, as formate corretamente
+                this.formatarMensagens();
+            } else {
+                console.warn('Nenhuma conversa encontrada para o usuário.');
+            }
+        } else {
+            console.warn('Resposta da API não contém conversas.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar conversas:', error);
+    }
+},
+
+formatarMensagens() {
+    if (!this.conversa || !this.conversa.messages || this.conversa.messages.length === 0) {
+        return "Nenhuma mensagem disponível.";
+    }
+
+    console.log("Mensagens da conversa:", this.conversa.messages); // Verificando as mensagens
+
+    return this.conversa.messages
+        .map(msg => `[${new Date(msg.timestamp).toLocaleString()}] ${msg.from}: ${msg.content}`)
+        .join("\n");
+},
+        async arquivarConversa() {
             try {
                 const token = this.store.getToken;
-
-                const response = await axios.put(`http://localhost:3000/ocorrencias/arquivar`, {
-                    ocorrenciaId: this.id
+                await axios.put(`http://localhost:3000/conversas/arquivar`, {
+                    conversaId: this.id
                 }, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-
                 Swal.fire({
                     title: 'Sucesso!',
-                    text: 'A ocorrência foi arquivada com sucesso.',
+                    text: 'A conversa foi arquivada com sucesso.',
                     icon: 'success',
                     confirmButtonText: 'Ok'
                 }).then(() => {
-                    router.push('/minhasocorrencias');
+                    router.push('/minhasconversas');
                 });
             } catch (error) {
-                console.error('Erro ao arquivar ocorrência:', error);
+                console.error('Erro ao arquivar conversa:', error);
                 Swal.fire({
                     title: 'Erro!',
-                    text: 'Não foi possível arquivar a ocorrência. Tente novamente.',
+                    text: 'Não foi possível arquivar a conversa. Tente novamente.',
                     icon: 'error',
                     confirmButtonText: 'Ok'
                 });
@@ -168,6 +172,21 @@ export default {
 
 
 <style scoped>
+.card{
+    min-height:  102%;
+    height: 102%;
+}
+.col-md-6 {
+    width: 100%; /* Faz a div ocupar toda a largura do container */
+}
+
+textarea.form-control {
+    min-height:  130%;
+    height: 130%;
+    max-height: 1000px; /* Define um limite máximo */
+    overflow-y: auto; /* Permite rolagem caso necessário */
+}
+
 .wrapper {
     display: flex;
     justify-content: center;
@@ -191,6 +210,7 @@ export default {
     cursor: pointer;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
+    margin-top: 80px;
 }
 
 .button {
