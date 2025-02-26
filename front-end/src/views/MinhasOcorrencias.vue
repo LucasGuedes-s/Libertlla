@@ -61,7 +61,7 @@
                 <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar
                   Progresso</button>
 
-              </div>   
+              </div>
             </div>
           </div>
         </div>
@@ -136,24 +136,30 @@ export default {
         Authorization: `Bearer ${token}`
       }
     }).then(response => {
-      this.ocorrencias = response.data.processos.map(processo => {
-        return {
-          ...processo,
-          ocorrencias: processo.ocorrencias.filter(ocorrencia =>
-            ocorrencia.status === 'Andamento' || ocorrencia.status === 'Em progresso')
-        };
-      });
-
-      this.ocorrencias.forEach(processo => {
-        processo.ocorrencias.sort((a, b) => {
-          const dateA = new Date(a.data_denuncia);
-          const dateB = new Date(b.data_denuncia);
-          return dateA - dateB;
+      if (response.data && response.data.processos) {
+        this.ocorrencias = response.data.processos.map(processo => {
+          return {
+            ...processo,
+            ocorrencias: processo.ocorrencias ? processo.ocorrencias.filter(ocorrencia =>
+              ocorrencia.status === 'Andamento' || ocorrencia.status === 'Em progresso') : []
+          };
         });
-        processo.ocorrencias.reverse();
-      });
+
+        this.ocorrencias.forEach(processo => {
+          if (processo.ocorrencias) {
+            processo.ocorrencias.sort((a, b) => {
+              const dateA = new Date(a.data_denuncia);
+              const dateB = new Date(b.data_denuncia);
+              return dateA - dateB;
+            });
+            processo.ocorrencias.reverse();
+          }
+        });
+      } else {
+        console.error('Dados de ocorrências não encontrados.');
+      }
     }).catch(error => {
-      if (error.status === 403 || error.status === 401) {
+      if (error.response?.status === 403 || error.response?.status === 401) {
         router.push('/nao-autorizado');
       }
       console.error('Erro ao buscar ocorrências:', error);
@@ -163,21 +169,21 @@ export default {
   },
   methods: {
     getConversas() {
-  const user = this.store.usuario.usuario;
-  const email = user.email;
-  const token = this.store.token;
+      const user = this.store.usuario.usuario;
+      const email = user.email;
+      const token = this.store.token;
 
-  axios.get(`http://localhost:3000/conversas/${email}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }).then(response => {
-    // Filtra as conversas para não incluir as arquivadas
-    this.conversas = response.data.conversas.filter(conversa => conversa.status !== "Arquivada");
-  }).catch(error => {
-    console.error('Erro ao buscar conversas:', error);
-  });
-},
+      axios.get(`http://localhost:3000/conversas/${email}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
+        // Filtra as conversas para não incluir as arquivadas
+        this.conversas = response.data.conversas.filter(conversa => conversa.status !== "Arquivada");
+      }).catch(error => {
+        console.error('Erro ao buscar conversas:', error);
+      });
+    },
 
 
     async gerarPDF(id) {

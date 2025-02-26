@@ -174,7 +174,6 @@ export default {
 
 .col-md-6 {
     width: 100%;
-    /* Faz a div ocupar toda a largura do container */
 }
 
 textarea.form-control {

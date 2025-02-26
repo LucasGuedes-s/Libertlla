@@ -62,7 +62,7 @@ model Conversa {
   adminId   String?  // ID do admin (pode ser nulo no início)
   messages  Json     // JSONB no PostgreSQL para armazenar a conversa
   status          String @default("Andamento") // Adicionando um valor padrão
-  profisssional     Profissionais? @relation(fields: [profissional], references: [id])
+  profissional     Profissionais? @relation(fields: [profissional], references: [id])
   profissional      Int?
   createdAt DateTime @default(now()) // Data da criação
   registros  Registro[] // ✅ Agora é um array, indicando relação 1 para muitos

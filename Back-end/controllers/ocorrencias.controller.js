@@ -29,10 +29,10 @@ async function getOcorrenciasProfissional(req, res, next) {
 }
 
 async function getConversas(req, res, next) {
-    const { profissionalEmail } = req.params; // Pega o email do profissional pela URL
+    const { profissionalEmail } = req.params; 
   
     try {
-      const conversas = await conversaService.getConversasProfissional(profissionalEmail); // Chama o serviço
+      const conversas = await conversaService.getConversasProfissional(profissionalEmail); 
       
       res.status(200).json({
         conversas
@@ -179,6 +179,7 @@ async function adicionarProgressoOcorrencia(req, res) {
         res.status(500).json({ error: 'Houve um erro ao adicionar o progresso na ocorrência.' });
     }
 }
+
 
 module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia};
 

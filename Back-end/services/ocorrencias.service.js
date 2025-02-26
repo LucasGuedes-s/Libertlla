@@ -31,18 +31,21 @@ async function getOcorrenciasProfissional(req, res) {
     return ocorrencias;
 }
 
-async function getConversasProfissional(profissionalEmail) {
+async function getConversasProfissional(profissionalEmail) { 
     const conversas = await prisma.Conversa.findMany({
       where: {
         profisssional: { 
           email: profissionalEmail, 
         },
       },
+      include: {
+        registros: true,  
+      },
     });
   
-    return conversas
-}
-
+    return conversas;
+  }
+  
 async function GetOcorrencias() {
     const ocorrencia = await prisma.Ocorrencias.findMany({
         where: { status: "Andamento" },
@@ -52,6 +55,7 @@ async function GetOcorrencias() {
 
     return ocorrencia;
 }
+
 async function GetOcorrenciaTotais() {
     const ocorrencias = await prisma.Ocorrencias.groupBy({
         by: ['tipo_violencia'],
@@ -74,7 +78,6 @@ async function GetOcorrencia(req) {
     return ocorrencias;
 }
 
-
 async function GetTodasOcorrencias() {
     const totalOcorrencias = await prisma.Ocorrencias.count();
     const totalConversas = await prisma.Conversa.count(); // Contagem das denúncias feitas pelo chat
@@ -89,7 +92,6 @@ async function GetTodasOcorrencias() {
     return { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas };
 }
 
-
 async function GetOcorrenciaEspecifica(id) {
     console.log(id)
     const ocorrencia = await prisma.Ocorrencias.findUnique({
@@ -100,7 +102,6 @@ async function GetOcorrenciaEspecifica(id) {
     });
     return ocorrencia;
 }
-
 
 async function updateOcorrencia(req, res) {
     try {
