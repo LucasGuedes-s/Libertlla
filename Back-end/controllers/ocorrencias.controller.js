@@ -1,7 +1,6 @@
 const  Ocorrencia = require("../services/ocorrencias.service");
 const conversaService = require('../services/ocorrencias.service'); 
 
-
 // Registrar uma ocorrência
 async function PostOcorrencias(req, res){
     try {
@@ -128,24 +127,40 @@ async function arquivarOcorrencia(req, res, next) {
     }
 }
 
-async function adicionarProgresso(req, res) {
+async function adicionarProgressoChat(req, res) {
     try {
-        console.log("ID da ocorrência recebido:", req.params.ocorrenciaId);
-        console.log("Dados recebidos no body:", req.body); 
-       
+        const { id } = req.params; 
         const { descricao, anexos } = req.body; 
-        const ocorrenciaId = req.params.ocorrenciaId; 
-        const progresso = await Ocorrencia.adicionarProgresso(descricao, anexos, ocorrenciaId);
+
+        const progresso = await conversaService.adicionarProgressoChat(descricao, anexos, id);
+
         res.status(201).json({
-            message: 'Progresso adicionado com sucesso!',
+            message: 'Progresso do chat adicionado com sucesso!',
             registro: progresso
         });
     } catch (error) {
-        console.error('Erro ao adicionar progresso:', error);
-        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso.' });
+        console.error('Erro ao adicionar progresso no chat:', error);
+        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso no chat.' });
     }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
+async function adicionarProgressoOcorrencia(req, res) {
+    try {
+        const { id } = req.params;  
+        const { descricao, anexos } = req.body;  
+
+        const progresso = await Ocorrencia.adicionarProgressoOcorrencia(descricao, anexos, id);
+
+        res.status(201).json({
+            message: 'Progresso da ocorrência adicionado com sucesso!',
+            registro: progresso
+        });
+    } catch (error) {
+        console.error('Erro ao adicionar progresso na ocorrência:', error);
+        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso na ocorrência.' });
+    }
+}
+
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia};
 
 

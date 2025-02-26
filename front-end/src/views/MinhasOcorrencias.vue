@@ -58,7 +58,8 @@
               <div class="buttons">
                 <router-link :to="`/conversa/${conversa.id}`" class="detalhar-btn">Detalhar</router-link>
 
-                <button type="button" class="btn-modal" @click="abrirModal(conversa.id)">Adicionar Progresso</button>
+                <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar
+                  Progresso</button>
 
               </div>
             </div>
@@ -130,7 +131,6 @@ export default {
     const email = user.email;
     const token = this.store.token;
 
-    // Buscar ocorrências
     axios.get(`http://localhost:3000/ocorrencias/${email}`, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -159,11 +159,9 @@ export default {
       console.error('Erro ao buscar ocorrências:', error);
     });
 
-    // Buscar conversas do profissional
     this.getConversas();
   },
   methods: {
-    // Buscar conversas do profissional
     getConversas() {
       const user = this.store.usuario.usuario;
       const email = user.email;
@@ -174,7 +172,7 @@ export default {
           Authorization: `Bearer ${token}`
         }
       }).then(response => {
-        this.conversas = response.data.conversas; // Armazenando as conversas
+        this.conversas = response.data.conversas;
       }).catch(error => {
         console.error('Erro ao buscar conversas:', error);
       });
@@ -196,7 +194,12 @@ export default {
       link.remove();
     },
     abrirModal(id) {
-      this.ocorrenciasId = id;
+      this.ocorrenciaSelecionada = id;
+      this.modalVisible = true;
+      this.modalKey++;
+    },
+    abrirModalConversa(id) {
+      this.conversaSelecionada = id;
       this.modalVisible = true;
       this.modalKey++;
     },
@@ -240,7 +243,6 @@ export default {
       }
 
       let anexos = [];
-
       if (this.file) {
         const fileUrl = await this.uploadFile();
         if (fileUrl) {
@@ -248,7 +250,22 @@ export default {
         }
       }
 
-      axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
+      let url = "";
+      if (this.ocorrenciaSelecionada) {
+        url = `http://localhost:3000/progresso/ocorrencia/${this.ocorrenciaSelecionada}`;
+      } else if (this.conversaSelecionada) {
+        url = `http://localhost:3000/progresso/chat/${this.conversaSelecionada}`;
+      }
+
+      if (!url) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Nenhuma ocorrência ou conversa foi selecionada.',
+        });
+        return;
+      }
+      axios.post(url, {
         descricao: this.descricao,
         anexos: anexos,
       })
@@ -265,9 +282,10 @@ export default {
           Swal.fire({
             icon: 'error',
             title: 'Erro',
-            text: 'Houve um problema ao adicionar o progresso.',
+            text: error.response?.data?.error || 'Houve um problema ao adicionar o progresso.',
           });
         });
+
     }
   },
   components: {
@@ -298,7 +316,7 @@ export default {
   flex-wrap: wrap;
 }
 
-.div_conversas{
+.div_conversas {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
@@ -336,7 +354,7 @@ label {
   margin-bottom: 15px;
 }
 
-.conversa{
+.conversa {
   margin-bottom: 15px;
 }
 

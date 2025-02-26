@@ -153,30 +153,28 @@ async function arquivarOcorrencia(ocorrenciaId) {
     }
 }
 
-async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
-    const progresso = await prisma.Registro.create({
+async function adicionarProgressoChat(descricao, anexos, chatId) {
+    return await prisma.Registro.create({
         data: {
-            descricoes: descricao.toString(),
+            descricoes: descricao, 
+            anexos: anexos,
+            data: new Date().toISOString(),
+            chat: {
+                connect: { id: chatId }
+            }
+        }
+    });
+}
+
+async function adicionarProgressoOcorrencia(descricao, anexos, ocorrenciaId) {
+    return await prisma.Registro.create({
+        data: {
+            descricoes: descricao,
             anexos: anexos,
             data: new Date().toISOString(),
             ocorrencia: { connect: { id: Number(ocorrenciaId) } }
         }
     });
-    return progresso;
 }
 
-// async function permissoes() {
-//     await prisma.permissoes.createMany({
-//         data: [
-//           { descricao: "Administrador" },
-//           { descricao: "Policial" },
-//           { descricao: "Investigador" },
-//           { descricao: "Agente de Segurança" },
-//           { descricao: "Delegado" }
-//         ],
-//         skipDuplicates: true // Evita duplicatas
-//       });
-// }
-// permissoes()
-
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional,GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgresso }
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional,GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia}

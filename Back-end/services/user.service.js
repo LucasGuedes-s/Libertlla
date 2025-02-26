@@ -21,7 +21,6 @@ async function LoginUser(req, res) {
         const token = jwt.sign(user, config.jwtSecret, {
             expiresIn: 86400 // 24 horas
         });
-        //console.log('Token gerado:', token);
         return {token: token, user}
         }
     else{
