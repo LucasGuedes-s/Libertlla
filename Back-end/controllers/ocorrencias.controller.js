@@ -126,6 +126,25 @@ async function arquivarOcorrencia(req, res, next) {
         res.status(500).json({ error: "Erro ao arquivar ocorrência." });
     }
 }
+async function arquivarConversa(req, res, next) {
+    try {
+        const { conversaId } = req.body;
+
+        if (!conversaId) {
+            return res.status(400).json({ error: "ID da conversa é obrigatório." });
+        }
+
+        const conversa = await conversaService.arquivarConversa(conversaId);
+
+        return res.status(200).json({ 
+            message: "Conversa arquivada com sucesso",
+            conversa 
+        });
+    } catch (error) {
+        console.error("Erro ao arquivar conversa:", error);
+        return res.status(500).json({ error: "Erro ao arquivar conversa." });
+    }
+}
 
 async function adicionarProgressoChat(req, res) {
     try {
@@ -161,6 +180,6 @@ async function adicionarProgressoOcorrencia(req, res) {
     }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia};
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia};
 
 

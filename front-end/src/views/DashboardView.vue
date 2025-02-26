@@ -60,7 +60,7 @@
         <div class="card-body">
           <div class="mb-3">
             <label class="form-label">Data:</label>
-            <input class="form-control" v-model="ocorrencia.data_denuncia" readonly />
+            <input class="form-control" :value="formatDate(ocorrencia.data_denuncia)" readonly />
           </div>
           <div class="mb-3">
             <label class="form-label">Tipo de violência:</label>

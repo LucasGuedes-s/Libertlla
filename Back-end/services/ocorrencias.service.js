@@ -153,6 +153,32 @@ async function arquivarOcorrencia(ocorrenciaId) {
     }
 }
 
+async function arquivarConversa(conversaId) {
+    try {
+        if (!conversaId) {
+            throw new Error("ID da conversa é obrigatório.");
+        }
+
+        const conversa = await prisma.conversa.findUnique({
+            where: { id: conversaId }
+        });
+
+        if (!conversa) {
+            throw new Error("Conversa não encontrada.");
+        }
+
+        const conversaArquivada = await prisma.conversa.update({
+            where: { id: conversaId },
+            data: { status: "Arquivada" }
+        });
+
+        return conversaArquivada;
+    } catch (error) {
+        console.error("Erro ao arquivar conversa:", error);
+        throw error;
+    }
+}
+
 async function adicionarProgressoChat(descricao, anexos, chatId) {
     return await prisma.Registro.create({
         data: {
@@ -177,4 +203,4 @@ async function adicionarProgressoOcorrencia(descricao, anexos, ocorrenciaId) {
     });
 }
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional,GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia}
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional,GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia}

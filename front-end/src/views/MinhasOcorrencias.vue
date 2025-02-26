@@ -163,20 +163,22 @@ export default {
   },
   methods: {
     getConversas() {
-      const user = this.store.usuario.usuario;
-      const email = user.email;
-      const token = this.store.token;
+  const user = this.store.usuario.usuario;
+  const email = user.email;
+  const token = this.store.token;
 
-      axios.get(`http://localhost:3000/conversas/${email}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).then(response => {
-        this.conversas = response.data.conversas;
-      }).catch(error => {
-        console.error('Erro ao buscar conversas:', error);
-      });
-    },
+  axios.get(`http://localhost:3000/conversas/${email}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }).then(response => {
+    // Filtra as conversas para não incluir as arquivadas
+    this.conversas = response.data.conversas.filter(conversa => conversa.status !== "Arquivada");
+  }).catch(error => {
+    console.error('Erro ao buscar conversas:', error);
+  });
+},
+
 
     async gerarPDF(id) {
       const response = await axios({

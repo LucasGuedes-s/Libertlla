@@ -11,7 +11,8 @@
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label for="data" class="form-label">Data:</label>
-                                <input id="data" class="form-control" :value="formatDate(conversa.createdAt)" readonly />
+                                <input id="data" class="form-control" :value="formatDate(conversa.createdAt)"
+                                    readonly />
                             </div>
                         </div>
 
@@ -84,82 +85,76 @@ export default {
         };
     },
     mounted() {
-        console.log("Registros:", this.conversa.registros); // Verificar o que está sendo retornado
+        console.log("Registros:", this.conversa.registros);
         this.getConversas();
     },
     methods: {
         async getConversas() {
-    try {
-        const user = this.store.usuario.usuario;
-        const email = user.email;
-        const token = this.store.token;
+            try {
+                const user = this.store.usuario.usuario;
+                const email = user.email;
+                const token = this.store.token;
 
-        const response = await axios.get(`http://localhost:3000/conversas/${email}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
+                const response = await axios.get(`http://localhost:3000/conversas/${email}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (response.data && response.data.conversas) {
+                    const conversas = response.data.conversas;
+                    console.log("Todas as conversas recebidas:", conversas);
+
+                    if (conversas.length > 0) {
+                        this.conversa = conversas.find(conversa => conversa.id === this.id) || conversas[0];
+                        console.log("Conversa selecionada:", this.conversa);
+                        this.formatarMensagens();
+                    } else {
+                        console.warn('Nenhuma conversa encontrada para o usuário.');
+                    }
+                } else {
+                    console.warn('Resposta da API não contém conversas.');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar conversas:', error);
             }
-        });
+        },
 
-        if (response.data && response.data.conversas) {
-            const conversas = response.data.conversas;
-
-            console.log("Todas as conversas recebidas:", conversas);
-
-            if (conversas.length > 0) {
-                // Seleção correta da conversa
-                this.conversa = conversas.find(conversa => conversa.id === this.id) || conversas[0];
-
-                console.log("Conversa selecionada:", this.conversa);
-
-                // Se você já tem mensagens dentro da conversa, as formate corretamente
-                this.formatarMensagens();
-            } else {
-                console.warn('Nenhuma conversa encontrada para o usuário.');
+        formatarMensagens() {
+            if (!this.conversa || !this.conversa.messages || this.conversa.messages.length === 0) {
+                return "Nenhuma mensagem disponível.";
             }
-        } else {
-            console.warn('Resposta da API não contém conversas.');
-        }
-    } catch (error) {
-        console.error('Erro ao buscar conversas:', error);
-    }
-},
-
-formatarMensagens() {
-    if (!this.conversa || !this.conversa.messages || this.conversa.messages.length === 0) {
-        return "Nenhuma mensagem disponível.";
-    }
-
-    console.log("Mensagens da conversa:", this.conversa.messages); // Verificando as mensagens
-
-    return this.conversa.messages
-        .map(msg => `[${new Date(msg.timestamp).toLocaleString()}] ${msg.from}: ${msg.content}`)
-        .join("\n");
-},
+            console.log("Mensagens da conversa:", this.conversa.messages);
+            return this.conversa.messages
+                .map(msg => `[${new Date(msg.timestamp).toLocaleString()}] ${msg.from}: ${msg.content}`)
+                .join("\n");
+        },
         async arquivarConversa() {
             try {
-                const token = this.store.getToken;
-                await axios.put(`http://localhost:3000/conversas/arquivar`, {
-                    conversaId: this.id
+                const token = this.store.token;
+                const response = await axios.put('http://localhost:3000/conversas/arquivar', {
+                    conversaId: this.conversa.id
                 }, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
+
                 Swal.fire({
                     title: 'Sucesso!',
-                    text: 'A conversa foi arquivada com sucesso.',
-                    icon: 'success',
-                    confirmButtonText: 'Ok'
-                }).then(() => {
-                    router.push('/minhasconversas');
+                    text: 'Conversa arquivada com sucesso!',
+                    icon: 'success'
                 });
+
+                this.conversa.status = "Arquivada";
+
+                router.push('/minhasocorrencias');
             } catch (error) {
-                console.error('Erro ao arquivar conversa:', error);
+                console.error("Erro ao arquivar conversa:", error);
                 Swal.fire({
                     title: 'Erro!',
-                    text: 'Não foi possível arquivar a conversa. Tente novamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Ok'
+                    text: 'Não foi possível arquivar a conversa.',
+                    icon: 'error'
                 });
             }
         }
@@ -172,19 +167,23 @@ formatarMensagens() {
 
 
 <style scoped>
-.card{
-    min-height:  102%;
+.card {
+    min-height: 102%;
     height: 102%;
 }
+
 .col-md-6 {
-    width: 100%; /* Faz a div ocupar toda a largura do container */
+    width: 100%;
+    /* Faz a div ocupar toda a largura do container */
 }
 
 textarea.form-control {
-    min-height:  130%;
+    min-height: 130%;
     height: 130%;
-    max-height: 1000px; /* Define um limite máximo */
-    overflow-y: auto; /* Permite rolagem caso necessário */
+    max-height: 1000px;
+    /* Define um limite máximo */
+    overflow-y: auto;
+    /* Permite rolagem caso necessário */
 }
 
 .wrapper {

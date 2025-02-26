@@ -23,6 +23,8 @@ router.post('/progresso/ocorrencia/:id', controller.adicionarProgressoOcorrencia
 
 router.put("/ocorrencias/arquivar", [validarJWT], controller.arquivarOcorrencia);
 
+router.put('/conversas/arquivar', [validarJWT], controller.arquivarConversa);
+
 router.get("/todas/ocorrencias", controller.GetOcorrenciasTotais);
 
 module.exports = router;
