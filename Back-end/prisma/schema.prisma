@@ -46,6 +46,8 @@ model Registro {
   data       String?
   ocorrenciaId Int?      //
   ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) // ✅ Correta relação 1 para muitos
+  chatId String?  
+  chat   Conversa? @relation(fields: [chatId], references: [id]) // ✅ Correta relação 1 para muitos
 }
 
 model Permissoes {
@@ -62,4 +64,5 @@ model Conversa {
   profisssional     Profissionais? @relation(fields: [profissional], references: [id])
   profissional      Int?
   createdAt DateTime @default(now()) // Data da criação
+  registros  Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
 }

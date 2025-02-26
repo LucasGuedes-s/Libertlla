@@ -31,6 +31,17 @@ async function getOcorrenciasProfissional(req, res) {
     return ocorrencias;
 }
 
+async function getConversasProfissional(profissionalEmail) {
+    const conversas = await prisma.Conversa.findMany({
+      where: {
+        profisssional: { 
+          email: profissionalEmail, 
+        },
+      },
+    });
+  
+    return conversas;
+}
 
 async function GetOcorrencias() {
     const ocorrencia = await prisma.Ocorrencias.findMany({
@@ -168,5 +179,4 @@ async function adicionarProgresso(descricao, anexos, ocorrenciaId) {
 // }
 // permissoes()
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgresso }
-
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional,GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, adicionarProgresso }

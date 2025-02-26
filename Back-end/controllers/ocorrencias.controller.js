@@ -1,4 +1,6 @@
 const  Ocorrencia = require("../services/ocorrencias.service");
+const conversaService = require('../services/ocorrencias.service'); 
+
 
 // Registrar uma ocorrência
 async function PostOcorrencias(req, res){
@@ -26,6 +28,22 @@ async function getOcorrenciasProfissional(req, res, next) {
         console.error('Erro no get em processos do profissional')
     }
 }
+
+async function getConversas(req, res, next) {
+    const { profissionalEmail } = req.params; // Pega o email do profissional pela URL
+  
+    try {
+      const conversas = await conversaService.getConversasProfissional(profissionalEmail); // Chama o serviço
+      
+      res.status(200).json({
+        conversas
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro ao buscar conversas do profissional' });
+    }
+}
+
 async function GetOcorrencias(req, res, next) {
     try {
         const ocorrencias = await Ocorrencia.GetOcorrencias()
@@ -128,7 +146,6 @@ async function adicionarProgresso(req, res) {
     }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
-
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, updateOcorrencia, adicionarProgresso};
 
 

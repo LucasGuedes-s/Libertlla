@@ -37,6 +37,33 @@
             </div>
           </div>
         </div>
+        <div class="div_conversas">
+          <div class="formulario">
+            <div class="info border rounded p-4 row" v-for="conversa in conversas" :key="conversa.id">
+              <div class="conversa">
+                <label>ID:</label>
+                <p>{{ conversa.id }}</p>
+              </div>
+
+              <div class="conversa">
+                <label>Data de Criação:</label>
+                <p>{{ formatDate(conversa.createdAt) }}</p>
+              </div>
+
+              <div class="conversa">
+                <label>Tipo de denuncia:</label>
+                <p> chat </p>
+              </div>
+
+              <div class="buttons">
+                <router-link :to="`/conversa/${conversa.id}`" class="detalhar-btn">Detalhar</router-link>
+
+                <button type="button" class="btn-modal" @click="abrirModal(conversa.id)">Adicionar Progresso</button>
+
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Modal -->
       <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
@@ -64,6 +91,190 @@
   </div>
 </template>
 
+<script>
+import SideBar from '@/components/SideBar.vue';
+import axios from 'axios';
+import { useAuthStore } from '@/store.js';
+import { formatDate } from '@/utils/dataformatar';
+import Swal from 'sweetalert2';
+import router from '@/router';
+
+export default {
+  setup() {
+    const store = useAuthStore();
+    return {
+      store
+    };
+  },
+  data() {
+    return {
+      formatDate,
+      sidebarVisible: true,
+      ocorrencias: [],  // Lista de ocorrências filtradas
+      conversas: [],    // Lista de conversas
+      modalVisible: false,
+      modalKey: 0, // Resetar o modal
+      progresso: '',
+      descricao: '',
+      data: '',
+      anexos: [],
+      selectedFileName: '',
+      ocorrenciasId: null,
+      uploadStatus: "",
+      imageUrl: "",
+      file: null,
+    };
+  },
+  mounted() {
+    const user = this.store.usuario.usuario;
+    const email = user.email;
+    const token = this.store.token;
+
+    // Buscar ocorrências
+    axios.get(`http://localhost:3000/ocorrencias/${email}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(response => {
+      this.ocorrencias = response.data.processos.map(processo => {
+        return {
+          ...processo,
+          ocorrencias: processo.ocorrencias.filter(ocorrencia =>
+            ocorrencia.status === 'Andamento' || ocorrencia.status === 'Em progresso')
+        };
+      });
+
+      this.ocorrencias.forEach(processo => {
+        processo.ocorrencias.sort((a, b) => {
+          const dateA = new Date(a.data_denuncia);
+          const dateB = new Date(b.data_denuncia);
+          return dateA - dateB;
+        });
+        processo.ocorrencias.reverse();
+      });
+    }).catch(error => {
+      if (error.status === 403 || error.status === 401) {
+        router.push('/nao-autorizado');
+      }
+      console.error('Erro ao buscar ocorrências:', error);
+    });
+
+    // Buscar conversas do profissional
+    this.getConversas();
+  },
+  methods: {
+    // Buscar conversas do profissional
+    getConversas() {
+      const user = this.store.usuario.usuario;
+      const email = user.email;
+      const token = this.store.token;
+
+      axios.get(`http://localhost:3000/conversas/${email}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(response => {
+        this.conversas = response.data.conversas; // Armazenando as conversas
+      }).catch(error => {
+        console.error('Erro ao buscar conversas:', error);
+      });
+    },
+
+    async gerarPDF(id) {
+      const response = await axios({
+        url: `http://localhost:3000/ocorrencia/pdf/${id}`,
+        method: 'GET',
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Relatório de ocorrencia.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    },
+    abrirModal(id) {
+      this.ocorrenciasId = id;
+      this.modalVisible = true;
+      this.modalKey++;
+    },
+    handleFileChange(event) {
+      this.file = event.target.files[0];
+    },
+    async uploadFile() {
+      if (!this.file) {
+        this.uploadStatus = "Por favor, selecione um arquivo.";
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append("file", this.file);
+
+      const response = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      this.uploadStatus = "Arquivo enviado com sucesso!";
+      return data.fileUrl;
+    },
+
+    fecharModal() {
+      this.modalVisible = false;
+      this.progresso = '';
+      this.descricao = '';
+      this.data = '';
+      this.anexos = [];
+      this.selectedFileName = '';
+    },
+    async adicionarProgresso() {
+      if (!this.descricao.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo obrigatório',
+          text: 'A descrição não pode estar vazia',
+        });
+        return;
+      }
+
+      let anexos = [];
+
+      if (this.file) {
+        const fileUrl = await this.uploadFile();
+        if (fileUrl) {
+          anexos.push(fileUrl);
+        }
+      }
+
+      axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
+        descricao: this.descricao,
+        anexos: anexos,
+      })
+        .then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Progresso Adicionado!',
+            text: 'O progresso foi salvo com sucesso.',
+          });
+          this.fecharModal();
+        })
+        .catch(error => {
+          console.error('Erro ao adicionar progresso:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Houve um problema ao adicionar o progresso.',
+          });
+        });
+    }
+  },
+  components: {
+    SideBar
+  }
+};
+</script>
 
 <style scoped>
 .dashboard {
@@ -82,6 +293,12 @@
 }
 
 .div_ocorrencias {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.div_conversas{
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
@@ -116,6 +333,10 @@ label {
 }
 
 .denuncia {
+  margin-bottom: 15px;
+}
+
+.conversa{
   margin-bottom: 15px;
 }
 
@@ -158,7 +379,7 @@ label {
 
 .detalhar-btn,
 .pdf-btn,
-.btn-modal{
+.btn-modal {
   background-color: rgba(245, 245, 245, 255);
   color: rgba(152, 152, 152, 255);
   border: 1px solid rgba(245, 245, 245, 255);
@@ -257,7 +478,7 @@ input[type="file"] {
 #adicionar_imagem {
   grid-column: 1 / -1;
   margin-top: 20px;
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
 }
 
 #imagem {
@@ -274,7 +495,8 @@ button {
   margin-top: -15px;
 }
 
-.btn-salvar, .btn-cancelar {
+.btn-salvar,
+.btn-cancelar {
   background-color: rgba(245, 245, 245, 255);
   color: rgba(152, 152, 152, 255);
   border: 1px solid rgba(245, 245, 245, 255);
@@ -343,167 +565,3 @@ button {
   }
 }
 </style>
-
-<script>
-import SideBar from '@/components/SideBar.vue';
-import axios from 'axios';
-import { useAuthStore } from '@/store.js';
-import { formatDate } from '@/utils/dataformatar';
-import Swal from 'sweetalert2';
-import router from '@/router';
-
-export default {
-  setup() {
-    const store = useAuthStore();
-    return {
-      store
-    };
-  },
-  data() {
-    return {
-      formatDate,
-      sidebarVisible: true,
-      ocorrencias: [],  // Lista de ocorrências filtradas
-      modalVisible: false,
-      modalKey: 0, // Resetar o modal
-      progresso: '',
-      descricao: '',
-      data: '',
-      anexos: [], 
-      selectedFileName: '',
-      ocorrenciasId: null,
-      uploadStatus: "",
-      imageUrl: "",
-      file: null, 
-    };
-  },
-  mounted() {
-    const user = this.store.usuario.usuario;
-    const email = user.email;
-    const token = this.store.token;
-    axios.get(`http://localhost:3000/ocorrencias/${email}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).then(response => {
-      // Filtrando as ocorrências 
-      this.ocorrencias = response.data.processos.map(processo => {
-        return {
-          ...processo,
-          ocorrencias: processo.ocorrencias.filter(ocorrencia => 
-            ocorrencia.status === 'Andamento' || ocorrencia.status === 'Em progresso')
-        };
-      });
-
-      // Ordena as ocorrências por data de denúncia (mais recentes primeiro)
-      this.ocorrencias.forEach(processo => {
-        processo.ocorrencias.sort((a, b) => {
-          const dateA = new Date(a.data_denuncia);
-          const dateB = new Date(b.data_denuncia);
-          return dateA - dateB;
-        });
-        processo.ocorrencias.reverse();
-      });
-    }).catch(error => {
-      if (error.status === 403 || error.status === 401) {
-        router.push('/nao-autorizado');
-      }
-      console.error('Erro ao buscar ocorrências:', error);
-    });
-  },
-  methods: {
-    async gerarPDF(id) {
-      const response = await axios({
-        url: `http://localhost:3000/ocorrencia/pdf/${id}`,
-        method: 'GET',
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Relatório de ocorrencia.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    },
-    abrirModal(id) {
-      this.ocorrenciasId = id;  
-      this.modalVisible = true;
-      this.modalKey++;
-    },
-    handleFileChange(event) {
-      this.file = event.target.files[0]; 
-    },
-    async uploadFile() {
-      if (!this.file) {
-        this.uploadStatus = "Por favor, selecione um arquivo.";
-        return null;
-      }
-
-      const formData = new FormData();
-      formData.append("file", this.file);
-
-      const response = await fetch("http://localhost:3000/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      this.uploadStatus = "Arquivo enviado com sucesso!";
-      return data.fileUrl;
-    },
-
-    fecharModal() {
-      this.modalVisible = false;
-      this.progresso = '';
-      this.descricao = '';
-      this.data = '';
-      this.anexos = [];
-      this.selectedFileName = '';
-    },
-    async adicionarProgresso() {
-      if (!this.descricao.trim()) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Campo obrigatório',
-          text: 'A descrição não pode estar vazia',
-        });
-        return;
-      }
-
-      let anexos = [];
-
-      if (this.file) {
-        const fileUrl = await this.uploadFile();
-        if (fileUrl) {
-          anexos.push(fileUrl);
-        }
-      }
-
-      axios.post(`http://localhost:3000/ocorrencia/${this.ocorrenciasId}/progresso`, {
-        descricao: this.descricao,
-        anexos: anexos, 
-      })
-        .then(() => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Progresso Adicionado!',
-            text: 'O progresso foi salvo com sucesso.',
-          });
-          this.fecharModal();
-        })
-        .catch(error => {
-          console.error('Erro ao adicionar progresso:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Erro',
-            text: 'Houve um problema ao adicionar o progresso.',
-          });
-        });
-    }
-  },
-  components: {
-    SideBar
-  }
-};
-</script>

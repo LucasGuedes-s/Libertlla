@@ -7,6 +7,8 @@ router.get('/ocorrencias', [validarJWT], controller.GetOcorrencias);
 
 router.get('/ocorrencia/:id', controller.GetOcorrenciaEspecifica);
 
+router.get('/conversas/:profissionalEmail', controller.getConversas);
+
 router.get('/todasocorrencias', controller.GetTodasOcorrencias);
 
 router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
