@@ -69,10 +69,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(userRouter);
-app.use(ocorrencias);
-app.use(pdf);
-app.use(profissionais)
+// app.use(userRouter);
+// app.use(ocorrencias);
+// app.use(pdf);
+// app.use(profissionais)
 
 io.on('connection', (socket) => {
     // Quando um administrador se conecta
