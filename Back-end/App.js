@@ -29,6 +29,16 @@ app.use(function (req, res, next) {
     next();
 });
 
+//ROTAS
+app.get('/teste', (req, res) => {
+    console.log("cheguei aqui")
+    res.send('Teste')
+})
+//ROTAS
+app.post('/teste', (req, res) => {
+    console.log("cheguei aqui")
+    res.send('Teste')
+})
 app.use(express.json());
 // Importar rotas
 const userRouter = require('../Back-end/routes/user.router');
