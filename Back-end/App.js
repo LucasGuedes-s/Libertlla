@@ -32,7 +32,8 @@ app.use(function (req, res, next) {
 //ROTAS
 app.get('/teste', (req, res) => {
     console.log("cheguei aqui")
-    res.send('Teste')
+    res.status(200).send('Teste');
+
 })
 //ROTAS
 app.post('/teste', (req, res) => {
