@@ -36,7 +36,20 @@ model Ocorrencias {
   registro        Int?
   profisssional   Profissionais? @relation(fields: [profissional], references: [id])
   profissional    Int?
-  registros  Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
+  registros       Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
+  email           String?
+  vitimaId        Int?      // ID da usuária que fez a ocorrência 
+  vitima          Vitima? @relation(fields: [vitimaId], references: [id]) // ✅ Correta relação 1 para muitos
+}
+
+model Vitima{
+  id                    Int        @id @default(autoincrement())
+  nome                  String
+  email                 String     @unique
+  senha                 String?
+  contatosdeEmergencia  String[] @db.VarChar(2048)
+  registros             Registro[] // ✅ Correta relação 1 para muitos
+  ocorrencias           Ocorrencias[] // ✅ Correta relação 1 para muitos
 }
 
 model Registro {
@@ -48,6 +61,8 @@ model Registro {
   ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) // ✅ Correta relação 1 para muitos
   chatId String?  
   chat   Conversa? @relation(fields: [chatId], references: [id]) // ✅ Correta relação 1 para muitos
+  vitimaId Int?      // ID da usuária que fez o registro
+  vitima   Vitima? @relation(fields: [vitimaId], references: [id]) // ✅ Correta relação 1 para muitos
 }
 
 model Permissoes {
