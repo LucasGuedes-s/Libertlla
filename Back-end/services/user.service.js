@@ -6,7 +6,6 @@ const config= require('../config/app.config')
 require('dotenv').config();
 
 async function LoginUser(req, res) {
-    console.log('AQUI')
     const user = await prisma.Profissionais.findFirst({
         where:{
             email: req.usuario.email
