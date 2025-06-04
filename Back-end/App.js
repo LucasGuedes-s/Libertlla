@@ -32,13 +32,16 @@ app.use(function (req, res, next) {
 //ROTAS
 app.get('/teste', (req, res) => {
     console.log("cheguei aqui")
-    res.status(200).send('Teste');
 
-})
+    res.setHeader('Content-Type', 'application/json'); // Adicional, só por garantia
+    res.json({ mensagem: "Deu certo!", agora: new Date().toISOString() });
+  });
+  
+  
 //ROTAS
 app.post('/teste', (req, res) => {
     console.log("cheguei aqui")
-    res.send('Teste')
+    res.status(200).send('Teste');
 })
 app.use(express.json());
 // Importar rotas
@@ -70,10 +73,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use(userRouter);
-// app.use(ocorrencias);
-// app.use(pdf);
-// app.use(profissionais)
+app.use(userRouter);
+app.use(ocorrencias);
+app.use(pdf);
+app.use(profissionais)
 
 io.on('connection', (socket) => {
     // Quando um administrador se conecta

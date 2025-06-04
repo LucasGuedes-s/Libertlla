@@ -19,5 +19,4 @@ async function postProfissional(user){
     return cadastro;
 }
 
-
 module.exports = {postProfissional};
