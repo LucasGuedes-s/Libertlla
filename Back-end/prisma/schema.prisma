@@ -19,7 +19,6 @@ model Profissionais {
   ocorrencias   Ocorrencias[]
   ocorrencias_chat   Conversa[]
   permissao     Permissoes @relation(fields: [permissaoId], references: [id])
-
 }
 
 model Ocorrencias {
@@ -34,10 +33,14 @@ model Ocorrencias {
   data_ocorrencia String
   status          String @default("Andamento") // Adicionando um valor padrão
   registro        Int?
+
   profisssional   Profissionais? @relation(fields: [profissional], references: [id])
   profissional    Int?
+
+  //MUDAR ESSA RELAÇÃO PARA UM ARRAY
+
   registros       Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
-  email           String?
+  endereco_vitima String
   vitimaId        Int?      // ID da usuária que fez a ocorrência 
   vitima          Vitima? @relation(fields: [vitimaId], references: [id]) // ✅ Correta relação 1 para muitos
 }
@@ -47,9 +50,10 @@ model Vitima{
   nome                  String
   email                 String     @unique
   senha                 String?
-  contatosdeEmergencia  String[] @db.VarChar(2048)
+  contatosdeEmergencia  String[] @db.VarChar(2048) 
   registros             Registro[] // ✅ Correta relação 1 para muitos
   ocorrencias           Ocorrencias[] // ✅ Correta relação 1 para muitos
+  denuncias             denuncia[] // Correta relação 1 para muitos
 }
 
 model Registro {
@@ -57,10 +61,13 @@ model Registro {
   anexos     String[]   @db.VarChar(2048)
   descricoes String?
   data       String?
-  ocorrenciaId Int?      //
+  ocorrenciaId Int?     
+  testemunhas String[] @db.VarChar(2048)
+
   ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) // ✅ Correta relação 1 para muitos
   chatId String?  
   chat   Conversa? @relation(fields: [chatId], references: [id]) // ✅ Correta relação 1 para muitos
+  
   vitimaId Int?      // ID da usuária que fez o registro
   vitima   Vitima? @relation(fields: [vitimaId], references: [id]) // ✅ Correta relação 1 para muitos
 }
@@ -69,6 +76,15 @@ model Permissoes {
   id            Int             @id @default(autoincrement())
   descricao     String?
   profissionais Profissionais[]
+}
+
+
+model denuncia{
+  id         Int      @id @default(autoincrement())
+  endereco   String
+  data       DateTime @db.Date
+  vitimaId   Int?
+  vitima     Vitima? @relation(fields: [vitimaId], references: [id])
 }
 
 model Conversa {
