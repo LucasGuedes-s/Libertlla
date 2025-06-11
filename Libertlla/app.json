@@ -9,14 +9,37 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Este app usa Bluetooth para conectar com dispositivos BLE próximos.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.anonymous.Libertlla"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "permissions": [
+          "ACCESS_FINE_LOCATION",
+          "BLUETOOTH",
+          "BLUETOOTH_ADMIN",
+          "BLUETOOTH_SCAN",
+          "BLUETOOTH_CONNECT",
+          "ACCESS_FINE_LOCATION",
+          "BLUETOOTH",
+          "BLUETOOTH_ADMIN",
+          "BLUETOOTH_SCAN",
+          "BLUETOOTH_CONNECT"
+        ]
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "package": "com.anonymous.Libertlla"
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +56,17 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "react-native-ble-plx"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "303c9e25-5f61-45a8-8965-4c9df5869f08"
+      }
     }
   }
 }
