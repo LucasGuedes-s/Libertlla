@@ -57,7 +57,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "react-native-ble-plx"
+      "react-native-ble-plx",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
