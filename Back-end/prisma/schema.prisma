@@ -15,10 +15,19 @@ model Profissionais {
   permissaoId   Int
   foto          String?    @db.VarChar(2048)
   especialidade String
-  processo      Int?
-  ocorrencias   Ocorrencias[]
   ocorrencias_chat   Conversa[]
   permissao     Permissoes @relation(fields: [permissaoId], references: [id])
+  profissionaisOcorrencias OcorrenciasProfissionais[] // Correta relação 1 para muitos
+}
+
+model OcorrenciasProfissionais {
+  ocorrenciaId    Int
+  profissionalId  Int
+
+  ocorrencia      Ocorrencias @relation(fields: [ocorrenciaId], references: [id])
+  profissional    Profissionais @relation(fields: [profissionalId], references: [id])
+
+  @@id([ocorrenciaId, profissionalId])
 }
 
 model Ocorrencias {
@@ -33,12 +42,8 @@ model Ocorrencias {
   data_ocorrencia String
   status          String @default("Andamento") // Adicionando um valor padrão
   registro        Int?
-
-  profisssional   Profissionais? @relation(fields: [profissional], references: [id])
-  profissional    Int?
-
-  //MUDAR ESSA RELAÇÃO PARA UM ARRAY
-
+  endereco        String?
+  ocorrenciasProfissionais OcorrenciasProfissionais[] // ✅ Correta relação 1 para muitos
   registros       Registro[] // ✅ Agora é um array, indicando relação 1 para muitos
   endereco_vitima String
   vitimaId        Int?      // ID da usuária que fez a ocorrência 
@@ -48,12 +53,52 @@ model Ocorrencias {
 model Vitima{
   id                    Int        @id @default(autoincrement())
   nome                  String
+  dataNascimento        String
+  cpf                   String?    @unique
   email                 String     @unique
   senha                 String?
+  telefone              String?    @db.VarChar(15)
+  genero               String?
+  estadoCivil          String?
+  profissao            String?
+  escolaridade         String?
+  endereco             String?
+  cidade               String?
+  estado               String?
+  etnia                String?
   contatosdeEmergencia  String[] @db.VarChar(2048) 
-  registros             Registro[] // ✅ Correta relação 1 para muitos
+  registros             Registro[] 
   ocorrencias           Ocorrencias[] // ✅ Correta relação 1 para muitos
-  denuncias             denuncia[] // Correta relação 1 para muitos
+  notificacao_botao     Notificacao_botao[] // Correta relação 1 para muitos
+  relacao_agressor_vitima relacao_agressor_vitima[] // Correta relação 1 para muitos
+}
+model relacao_agressor_vitima{
+  agressorId  Int
+  vitimaId    Int
+
+  agressor    Agressor @relation(fields: [agressorId], references: [id])
+  vitima      Vitima   @relation(fields: [vitimaId], references: [id])
+
+  @@id([agressorId, vitimaId]) // Garante que a relação seja única
+}
+model Agressor{
+  id                    Int      @id @default(autoincrement())
+  nome                  String
+  relacionamento_vitima String?
+  cpf                   String?  @unique
+  dataNascimento        String?
+  email      String?  @unique
+  telefone   String?  @db.VarChar(15)
+  genero     String?
+  estadoCivil String?
+  profissao String?
+  escolaridade String?
+  endereco   String?
+  cidade     String?
+  estado     String?
+  etnia      String?
+  caracteristicas_fisicas String?
+  relacao_agressor_vitima relacao_agressor_vitima[] // Correta relação 1 para muitos
 }
 
 model Registro {
@@ -63,12 +108,11 @@ model Registro {
   data       String?
   ocorrenciaId Int?     
   testemunhas String[] @db.VarChar(2048)
-
-  ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) // ✅ Correta relação 1 para muitos
+  assinatura      String? @db.VarChar(2048)
+  ocorrencia   Ocorrencias? @relation(fields: [ocorrenciaId], references: [id]) 
   chatId String?  
-  chat   Conversa? @relation(fields: [chatId], references: [id]) // ✅ Correta relação 1 para muitos
-  
-  vitimaId Int?      // ID da usuária que fez o registro
+  chat   Conversa? @relation(fields: [chatId], references: [id])
+  vitimaId Int? 
   vitima   Vitima? @relation(fields: [vitimaId], references: [id]) // ✅ Correta relação 1 para muitos
 }
 
@@ -78,11 +122,11 @@ model Permissoes {
   profissionais Profissionais[]
 }
 
-
-model denuncia{
+model Notificacao_botao{
   id         Int      @id @default(autoincrement())
   endereco   String
   data       DateTime @db.Date
+
   vitimaId   Int?
   vitima     Vitima? @relation(fields: [vitimaId], references: [id])
 }

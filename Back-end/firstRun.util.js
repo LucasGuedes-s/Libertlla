@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 const bcryptUtil = require("./utils/bcrypt.util");
+require('dotenv').config();
 
 async function cadastrarProfissional() {
     const user = {
