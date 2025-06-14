@@ -1,9 +1,57 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, KeyboardAvoidingView, Platform } from "react-native";
-import { useRouter } from "expo-router";
 // import BLEScanner from "../app/BLEScanner";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+
+import { useRouter } from "expo-router";
+import axios from "../services/axios"; // ajuste o caminho conforme necessário
 
 export default function Index() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert("Erro", "Preencha todos os campos.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("/login/vitima", {
+        usuario: {
+          email,
+          senha,
+        }
+      });
+
+      const { user } = response.data;
+      console.log("Token recebido:", response.data);
+      router.push("/");
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        Alert.alert("Erro", "E-mail ou senha inválidos.");
+      } else {
+        Alert.alert("Erro", "Não foi possível fazer login.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -11,7 +59,11 @@ export default function Index() {
         style={styles.imageSection}
         imageStyle={{ resizeMode: "cover", opacity: 0.6 }}
       />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.loginSection}>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.loginSection}
+      >
         <Text style={styles.title}>
           <Text style={styles.brand}>Libertlla</Text>
         </Text>
@@ -22,6 +74,10 @@ export default function Index() {
             style={styles.input}
             placeholder="Digite o seu e-mail"
             placeholderTextColor="#ffffff"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
 
           <Text style={styles.label}>Senha</Text>
@@ -30,17 +86,23 @@ export default function Index() {
             placeholder="Digite a sua senha"
             placeholderTextColor="#ffffff"
             secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
           />
 
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Entrar</Text>
+          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-      {/* <BLEScanner /> */}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
