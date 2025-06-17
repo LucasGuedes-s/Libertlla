@@ -6,6 +6,7 @@ const config= require('../config/app.config')
 require('dotenv').config();
 
 async function LoginUser(req, res) {
+    console.log(req)
     if (req.usuario.senha == config.senha) {
         throw new Error('Troque sua senha antes de continuar')
     }
