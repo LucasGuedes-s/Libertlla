@@ -1,4 +1,3 @@
-// import BLEScanner from "../app/BLEScanner";
 import { useState } from "react";
 import {
   View,
@@ -9,53 +8,47 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
   Alert,
 } from "react-native";
-
 import { useRouter } from "expo-router";
-import axios from "../services/axios"; // ajuste o caminho conforme necessário
+import axios from "axios";
 
 export default function Index() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !senha) {
-      Alert.alert("Erro", "Preencha todos os campos.");
-      return;
-    }
-
-    setLoading(true);
+    console.log("Botão de login pressionado");
 
     try {
-      const response = await axios.post("/login/vitima", {
+      console.log("Tentando fazer login com:", { email, senha });
+      const response = await axios.post("http://localhost:3000/login/vitima", {
         usuario: {
           email,
           senha,
-        }
+        },
       });
 
       const { user } = response.data;
       console.log("Token recebido:", response.data);
-      router.push("/");
+      router.push("/botaodepanico");
     } catch (error: any) {
       if (error.response?.status === 401) {
         Alert.alert("Erro", "E-mail ou senha inválidos.");
       } else {
+        console.error(error);
         Alert.alert("Erro", "Não foi possível fazer login.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={{ uri: "https://i.scdn.co/image/ab6761610000e5eb9e528993a2820267b97f6aae" }}
+        source={{
+          uri: "https://i.scdn.co/image/ab6761610000e5eb9e528993a2820267b97f6aae",
+        }}
         style={styles.imageSection}
         imageStyle={{ resizeMode: "cover", opacity: 0.6 }}
       />
@@ -90,12 +83,8 @@ export default function Index() {
             onChangeText={setSenha}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Entrar</Text>
-            )}
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -103,11 +92,10 @@ export default function Index() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column", // antes era "row"
+    flexDirection: "column",
   },
   imageSection: {
     flex: 1,
@@ -116,7 +104,7 @@ const styles = StyleSheet.create({
   loginSection: {
     flex: 1,
     backgroundColor: "#54123F",
-    justifyContent: "flex-start", // <-- aqui
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 20,
   },
@@ -125,7 +113,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#ffffff",
     fontFamily: "Montserrat",
-    marginTop: 0,
     marginBottom: 20,
   },
   brand: {
