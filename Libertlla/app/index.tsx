@@ -14,7 +14,8 @@ import {
 } from "react-native";
 
 import { useRouter } from "expo-router";
-import axios from "../services/axios"; // ajuste o caminho conforme necessário
+// import axios from "../services/axios"; // ajuste o caminho conforme necessário
+import axios from "axios";
 
 export default function Index() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function Index() {
     setLoading(true);
 
     try {
-      const response = await axios.post("/login/vitima", {
+      const response = await axios.post("https://7d10-200-137-5-186.ngrok-free.app/login/vitima", {
         usuario: {
           email,
           senha,
@@ -40,7 +41,7 @@ export default function Index() {
 
       const { user } = response.data;
       console.log("Token recebido:", response.data);
-      router.push("/");
+      router.push("/botaodepanico");
     } catch (error: any) {
       if (error.response?.status === 401) {
         Alert.alert("Erro", "E-mail ou senha inválidos.");

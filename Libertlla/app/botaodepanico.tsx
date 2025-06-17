@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'; // ícones para sirene, bluetooth, perfil e sair
-import { openBluetoothSettings } from '../assets/utils/openBluetoothSettings';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function Tela() {
+  const router = useRouter(); // Adicionado aqui
+
   return (
     <View style={styles.container}>
       <View style={styles.box}>
@@ -23,27 +25,21 @@ export default function Tela() {
         </View>
       </View>
 
-      {/* Terceiro box vazio */}
       <View style={styles.box} />
 
-      {/* Menu: agora posicionado após os 3 boxes */}
       <View style={styles.menu_container}>
-        {/* Ícone de Sirene de emergência */}
         <TouchableOpacity onPress={() => console.log('Sirene de emergência')}>
           <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        {/* Ícone de Bluetooth */}
-        <TouchableOpacity onPress={openBluetoothSettings}>
+        <TouchableOpacity onPress={() => router.push('/BLEScanner')}>
           <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        {/* Ícone de Perfil */}
         <TouchableOpacity onPress={() => console.log('Perfil')}>
           <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        {/* Ícone de Sair */}
         <TouchableOpacity onPress={() => console.log('Sair')}>
           <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
         </TouchableOpacity>
@@ -61,7 +57,7 @@ const styles = StyleSheet.create({
   },
   box: {
     width: '90%',
-    height: 200, // novo valor
+    height: 200,
     marginVertical: 10,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
