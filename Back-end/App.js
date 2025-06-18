@@ -50,6 +50,7 @@ const ocorrencias = require('../Back-end/routes/ocorrencia.router');
 const pdf = require('../Back-end/routes/pdfs.router');
 const profissionais = require('../Back-end/routes/profissionais.router');
 const vitimas = require('../Back-end/routes/vitima.router');
+const notificacao = require('../Back-end/routes/notificacao.route')
 
 // Criar servidor HTTP e configurar Socket.io
 const PORT = 3000;
@@ -79,6 +80,7 @@ app.use(ocorrencias);
 app.use(pdf);
 app.use(profissionais)
 app.use(vitimas);
+app.use(notificacao);
 
 io.on('connection', (socket) => {
     // Quando um administrador se conecta
