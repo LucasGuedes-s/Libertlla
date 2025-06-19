@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image } from 'react-native';
+import axios from 'axios';
+import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -9,6 +10,23 @@ export default function Tela() {
   const [isPressing, setIsPressing] = useState(false);
   const [counter, setCounter] = useState(5);
   const intervalRef = useRef<number | null>(null);
+
+  // Função para enviar a notificação ao pressionar o botão
+  const enviarNotificacao = async () => {
+    try {
+      await axios.post('https://libertlla.onrender.com/notificacao', {
+        endereco: 'Rua das Rosas, 123',
+        data: "2025-06-18T00:00:00:000Z",
+        vitimaId: 1
+      });
+
+      Alert.alert("✅ Alerta enviado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao enviar notificação:", error);
+      Alert.alert("❌ Erro ao enviar alerta");
+    }
+  };
+
 
   // Inicia o contador ao pressionar
   const startCounter = () => {
@@ -26,6 +44,7 @@ export default function Tela() {
             clearInterval(intervalRef.current);
           }
           setIsPressing(false);
+          enviarNotificacao();
           return 0;
         }
         return prev - 1;
