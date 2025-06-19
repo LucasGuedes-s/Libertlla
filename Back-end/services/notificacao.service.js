@@ -7,5 +7,12 @@ async function CriarNotificacaoService(data) {
   });
   return notificacao;
 }
-
-module.exports = CriarNotificacaoService;
+async function BuscarNotificacoesService() {
+  const notificacoes = await prisma.notificacao_botao.findMany({
+    orderBy: {
+      data: 'desc',
+    },
+  });
+  return notificacoes;
+}
+module.exports = {CriarNotificacaoService, BuscarNotificacoesService};

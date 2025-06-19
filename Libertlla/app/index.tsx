@@ -11,8 +11,8 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import axios from "../services/axios"; // ajuste o caminho conforme necessário
-
+//import axios from "../services/axios"; // ajuste o caminho conforme necessário
+import axios from "axios"; // ou o caminho correto para o seu arquivo axios
 export default function Index() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ export default function Index() {
     console.log("Botão de login pressionado");
 
     try {
-      const response = await axios.post("/login/vitima", {
+      const response = await axios.post("https://libertlla.onrender.com/login/vitima", {
         usuario: {
           email,
           senha,
