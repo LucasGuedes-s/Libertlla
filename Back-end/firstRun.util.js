@@ -4,6 +4,7 @@ const bcryptUtil = require("./utils/bcrypt.util");
 require('dotenv').config();
 
 async function cadastrarProfissional() {
+
     const user = {
         usuario: {
             nome: 'Admin',
@@ -41,7 +42,7 @@ async function cadastrarProfissional() {
 //cadastrarProfissional()
 const senhaCriptografada = bcryptUtil.hash('senha', 10)
 
-async function main() {
+/*async function main() {
   // 1. Cadastrar Vítima
   const vitima = await prisma.vitima.create({
     data: {
@@ -120,3 +121,23 @@ main()
   .finally(() => {
     prisma.$disconnect()
   })
+async function criarPermissoes() {
+  try {
+    await prisma.permissoes.createMany({
+      data: [
+        { descricao: 'Psicologo' },
+        { descricao: 'Policial' },
+        { descricao: 'Administrador' },
+      ],
+    });
+
+    console.log('Permissões criadas com sucesso!');
+  } catch (error) {
+    console.error('Erro ao criar permissões:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+// Descomente a linha abaixo para criar as permissões
+  criarPermissoes();*/
+  cadastrarProfissional()
