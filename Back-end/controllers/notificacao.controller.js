@@ -1,8 +1,8 @@
-const CriarNotificacaoService = require('../services/notificacao.service');
+const notificacaoService = require('../services/notificacao.service');
 
 async function CriarNotificacao(req, res) {
   try {
-    const notificacao = await CriarNotificacaoService(req.body);
+    const notificacao = await notificacaoService.CriarNotificacaoService(req);
     res.status(201).json(notificacao);
   } catch (error) {
     console.error(error);
@@ -11,7 +11,7 @@ async function CriarNotificacao(req, res) {
 }
 async function BuscarNotificacoes(req, res) {
   try {
-    const notificacoes = await CriarNotificacaoService.BuscarNotificacoesService();
+    const notificacoes = await notificacaoService.BuscarNotificacoesService();
     res.status(200).json(notificacoes);
   } catch (error) {
     console.error(error);

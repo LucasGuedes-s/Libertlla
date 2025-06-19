@@ -1,9 +1,18 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-async function CriarNotificacaoService(data) {
+async function CriarNotificacaoService(req) {
+  const { endereco, vitimaId} = req.body;
+
+  const data = new Date(); 
+  data.setHours(0, 0, 0, 0); // zera hora, minuto, segundo, milissegundo
+
   const notificacao = await prisma.notificacao_botao.create({
-    data,
+    data:{
+      endereco,
+      data: data,
+      vitimaId, // Adicione o ID da vítima se necessário
+    },
   });
   return notificacao;
 }
@@ -15,4 +24,4 @@ async function BuscarNotificacoesService() {
   });
   return notificacoes;
 }
-module.exports = {CriarNotificacaoService, BuscarNotificacoesService};
+module.exports = { CriarNotificacaoService, BuscarNotificacoesService };
