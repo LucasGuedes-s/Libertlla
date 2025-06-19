@@ -1,14 +1,50 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function Tela() {
-  const router = useRouter(); // Adicionado aqui
+  const router = useRouter();
+
+  const [isPressing, setIsPressing] = useState(false);
+  const [counter, setCounter] = useState(5);
+  const intervalRef = useRef<number | null>(null);
+
+  // Inicia o contador ao pressionar
+  const startCounter = () => {
+    setIsPressing(true);
+    setCounter(5);
+
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      setCounter(prev => {
+        if (prev === 1) {
+          if (intervalRef.current !== null) {
+            clearInterval(intervalRef.current);
+          }
+          setIsPressing(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Para o contador ao soltar
+  const stopCounter = () => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+    }
+    setIsPressing(false);
+    setCounter(5);
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.box}>
+      <View style={styles.box1}>
         <Text style={styles.linha1}>
           <Text style={styles.textoPressione}>Pressione </Text>
           <Text style={styles.textoBotao}>o botão por</Text>
@@ -19,28 +55,42 @@ export default function Tela() {
 
       <View style={styles.box}>
         <View style={styles.circuloMaior}>
-          <Pressable style={styles.circuloMenor} onPress={() => console.log('Botão pressionado')}>
+          <Pressable
+            style={styles.circuloMenor}
+            onPressIn={startCounter}
+            onPressOut={stopCounter}
+          >
             <MaterialCommunityIcons name="alarm-light" size={70} color="#5C164E" />
           </Pressable>
         </View>
       </View>
 
-      <View style={styles.box} />
+      <View style={styles.box}>
+        {isPressing ? (
+          <Text style={styles.contadorTexto}>{counter}</Text>
+        ) : (
+          <Image
+            source={{ uri: 'https://www.sjpmg.org.br/wp-content/uploads/2024/03/protestos-mulheres-tania-rego-agencia-brasil.jpg' }}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+        )}
+      </View>
 
       <View style={styles.menu_container}>
-        <TouchableOpacity onPress={() => console.log('Sirene de emergência')}>
+        <TouchableOpacity>
           <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/BLEScanner')}>
+        <TouchableOpacity>
           <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => console.log('Perfil')}>
+        <TouchableOpacity>
           <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => console.log('Sair')}>
+        <TouchableOpacity>
           <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
         </TouchableOpacity>
       </View>
@@ -55,6 +105,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
+  box1: {
+    width: '90%',
+    height: 150,
+    marginVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EFEFEF',
+  },
   box: {
     width: '90%',
     height: 200,
@@ -65,6 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EFEFEF',
+    overflow: 'hidden',
   },
   linha1: {
     fontSize: 18,
@@ -102,9 +164,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circuloMenor: {
-    width: 125,
-    height: 125,
-    borderRadius: 62,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
     backgroundColor: '#9B287B',
     justifyContent: 'center',
     alignItems: 'center',
@@ -115,13 +177,23 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   menu_container: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    width: "70%",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '70%',
     paddingVertical: 12,
-    backgroundColor: "#9B287B",
+    backgroundColor: '#9B287B',
     borderRadius: 30,
     marginTop: 40,
+  },
+  imagem: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  contadorTexto: {
+    fontSize: 60,
+    fontWeight: 'bold',
+    color: '#9B287B',
   },
 });
