@@ -102,7 +102,7 @@ export default function Tela() {
         </TouchableOpacity>
 
         <TouchableOpacity>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
+          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" onPress={() => router.push('/BLEScanner')}/>
         </TouchableOpacity>
 
         <TouchableOpacity>

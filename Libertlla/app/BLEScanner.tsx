@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { BleManager, Device } from 'react-native-ble-plx';
 
 export default function BLEScanner() {
@@ -26,7 +26,6 @@ export default function BLEScanner() {
   }, []);
 
   const startScan = () => {
-    // Iniciar o scan
     manager.startDeviceScan(null, null, (error, device) => {
       if (error) {
         console.log('Erro ao escanear:', error);
@@ -42,10 +41,9 @@ export default function BLEScanner() {
       }
     });
 
-    // Definir o tempo de expiração do scan para 10 segundos
     scanTimeout.current = setTimeout(() => {
       console.log('Tempo de scan esgotado. Parando...');
-      manager.stopDeviceScan();  // Parar o scan após 10 segundos
+      manager.stopDeviceScan();
     }, 10000);
   };
 
@@ -77,46 +75,114 @@ export default function BLEScanner() {
     const isConnected = connectedDevice?.id === item.id;
     return (
       <TouchableOpacity
-        onPress={() => {
-          if (isConnected) {
-            disconnectDevice();
-          } else {
-            connectToDevice(item);
-          }
-        }}
-        style={{
-          padding: 10,
-          borderBottomWidth: 1,
-          backgroundColor: isConnected ? '#d4edda' : 'white',
-        }}
+        onPress={() => isConnected ? disconnectDevice() : connectToDevice(item)}
+        style={[
+          styles.deviceItem,
+          isConnected && styles.deviceItemConnected,
+        ]}
       >
-        <Text>{item.name || 'Dispositivo desconhecido'} - {item.id}</Text>
-        {isConnected && <Text style={{ color: 'green' }}>✅ Conectado</Text>}
+        <Text style={styles.deviceText}>
+          {item.name || 'Dispositivo desconhecido'} - {item.id}
+        </Text>
+        {isConnected && <Text style={styles.connectedText}>✅ Conectado</Text>}
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Dispositivos BLE encontrados:</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.box}>
+        <Text style={styles.title}>Dispositivos BLE encontrados</Text>
+      </View>
 
-      <FlatList
-        data={devices}
-        keyExtractor={(item) => item.id}
-        renderItem={renderDeviceItem}
-      />
+      <View style={styles.box}>
+        <FlatList
+          data={devices}
+          keyExtractor={(item) => item.id}
+          renderItem={renderDeviceItem}
+          contentContainerStyle={styles.listContainer}
+        />
+      </View>
 
       {connectedDevice && (
-        <View style={{ marginTop: 20 }}>
-          <Text>Dispositivo conectado: {connectedDevice.name || connectedDevice.id}</Text>
+        <View style={styles.box}>
+          <Text style={styles.connectedInfo}>
+            Dispositivo conectado: {connectedDevice.name || connectedDevice.id}
+          </Text>
           <TouchableOpacity
             onPress={disconnectDevice}
-            style={{ marginTop: 10, padding: 10, backgroundColor: '#f8d7da', borderRadius: 5 }}
+            style={styles.disconnectButton}
           >
-            <Text style={{ color: '#721c24', textAlign: 'center' }}>Desconectar</Text>
+            <Text style={styles.disconnectText}>Desconectar</Text>
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    padding: 16,
+  },
+  box: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EFEFEF',
+    padding: 16,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Bold',
+    color: '#9B287B',
+  },
+  deviceItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EFEFEF',
+    backgroundColor: '#F9F9F9',
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  deviceItemConnected: {
+    backgroundColor: '#d4edda',
+  },
+  deviceText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
+    color: '#333',
+  },
+  connectedText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Bold',
+    color: 'green',
+    marginTop: 4,
+  },
+  connectedInfo: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  disconnectButton: {
+    backgroundColor: '#f8d7da',
+    padding: 10,
+    borderRadius: 5,
+  },
+  disconnectText: {
+    fontFamily: 'Montserrat-Bold',
+    color: '#721c24',
+    textAlign: 'center',
+  },
+  listContainer: {
+    paddingBottom: 16,
+  },
+});
