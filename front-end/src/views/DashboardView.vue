@@ -475,7 +475,7 @@ export default {
       this.buscarTotalDenuncias();
     }
 
-    this.socket = io("http://localhost:3000");
+    this.socket = io("https://libertlla.onrender.com");
 
     this.socket.on("nova_ocorrencia", () => {
       this.buscarOcorrencias(); // Atualiza a lista
@@ -518,7 +518,7 @@ export default {
     async abrirModal(id) {
       try {
         const token = this.store.token;
-        const response = await axios.get(`http://localhost:3000/ocorrencia/${id}`, {
+        const response = await axios.get(`https://libertlla.onrender.com/ocorrencia/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -551,7 +551,7 @@ export default {
           this.$router.push('/nao-autorizado');
           return;
         }
-        const response = await axios.get("http://localhost:3000/ocorrencias", {
+        const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` }
         });
         this.ocorrencias = response.data.ocorrencias;
@@ -571,7 +571,7 @@ export default {
         const email = user.email;
         const token = this.store.token;
 
-        await axios.post("http://localhost:3000/aceitar/ocorrencia", {
+        await axios.post("https://libertlla.onrender.com/aceitar/ocorrencia", {
           ocorrenciaId: id,
           profissionalEmail: email
         }, {
@@ -596,7 +596,7 @@ export default {
     async buscarTotalDenuncias() {
       try {
         const token = this.store.token;
-        const response = await axios.get("http://localhost:3000/todasocorrencias", {
+        const response = await axios.get("https://libertlla.onrender.com/todasocorrencias", {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.totalDenuncias = response.data.totalDenuncias;

@@ -44,7 +44,7 @@ export default {
     };
   },
   mounted() {
-    this.socket = io("http://localhost:3000");
+    this.socket = io("https://libertlla.onrender.com");
 
     this.socket.on("chat accepted", () => {
       this.chatAceito = true;

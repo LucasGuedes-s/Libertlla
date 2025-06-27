@@ -95,7 +95,7 @@ export default {
                 const email = user.email;
                 const token = this.store.token;
 
-                const response = await axios.get(`http://localhost:3000/conversas/${email}`, {
+                const response = await axios.get(`https://libertlla.onrender.com/conversas/${email}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -132,7 +132,7 @@ export default {
         async arquivarConversa() {
             try {
                 const token = this.store.token;
-                const response = await axios.put('http://localhost:3000/conversas/arquivar', {
+                const response = await axios.put('https://libertlla.onrender.com/conversas/arquivar', {
                     conversaId: this.conversa.id
                 }, {
                     headers: {

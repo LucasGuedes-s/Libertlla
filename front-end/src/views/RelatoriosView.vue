@@ -37,7 +37,7 @@ export default {
     const buscarTotalDenuncias = async () => {
       try {
         const token = store.token;
-        const response = await axios.get("http://localhost:3000/todasocorrencias", {
+        const response = await axios.get("https://libertlla.onrender.com/todasocorrencias", {
           headers: { Authorization: `Bearer ${token}` },
         });
         //totalDenuncias.value = response.data.totalDenuncias;
@@ -53,7 +53,7 @@ export default {
     const buscarOcorrenciasPorTipo = async () => {
       try {
         const token = store.token;
-        const response = await axios.get("http://localhost:3000/todas/ocorrencias", {
+        const response = await axios.get("https://libertlla.onrender.com/todas/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -112,7 +112,7 @@ export default {
     methods: {
         async carregarOcorrencia() {
             try {
-                const response = await axios.get(`http://localhost:3000/ocorrencia/${this.id}`);
+                const response = await axios.get(`https://libertlla.onrender.com/ocorrencia/${this.id}`);
                 if (response.data && response.data.ocorrencia) {
                     const dados = response.data.ocorrencia;
                     this.ocorrencia = {
@@ -133,7 +133,7 @@ export default {
             try {
                 const token = this.store.getToken;
 
-                const response = await axios.put(`http://localhost:3000/ocorrencias/arquivar`, {
+                const response = await axios.put(`https://libertlla.onrender.com/ocorrencias/arquivar`, {
                     ocorrenciaId: this.id
                 }, {
                     headers: {

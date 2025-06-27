@@ -11,7 +11,7 @@ async function cadastrarProfissional() {
             especialidade: 'Psicóloga',
             email: 'admin@gmail.com',
             senha: 'password',
-            foto: 'password'
+            foto: 'https://firebasestorage.googleapis.com/v0/b/clinica-maria-luiza-17cef.appspot.com/o/pacientes%2F18289c5a-86ef-428b-901b-e864fa589721_default-avatar-profile-icon-vector-social-media-user-photo-183042379.webp?alt=media&token=62e2a198-bcf9-4b67-8735-fbf69a1f0b79'
         }
     }
 

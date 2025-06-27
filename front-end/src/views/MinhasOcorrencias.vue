@@ -131,7 +131,7 @@ export default {
     const email = user.email;
     const token = this.store.token;
 
-    axios.get(`http://localhost:3000/ocorrencias/${email}`, {
+    axios.get(`https://libertlla.onrender.com/ocorrencias/${email}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -173,7 +173,7 @@ export default {
       const email = user.email;
       const token = this.store.token;
 
-      axios.get(`http://localhost:3000/conversas/${email}`, {
+      axios.get(`https://libertlla.onrender.com/conversas/${email}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -188,7 +188,7 @@ export default {
 
     async gerarPDF(id) {
       const response = await axios({
-        url: `http://localhost:3000/ocorrencia/pdf/${id}`,
+        url: `https://libertlla.onrender.com/ocorrencia/pdf/${id}`,
         method: 'GET',
         responseType: 'blob',
       });
@@ -223,7 +223,7 @@ export default {
       const formData = new FormData();
       formData.append("file", this.file);
 
-      const response = await fetch("http://localhost:3000/upload", {
+      const response = await fetch("https://libertlla.onrender.com/upload", {
         method: "POST",
         body: formData,
       });
@@ -260,9 +260,9 @@ export default {
 
       let url = "";
       if (this.ocorrenciaSelecionada) {
-        url = `http://localhost:3000/progresso/ocorrencia/${this.ocorrenciaSelecionada}`;
+        url = `https://libertlla.onrender.com/progresso/ocorrencia/${this.ocorrenciaSelecionada}`;
       } else if (this.conversaSelecionada) {
-        url = `http://localhost:3000/progresso/chat/${this.conversaSelecionada}`;
+        url = `https://libertlla.onrender.com/progresso/chat/${this.conversaSelecionada}`;
       }
 
       if (!url) {

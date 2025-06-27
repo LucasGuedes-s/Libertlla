@@ -85,7 +85,7 @@ export default {
                 formData.append("file", this.file);
                 console.log(FormData)
 
-                const response = await fetch("http://localhost:3000/upload", {
+                const response = await fetch("https://libertlla.onrender.com/upload", {
                     method: "POST",
                     body: formData,
                 });
@@ -107,7 +107,7 @@ export default {
             }
             try {
                 console.log(this.form.especialidade)
-                await Axios.post('http://localhost:3000/cadastrar/profissional', {
+                await Axios.post('https://libertlla.onrender.com/cadastrar/profissional', {
                     usuario: {
                         nome: this.form.nome,
                         especialidade: this.form.especialidade,

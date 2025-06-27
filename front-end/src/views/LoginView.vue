@@ -138,7 +138,7 @@ export default {
   },
   methods: {
     async login() {
-      await axios.post("http://localhost:3000/login", {
+      await axios.post("https://libertlla.onrender.com/login", {
         usuario: {
           email: this.email,
           senha: this.senha
