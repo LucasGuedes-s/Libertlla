@@ -13,6 +13,8 @@ import {
 import { useRouter } from "expo-router";
 //import axios from "../services/axios"; // ajuste o caminho conforme necessário
 import axios from "axios"; // ou o caminho correto para o seu arquivo axios
+
+
 export default function Index() {
   const router = useRouter();
   const [email, setEmail] = useState("");
