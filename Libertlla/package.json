@@ -44,7 +44,11 @@
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "expo-sqlite": "~15.2.12",
+    "expo-secure-store": "~14.2.3",
+    "jsEngine": "jsc"
+
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

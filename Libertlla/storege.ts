@@ -1,73 +1,38 @@
-import SQLite from 'react-native-sqlite-storage';
+// services/StorageService.ts
+import * as FileSystem from 'expo-file-system';
 
-SQLite.enablePromise(true);
+const DEVICE_FILE = FileSystem.documentDirectory + 'bluetoothDevice.json';
 
-const database_name = 'app.db';
-const database_version = '1.0';
-const database_displayname = 'App Database';
-const database_size = 200000;
-
-let db: SQLite.SQLiteDatabase | null = null;
-
-// Abre o banco e cria a tabela se não existir
-export async function initDB() {
-  db = await SQLite.openDatabase({
-    name: database_name,
-    location: 'default',
-  });
-
-  await db.executeSql(
-    `CREATE TABLE IF NOT EXISTS KeyValue (
-      key TEXT PRIMARY KEY NOT NULL,
-      value TEXT
-    );`
-  );
-}
-
-// Salvar um par chave-valor simples
-export async function setItem(key: string, value: string) {
-  if (!db) throw new Error('Database not initialized');
-
-  await db.executeSql(
-    `REPLACE INTO KeyValue (key, value) VALUES (?, ?)`,
-    [key, value]
-  );
-}
-
-// Ler valor pela chave
-export async function getItem(key: string): Promise<string | null> {
-  if (!db) throw new Error('Database not initialized');
-
-  const [result] = await db.executeSql(
-    `SELECT value FROM KeyValue WHERE key = ? LIMIT 1`,
-    [key]
-  );
-
-  if (result.rows.length > 0) {
-    return result.rows.item(0).value;
-  }
-
-  return null;
-}
-// storage.ts (adicionar no final do arquivo)
 export async function saveBluetoothDevice(device: { id: string; name?: string }) {
-  return setItem('bluetoothDevice', JSON.stringify(device));
+  try {
+    const json = JSON.stringify(device);
+    await FileSystem.writeAsStringAsync(DEVICE_FILE, json);
+    console.log('[saveBluetoothDevice] Dispositivo salvo com sucesso.');
+  } catch (error) {
+    console.error('[saveBluetoothDevice] Erro ao salvar dispositivo:', error);
+  }
 }
 
 export async function getBluetoothDevice(): Promise<{ id: string; name?: string } | null> {
-  const json = await getItem('bluetoothDevice');
-  if (!json) return null;
   try {
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
-}
+    const exists = await FileSystem.getInfoAsync(DEVICE_FILE);
+    if (!exists.exists) {
+      console.log('[getBluetoothDevice] Nenhum arquivo encontrado.');
+      return null;
+    }
 
-// Fechar o banco (opcional)
-export async function closeDB() {
-  if (db) {
-    await db.close();
-    db = null;
+    const json = await FileSystem.readAsStringAsync(DEVICE_FILE);
+    const parsed = JSON.parse(json);
+
+    if (parsed && typeof parsed === 'object' && parsed.id) {
+      console.log('[getBluetoothDevice] Dispositivo carregado:', parsed);
+      return parsed;
+    } else {
+      console.warn('[getBluetoothDevice] Objeto inválido:', parsed);
+      return null;
+    }
+  } catch (error) {
+    console.error('[getBluetoothDevice] Erro ao carregar dispositivo:', error);
+    return null;
   }
 }

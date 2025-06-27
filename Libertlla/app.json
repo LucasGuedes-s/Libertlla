@@ -1,5 +1,8 @@
 {
   "expo": {
+    "jsEngine": "jsc"
+  },
+  "expo": {
     "name": "Libertlla",
     "slug": "Libertlla",
     "version": "1.0.0",
@@ -58,7 +61,11 @@
         }
       ],
       "react-native-ble-plx",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-sqlite"
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
