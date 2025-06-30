@@ -32,6 +32,18 @@ async function LoginUser(req, res) {
     }
 }
 
+async function getVitimas() {
+    const vitimas = await prisma.Vitima.findMany(
+        {
+            select: {
+                id: true,
+                nome: true,
+                email: true,
+                telefone: true,
+            }
+        }
+    );
+    return vitimas;
+}
 
-
-module.exports = {LoginUser}
+module.exports = { LoginUser, getVitimas }
