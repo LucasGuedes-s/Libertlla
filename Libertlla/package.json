@@ -26,7 +26,7 @@
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.2.1",
     "expo-linking": "~7.1.5",
-    "expo-router": "~5.0.7",
+    "expo-router": "~5.1.1",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
@@ -46,9 +46,7 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "expo-sqlite": "~15.2.12",
-    "expo-secure-store": "~14.2.3",
-    "jsEngine": "jsc"
-
+    "expo-secure-store": "~14.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

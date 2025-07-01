@@ -36,7 +36,11 @@ class BluetoothService {
 
   // Tentar reconectar ao dispositivo salvo
   async reconnectToSavedDevice() {
+    console.log("Cheguei aqui")
     const savedDevice = await getBluetoothDevice();
+    console.log("Cheguei aqui")
+    console.log(savedDevice)
+
     if (!savedDevice) return null;
 
     try {

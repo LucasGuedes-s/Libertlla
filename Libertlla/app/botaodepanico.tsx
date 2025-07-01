@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback  } from 'react';
 import axios from 'axios';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect  } from 'expo-router';
+import { verifyOrConnectBluetooth } from '@/assets/utils/bluetooth';
 
 export default function Tela() {
   const router = useRouter();
@@ -10,6 +11,17 @@ export default function Tela() {
   const [isPressing, setIsPressing] = useState(false);
   const [counter, setCounter] = useState(5);
   const intervalRef = useRef<number | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      verifyOrConnectBluetooth();
+      alert('Cheguei aqui');
+
+      // Se você não precisar limpar nada quando a tela perder o foco, pode retornar undefined ou nada mesmo.
+      return () => {};
+    }, []) // o array de dependências pode ficar vazio
+  );
+
 
   // Função para enviar a notificação ao pressionar o botão
   const enviarNotificacao = async () => {
@@ -102,7 +114,7 @@ export default function Tela() {
         </TouchableOpacity>
 
         <TouchableOpacity>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" onPress={() => router.push('/BLEScanner')}/>
+          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" onPress={() => router.push('/Bluetooth')}/>
         </TouchableOpacity>
 
         <TouchableOpacity>

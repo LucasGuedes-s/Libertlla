@@ -26,6 +26,7 @@ export async function getBluetoothDevice(): Promise<{ id: string; name?: string 
 
     if (parsed && typeof parsed === 'object' && parsed.id) {
       console.log('[getBluetoothDevice] Dispositivo carregado:', parsed);
+
       return parsed;
     } else {
       console.warn('[getBluetoothDevice] Objeto inválido:', parsed);
