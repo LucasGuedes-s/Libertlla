@@ -5,10 +5,6 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import BluetoothService from '../assets/services/BluetoothService';
 
-// UUIDs BLE — substitua pelos seus
-const SERVICE_UUID = '12345678-1234-5678-1234-56789abcdef0';
-const CHARACTERISTIC_UUID = '12345678-1234-5678-1234-56789abcdef1';
-
 export default function Tela() {
   const router = useRouter();
 
@@ -16,45 +12,7 @@ export default function Tela() {
   const [counter, setCounter] = useState(5);
   const intervalRef = useRef<number | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      let subscription: { remove: () => void } | null = null;
-
-      async function setupNotification() {
-        try {
-          // Tenta reconectar se não conectado
-          if (!BluetoothService.connectedDevice) {
-            await BluetoothService.reconnectToSavedDevice();
-          }
-
-          if (BluetoothService.connectedDevice) {
-            subscription = await BluetoothService.startNotification(
-              SERVICE_UUID,
-              CHARACTERISTIC_UUID,
-              (data: string) => {
-                Alert.alert('Alerta via BLE', `Notificação recebida: ${data}`);
-              }
-            );
-          } else {
-            Alert.alert('Bluetooth', 'Nenhum dispositivo BLE conectado');
-          }
-        } catch (e) {
-          console.warn('Erro na configuração da notificação BLE:', e);
-        }
-      }
-
-      setupNotification();
-
-      return () => {
-        // Cleanup da subscrição quando a tela perder foco
-        if (subscription) {
-          subscription.remove();
-          subscription = null;
-        }
-      };
-    }, [])
-  );
-
+  // === Envio da notificação para API ===
   const enviarNotificacao = async () => {
     try {
       await axios.post('https://libertlla.onrender.com/notificacao', {
@@ -68,6 +26,51 @@ export default function Tela() {
       Alert.alert("❌ Erro ao enviar alerta");
     }
   };
+
+  // === BLE: escuta notificações e dispara envio se 'ALERTA'
+  useFocusEffect(
+    useCallback(() => {
+      let subscription: { remove: () => void } | null = null;
+
+      async function setupNotification() {
+        try {
+          if (!BluetoothService.connectedDevice) {
+            await BluetoothService.reconnectToSavedDevice();
+          }
+
+          if (BluetoothService.connectedDevice) {
+            const { serviceUUID, characteristicUUID } =
+              await BluetoothService.getNotifiableCharacteristicUUIDs();
+
+            subscription = await BluetoothService.startNotification(
+              serviceUUID,
+              characteristicUUID,
+              async (data: string) => {
+                console.log("BLE recebeu:", data);
+                if (data === "ALERTA") {
+                  await enviarNotificacao();
+                }
+                Alert.alert('Alerta via BLE', `Notificação recebida: ${data}`);
+              }
+            );
+          } else {
+            Alert.alert('Bluetooth', 'Nenhum dispositivo BLE conectado');
+          }
+        } catch (e) {
+          console.warn('Erro ao configurar BLE:', e);
+        }
+      }
+
+      setupNotification();
+
+      return () => {
+        if (subscription) {
+          subscription.remove();
+          subscription = null;
+        }
+      };
+    }, [])
+  );
 
   const startCounter = () => {
     setIsPressing(true);
@@ -140,8 +143,8 @@ export default function Tela() {
           <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
-        <TouchableOpacity>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" onPress={() => router.push('/Bluetooth')} />
+        <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
+          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
         <TouchableOpacity>
