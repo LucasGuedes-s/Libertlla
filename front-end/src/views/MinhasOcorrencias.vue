@@ -11,9 +11,9 @@
         </div>
 
         <div v-else>
-          <template v-if="ocorrencias.length === 0 && conversas.length === 0">
-            <p class="nenhuma-encontrada">Nenhuma ocorrência ou conversa encontrada.</p>
-          </template>
+          <p v-if="ocorrencias.length === 0 && conversas.length === 0" class="nenhuma-encontrada">
+            Nenhuma ocorrência ou conversa encontrada.
+          </p>
 
           <!-- Ocorrências -->
           <div v-if="ocorrencias.length > 0" class="div_ocorrencias">
