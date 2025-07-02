@@ -2,17 +2,17 @@ const  Ocorrencia = require("../services/ocorrencias.service");
 const conversaService = require('../services/ocorrencias.service'); 
 
 // Registrar uma ocorrência
-async function PostOcorrencias(req, res){
-    try {
-        const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body)
+async function PostOcorrencias(req, res) {
+  try {
+    const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body.ocorrencias);
+    
+    req.io.emit('nova_ocorrencia', ocorrencias);
 
-        req.io.emit('nova_ocorrencia', ocorrencias);
-
-        res.status(200).json({ message: 'Ocorrência registrada com sucesso', ocorrencia: ocorrencias });
-    } catch (error) {
-        console.error('Erro ao registrar ocorrência:', error);
-        res.status(500).json({ message: 'Erro ao registrar ocorrência' });
-    }
+    res.status(200).json({ message: 'Ocorrência registrada com sucesso', ocorrencia: ocorrencias });
+  } catch (error) {
+    console.error('Erro ao registrar ocorrência:', error);
+    res.status(500).json({ message: 'Erro ao registrar ocorrência' });
+  }
 };
 
 async function getOcorrenciasProfissional(req, res, next) {
@@ -127,60 +127,64 @@ async function arquivarOcorrencia(req, res, next) {
     }
 }
 async function arquivarConversa(req, res, next) {
-    try {
-        const { conversaId } = req.body;
+  try {
+    const { conversaId } = req.body;
 
-        if (!conversaId) {
-            return res.status(400).json({ error: "ID da conversa é obrigatório." });
-        }
-
-        const conversa = await conversaService.arquivarConversa(conversaId);
-
-        return res.status(200).json({ 
-            message: "Conversa arquivada com sucesso",
-            conversa 
-        });
-    } catch (error) {
-        console.error("Erro ao arquivar conversa:", error);
-        return res.status(500).json({ error: "Erro ao arquivar conversa." });
+    if (!conversaId) {
+      return res.status(400).json({ error: "ID da conversa é obrigatório." });
     }
+
+    await conversaService.arquivarConversa(conversaId);
+
+    return res.status(200).json({ message: "Conversa arquivada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao arquivar conversa:", error);
+    return res.status(500).json({ error: "Erro ao arquivar conversa." });
+  }
 }
 
 async function adicionarProgressoChat(req, res) {
-    try {
-        const { id } = req.params; 
-        const { descricao, anexos } = req.body; 
+  try {
+    const { id } = req.params;
+    const { descricao, anexos } = req.body;
 
-        const progresso = await conversaService.adicionarProgressoChat(descricao, anexos, id);
+    await conversaService.adicionarProgressoChat(descricao, anexos, id);
 
-        res.status(201).json({
-            message: 'Progresso do chat adicionado com sucesso!',
-            registro: progresso
-        });
-    } catch (error) {
-        console.error('Erro ao adicionar progresso no chat:', error);
-        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso no chat.' });
-    }
+    return res.status(200).json({ message: "Progresso do chat adicionado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao adicionar progresso no chat:", error);
+    return res.status(500).json({ error: "Houve um erro ao adicionar o progresso no chat." });
+  }
 }
 
 async function adicionarProgressoOcorrencia(req, res) {
-    try {
-        const { id } = req.params;  
-        const { descricao, anexos } = req.body;  
+  try {
+    const { id } = req.params;
+    const { descricao, anexos } = req.body;
 
-        const progresso = await Ocorrencia.adicionarProgressoOcorrencia(descricao, anexos, id);
+    await Ocorrencia.adicionarProgressoOcorrencia(descricao, anexos, id);
 
-        res.status(201).json({
-            message: 'Progresso da ocorrência adicionado com sucesso!',
-            registro: progresso
-        });
-    } catch (error) {
-        console.error('Erro ao adicionar progresso na ocorrência:', error);
-        res.status(500).json({ error: 'Houve um erro ao adicionar o progresso na ocorrência.' });
-    }
+    return res.status(200).json({ message: "Progresso da ocorrência adicionado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao adicionar progresso na ocorrência:", error);
+    return res.status(500).json({ error: "Houve um erro ao adicionar o progresso na ocorrência." });
+  }
+}
+
+async function vincularVitimaController(req, res) {
+  const ocorrenciaId = parseInt(req.params.id);
+  const { vitimaId } = req.body;
+
+  try {
+    await Ocorrencia.vincularVitima(ocorrenciaId, vitimaId);
+    return res.status(200).json({ message: "Vítima vinculada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao vincular vítima:", error);
+    return res.status(500).json({ error: "Erro ao vincular vítima à ocorrência." });
+  }
 }
 
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia};
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController};
 
 

@@ -29,7 +29,7 @@
                         <option value="colega_trabalho">Colega de trabalho</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group" id="descricao">
                     <label for="descricao">Descrição:</label>
                     <textarea id="descricao" name="descricao" rows="8" v-model="descricao"></textarea>
@@ -49,6 +49,13 @@
                 <div class="form-group" id="local_do_ocorrido">
                     <label for="local_do_ocorrido">Local do Ocorrido:</label>
                     <textarea id="local_do_ocorrido" name="local_do_ocorrido" v-model="local_do_ocorrido" rows="1"
+                        placeholder="Rua, Bairro, Nº de Residência..."></textarea>
+                </div>
+
+                <!-- Campo temporario-->
+                  <div class="form-group" id="endereco_da_vitima">
+                    <label for="endereco_vitima">Endereço da vitima:</label>
+                    <textarea id="endereco_vitima" name="endereco_vitima" v-model="endereco_vitima" rows="1"
                         placeholder="Rua, Bairro, Nº de Residência..."></textarea>
                 </div>
 
@@ -144,7 +151,8 @@ select option:hover {
 #adicionar_imagem,
 #local_do_ocorrido,
 #anexo_provas,
-#data_ocorrido {
+#data_ocorrido,
+#endereco_da_vitima {
     grid-column: 1 / -1;
 }
 
@@ -188,10 +196,10 @@ h2 {
     }
 }
 </style>
+
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
-
 
 export default {
     name: 'FormularioDenuncia',
@@ -203,7 +211,8 @@ export default {
             data_ocorrido: '',
             descricao: '',
             file: null,
-            provas: []
+            provas: [],
+            endereco_vitima: '',
         };
     },
     mounted() {
@@ -231,20 +240,17 @@ export default {
             formData.append("file", this.file);
 
             try {
-                const response = await fetch("https://libertlla.onrender.com/upload", {
+                const response = await fetch("http://libertlla.onrender.com/upload", {
                     method: "POST",
                     body: formData,
                 });
-
 
                 if (!response.ok) {
                     throw new Error('Erro ao enviar o arquivo');
                 }
 
-
                 const data = await response.json();
-                return data.fileUrl; // Retorna a URL da imagem enviada
-
+                return data.fileUrl;
 
             } catch (error) {
                 console.error('Erro no upload:', error);
@@ -267,7 +273,7 @@ export default {
                     }
                 }
 
-                const response = await axios.post("https://libertlla.onrender.com/cadastrar/ocorrencia", {
+                const response = await axios.post("http://libertlla.onrender.com/cadastrar/ocorrencia", {
                     ocorrencias: {
                         tipo_denuncia: this.tipodeviolencia,
                         tipo_violencia: this.tipodeviolencia,
@@ -275,21 +281,20 @@ export default {
                         provas: this.provas,
                         descricao: this.descricao,
                         local: this.local_do_ocorrido,
-                        data_ocorrencia: this.data_ocorrido
+                        data_ocorrencia: this.data_ocorrido,
+                        endereco_vitima: this.endereco_vitima
                     }
                 });
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Denúncia realizada com sucesso',
-                    text: `Denúncia ID: ${response.data.ocorrencia}`,
+                    text: `Denúncia ID: ${response.data.id}`,
                     timer: 2000,
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
 
-
-                // Resetando os campos após o envio
                 this.tipodeviolencia = '';
                 this.relacao_agressor = '';
                 this.provas = [];
@@ -298,9 +303,7 @@ export default {
                 this.data_ocorrido = '';
                 this.file = null;
 
-                // Resetando input file
                 document.getElementById("anexo_provas").value = "";
-
 
             } catch (error) {
                 console.error('Erro ao enviar denúncia:', error);

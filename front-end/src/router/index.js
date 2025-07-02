@@ -113,7 +113,9 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import('../views/DenunciasBotaodePanicoView.vue')
   },
+
 ];
+
 
 const router = new VueRouter({
   mode: 'history',

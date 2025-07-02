@@ -13,7 +13,7 @@ router.get('/todasocorrencias', controller.GetTodasOcorrencias);
 
 router.post('/cadastrar/ocorrencia', controller.PostOcorrencias)
 
-router.get('/ocorrencias/:email',  [validarJWT], controller.getOcorrenciasProfissional)
+router.get('/ocorrencias/:email', controller.getOcorrenciasProfissional)
 
 router.post('/aceitar/ocorrencia',  [validarJWT], controller.updateOcorrencia)
 
@@ -26,5 +26,7 @@ router.put("/ocorrencias/arquivar", [validarJWT], controller.arquivarOcorrencia)
 router.put('/conversas/arquivar', [validarJWT], controller.arquivarConversa);
 
 router.get("/todas/ocorrencias", controller.GetOcorrenciasTotais);
+
+router.post('/ocorrencias/:id/vincular-vitima', controller.vincularVitimaController);
 
 module.exports = router;
