@@ -39,7 +39,7 @@ export default {
   mounted() {
     this.carregarNotificacoes();
     this.socket = io('https://libertlla.onrender.com/');
-    this.socket.on('Novanotificacao', () => {
+    this.socket.on('novaNotificacao', () => {
       console.log('Nova notificação recebida');
       this.carregarNotificacoes();
     });
