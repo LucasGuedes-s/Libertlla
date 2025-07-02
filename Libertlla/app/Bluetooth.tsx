@@ -7,6 +7,8 @@ import {
   FlatList,
   Alert,
   SafeAreaView,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import { BleManager, Device } from 'react-native-ble-plx';
 import { saveBluetoothDevice, getBluetoothDevice } from '../storege';
@@ -23,24 +25,31 @@ export default function BluetoothScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      const storedDevice = await getBluetoothDevice();
-      setSavedDevice(storedDevice);
-    })();
+  (async () => {
+    const storedDevice = await getBluetoothDevice();
+    setSavedDevice(storedDevice);
+  })();
 
-    const subscription = bleManager.onStateChange((state) => {
-      if (state === 'PoweredOn') {
-        startScan();
-        subscription.remove();
-      }
-    }, true);
+  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+    ToastAndroid.show('Você não pode voltar agora', ToastAndroid.SHORT);
+    return true;
+  });
 
-    return () => {
-      if (scanTimeout.current) clearTimeout(scanTimeout.current);
+  const subscription = bleManager.onStateChange((state) => {
+    if (state === 'PoweredOn') {
+      startScan();
+      subscription.remove();
+    }
+  }, true);
+
+  return () => {
+    if (scanTimeout.current) clearTimeout(scanTimeout.current);
       bleManager.stopDeviceScan();
       bleManager.destroy();
-    };
-  }, []);
+
+      backHandler.remove();
+  };
+}, []);
 
   const startScan = () => {
     setIsScanning(true);
