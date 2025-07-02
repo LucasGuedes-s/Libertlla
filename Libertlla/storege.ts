@@ -37,3 +37,11 @@ export async function getBluetoothDevice(): Promise<{ id: string; name?: string 
     return null;
   }
 }
+export async function removeBluetoothDevice() {
+  try {
+    await FileSystem.deleteAsync(DEVICE_FILE);
+    console.log('[removeBluetoothDevice] Dispositivo removido com sucesso.');
+  } catch (error) {
+    console.error('[removeBluetoothDevice] Erro ao remover dispositivo:', error);
+  }
+}
