@@ -5,20 +5,73 @@
       <SideBar />
       <div class="container">
         <h1>Notificações do Botão de Pânico</h1>
-        <div class="notificacao-card">
+
+        <div
+          v-for="notificacao in notificacoes"
+          :key="notificacao.id"
+          class="notificacao-card"
+        >
           <h2>Nova ocorrência</h2>
-          <p><strong>Data:</strong></p>
-          <p><strong>Localização:</strong></p>
+          <p><strong>Data:</strong> {{ formatarData(notificacao.data) }}</p>
+          <p><strong>Localização:</strong> {{ notificacao.endereco }}</p>
         </div>
       </div>
     </div>
   </div>
 </template>
 
+<script>
+import { io } from 'socket.io-client';
+import SideBar from '@/components/SideBar.vue';
+import NavBarUser from '@/components/NavBarUser.vue';
+
+export default {
+  components: {
+    SideBar,
+    NavBarUser,
+  },
+  data() {
+    return {
+      socket: null,
+      notificacoes: [],
+    };
+  },
+  mounted() {
+    this.carregarNotificacoes();
+    this.socket = io('https://libertlla.onrender.com/');
+    this.socket.on('Novanotificacao', () => {
+      console.log('Nova notificação recebida');
+      this.carregarNotificacoes();
+    });
+  },
+  methods: {
+    async carregarNotificacoes() {
+      try {
+        const res = await fetch('https://libertlla.onrender.com/notificacoes');
+        const dados = await res.json();
+        console.log(dados);
+        this.notificacoes = dados;
+      } catch (error) {
+        console.error('Erro ao carregar notificações', error);
+      }
+    },
+    formatarData(data) {
+      return new Date(data).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    },
+  },
+};
+</script>
+
 <style scoped>
 .denunciasapp {
   margin-left: 250px;
-  margin-top: 30px; 
+  margin-top: 30px;
   padding: 20px;
   border-radius: 10px;
 }
@@ -48,30 +101,9 @@ h2 {
   font-family: "Montserrat", sans-serif;
 }
 
-.notificacao-card h3 {
-  margin: 0 0 12px;
-  color: #54123F;
-  font-size: 20px;
-  font-weight: 600;
-}
-
 .notificacao-card p {
   margin: 6px 0;
   font-size: 15px;
   color: #7E7E7E;
 }
 </style>
-
-
-
-<script>
-import SideBar from '@/components/SideBar.vue';
-import NavBarUser from '@/components/NavBarUser.vue';
-export default {
-  components: {
-    SideBar,
-    NavBarUser
-  },
-  
-}
-</script>
