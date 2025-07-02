@@ -14,7 +14,7 @@ export default function Tela() {
 
   const [isPressing, setIsPressing] = useState(false);
   const [counter, setCounter] = useState(5);
-  const intervalRef = useRef<NodeJS.Timer | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
