@@ -571,7 +571,7 @@ export default {
         const email = user.email;
         const token = this.store.token;
 
-        await axios.post("http://libertlla.onrender.com/aceitar/ocorrencia", {
+        await axios.post("https://libertlla.onrender.com/aceitar/ocorrencia", {
           ocorrenciaId: id,
           profissionalEmail: email
         }, {

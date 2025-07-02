@@ -25,32 +25,43 @@ export default function BluetoothScreen() {
   const router = useRouter();
 
   useEffect(() => {
-  (async () => {
-    const storedDevice = await getBluetoothDevice();
-    setSavedDevice(storedDevice);
-  })();
+    (async () => {
+      const storedDevice = await getBluetoothDevice();
+      setSavedDevice(storedDevice);
+    })();
 
-  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-    ToastAndroid.show('Você não pode voltar agora', ToastAndroid.SHORT);
-    return true;
-  });
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      ToastAndroid.show('Você não pode voltar agora', ToastAndroid.SHORT);
+      return true;
+    });
 
-  const subscription = bleManager.onStateChange((state) => {
-    if (state === 'PoweredOn') {
-      startScan();
-      subscription.remove();
-    }
-  }, true);
+    const subscription = bleManager.onStateChange((state) => {
+      if (state === 'PoweredOn') {
+        Alert.alert('Bluetooth ligado', 'O Bluetooth foi ativado. Iniciando escaneamento...');
+        startScan();
+      }
+      if (state === 'PoweredOff') {
+        if (connectedDevice) {
+          setConnectedDevice(null);
+        }
 
-  return () => {
-    if (scanTimeout.current) clearTimeout(scanTimeout.current);
+        Alert.alert(
+          'Bluetooth desligado',
+          connectedDevice
+            ? 'O dispositivo foi desconectado porque o Bluetooth foi desativado.'
+            : 'O Bluetooth do aparelho foi desligado.'
+        );
+      }
+    }, true);
+
+    return () => {
+      if (scanTimeout.current) clearTimeout(scanTimeout.current);
       bleManager.stopDeviceScan();
       bleManager.destroy();
-
       backHandler.remove();
-  };
-}, []);
-
+    };
+  }, []);
+  
   const startScan = () => {
     setIsScanning(true);
     setDevices([]);
@@ -60,6 +71,7 @@ export default function BluetoothScreen() {
         setIsScanning(false);
         return;
       }
+
       if (device && (device.name || device.localName)) {
         setDevices((prev) => {
           const exists = prev.some((d) => d.id === device.id);
@@ -79,9 +91,11 @@ export default function BluetoothScreen() {
       const connected = await bleManager.connectToDevice(device.id, { timeout: 5000 });
       await connected.discoverAllServicesAndCharacteristics();
       setConnectedDevice(connected);
+
       const deviceToSave = { id: connected.id, name: connected.name ?? undefined };
       await saveBluetoothDevice(deviceToSave);
       setSavedDevice(deviceToSave);
+
       Alert.alert('Dispositivo salvo', `Conectado a ${deviceToSave.name || deviceToSave.id}`);
     } catch (err) {
       Alert.alert('Erro ao conectar', err instanceof Error ? err.message : 'Erro desconhecido');

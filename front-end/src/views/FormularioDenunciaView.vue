@@ -240,7 +240,7 @@ export default {
             formData.append("file", this.file);
 
             try {
-                const response = await fetch("http://libertlla.onrender.com/upload", {
+                const response = await fetch("https://libertlla.onrender.com/upload", {
                     method: "POST",
                     body: formData,
                 });
@@ -273,7 +273,7 @@ export default {
                     }
                 }
 
-                const response = await axios.post("http://libertlla.onrender.com/cadastrar/ocorrencia", {
+                const response = await axios.post("https://libertlla.onrender.com/cadastrar/ocorrencia", {
                     ocorrencias: {
                         tipo_denuncia: this.tipodeviolencia,
                         tipo_violencia: this.tipodeviolencia,

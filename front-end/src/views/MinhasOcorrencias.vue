@@ -228,8 +228,8 @@ export default {
       }
 
       const url = this.ocorrenciaSelecionada
-        ? `http://libertlla.onrender.com/progresso/ocorrencia/${this.ocorrenciaSelecionada}`
-        : `http://libertlla.onrender.com/progresso/chat/${this.conversaSelecionada}`;
+        ? `https://libertlla.onrender.com/progresso/ocorrencia/${this.ocorrenciaSelecionada}`
+        : `https://libertlla.onrender.com/progresso/chat/${this.conversaSelecionada}`;
 
       try {
         await axios.post(url, { descricao: this.descricao, anexos });
@@ -256,7 +256,7 @@ export default {
       formData.append("file", this.file);
 
       try {
-        const res = await axios.post("http://libertlla.onrender.com/upload", formData);
+        const res = await axios.post("https://libertlla.onrender.com/upload", formData);
         return res.data.fileUrl;
       } catch (err) {
         Swal.fire({
@@ -271,7 +271,7 @@ export default {
     async gerarPDF(id) {
       try {
         const res = await axios({
-          url: `http://libertlla.onrender.com/ocorrencia/pdf/${id}`,
+          url: `https://libertlla.onrender.com/ocorrencia/pdf/${id}`,
           method: "GET",
           responseType: "blob",
         });
@@ -296,7 +296,7 @@ export default {
       const email = this.store.usuario.usuario.email;
       const token = this.store.token;
       try {
-        const res = await axios.get(`http://libertlla.onrender.com/ocorrencias/${email}`, {
+        const res = await axios.get(`https://libertlla.onrender.com/ocorrencias/${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.ocorrencias = (res.data.processos || [])
@@ -314,7 +314,7 @@ export default {
       const email = this.store.usuario.usuario.email;
       const token = this.store.token;
       try {
-        const res = await axios.get(`http://libertlla.onrender.com/conversas/${email}`, {
+        const res = await axios.get(`https://libertlla.onrender.com/conversas/${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.conversas = res.data.conversas
@@ -329,7 +329,7 @@ export default {
 
     async buscarVitimas() {
       try {
-        const res = await axios.get("http://libertlla.onrender.com/vitimas");
+        const res = await axios.get("https://libertlla.onrender.com/vitimas");
         this.vitimas = res.data;
       } catch (err) {
         Swal.fire({ icon: "error", title: "Erro", text: "Erro ao carregar vítimas." });
@@ -347,7 +347,7 @@ export default {
 
       try {
         await axios.post(
-          `http://libertlla.onrender.com/ocorrencias/${this.ocorrenciaSelecionada}/vincular-vitima`,
+          `https://libertlla.onrender.com/ocorrencias/${this.ocorrenciaSelecionada}/vincular-vitima`,
           { vitimaId: Number(this.vitimaSelecionada) }
         );
         Swal.fire({ icon: "success", title: "Vítima vinculada com sucesso!" });
