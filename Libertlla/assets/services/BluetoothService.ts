@@ -1,6 +1,7 @@
 // BluetoothService.ts
 import { BleManager, Device } from 'react-native-ble-plx';
-import { saveBluetoothDevice, getBluetoothDevice } from '../../storege'; // Ajuste o caminho conforme necessário
+import { saveBluetoothDevice, getBluetoothDevice } from '../../storege'; 
+import { Buffer } from 'buffer';
 
 class BluetoothService {
   private static instance: BluetoothService;
@@ -18,17 +19,17 @@ class BluetoothService {
     return BluetoothService.instance;
   }
 
-  // Conectar a um dispositivo e salvar no storage
-  async connectToDevice(device: Device) {
+  // Conectar a um dispositivo pelo deviceId e salvar no storage
+  async connectToDevice(deviceId: string) {
     try {
-      const connectedDevice = await device.connect();
-      await connectedDevice.discoverAllServicesAndCharacteristics();
-      this.connectedDevice = connectedDevice;
+      const device = await this.manager.connectToDevice(deviceId);
+      await device.discoverAllServicesAndCharacteristics();
+      this.connectedDevice = device;
 
       // Salvar dispositivo no banco
       await saveBluetoothDevice({ id: device.id, name: device.name ?? undefined });
 
-      return connectedDevice;
+      return device;
     } catch (error) {
       throw error;
     }
@@ -36,10 +37,9 @@ class BluetoothService {
 
   // Tentar reconectar ao dispositivo salvo
   async reconnectToSavedDevice() {
-    console.log("Cheguei aqui")
+    console.log("Cheguei aqui");
     const savedDevice = await getBluetoothDevice();
-    console.log("Cheguei aqui")
-    console.log(savedDevice)
+    console.log("Dispositivo salvo:", savedDevice);
 
     if (!savedDevice) return null;
 
@@ -62,6 +62,37 @@ class BluetoothService {
 
   getManager() {
     return this.manager;
+  }
+
+  // Escutar notificações BLE (monitorar characteristic)
+  async startNotification(
+    serviceUUID: string,
+    characteristicUUID: string,
+    onData: (data: string) => void
+  ) {
+    if (!this.connectedDevice) {
+      throw new Error("Nenhum dispositivo conectado");
+    }
+
+    const subscription = this.connectedDevice.monitorCharacteristicForService(
+      serviceUUID,
+      characteristicUUID,
+      (error, characteristic) => {
+        if (error) {
+          console.error("Erro ao monitorar characteristic:", error);
+          return;
+        }
+
+        if (characteristic?.value) {
+          // characteristic.value vem em base64
+          const decoded = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          console.log("Notificação recebida:", decoded);
+          onData(decoded);
+        }
+      }
+    );
+
+    return subscription;
   }
 }
 

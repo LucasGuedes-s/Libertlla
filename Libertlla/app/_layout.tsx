@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
+import { BluetoothProvider } from "../assets/context/BluetoothContext";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -16,9 +17,13 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <Stack 
-   screenOptions={{
-        headerShown: false, 
-      }}
-  />;
+  return (
+    <BluetoothProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </BluetoothProvider>
+  );
 }

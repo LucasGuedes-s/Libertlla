@@ -1,7 +1,7 @@
 // context/BluetoothContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import BluetoothService from '../services/BluetoothService';
-import { storage } from '../../storege.Js'; // ajuste o caminho conforme necessário
+import * as storage from '../../storege';
 
 type BluetoothContextType = {
   isConnected: boolean;
