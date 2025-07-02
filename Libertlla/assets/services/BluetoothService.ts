@@ -1,6 +1,5 @@
-// BluetoothService.ts
-import { BleManager, Device } from 'react-native-ble-plx';
-import { saveBluetoothDevice, getBluetoothDevice } from '../../storege'; 
+import { BleManager, Device, Characteristic } from 'react-native-ble-plx';
+import { saveBluetoothDevice, getBluetoothDevice } from '../../storege';
 import { Buffer } from 'buffer';
 
 class BluetoothService {
@@ -19,14 +18,12 @@ class BluetoothService {
     return BluetoothService.instance;
   }
 
-  // Conectar a um dispositivo pelo deviceId e salvar no storage
   async connectToDevice(deviceId: string) {
     try {
       const device = await this.manager.connectToDevice(deviceId);
       await device.discoverAllServicesAndCharacteristics();
       this.connectedDevice = device;
 
-      // Salvar dispositivo no banco
       await saveBluetoothDevice({ id: device.id, name: device.name ?? undefined });
 
       return device;
@@ -35,7 +32,6 @@ class BluetoothService {
     }
   }
 
-  // Tentar reconectar ao dispositivo salvo
   async reconnectToSavedDevice() {
     console.log("Cheguei aqui");
     const savedDevice = await getBluetoothDevice();
@@ -64,7 +60,6 @@ class BluetoothService {
     return this.manager;
   }
 
-  // Escutar notificações BLE (monitorar characteristic)
   async startNotification(
     serviceUUID: string,
     characteristicUUID: string,
@@ -84,7 +79,6 @@ class BluetoothService {
         }
 
         if (characteristic?.value) {
-          // characteristic.value vem em base64
           const decoded = Buffer.from(characteristic.value, 'base64').toString('utf-8');
           console.log("Notificação recebida:", decoded);
           onData(decoded);
@@ -93,6 +87,36 @@ class BluetoothService {
     );
 
     return subscription;
+  }
+
+  // Buscar automaticamente a primeira characteristic UUID
+  async getNotifiableCharacteristicUUIDs(): Promise<{
+    serviceUUID: string;
+    characteristicUUID: string;
+  }> {
+    if (!this.connectedDevice) {
+      throw new Error("Nenhum dispositivo conectado");
+    }
+
+    const services = await this.connectedDevice.services();
+    for (const service of services) {
+      const characteristics = await this.connectedDevice.characteristicsForService(service.uuid);
+
+      for (const char of characteristics) {
+        if (char.isNotifiable) {
+          console.log("UUIDs encontrados:", {
+            serviceUUID: service.uuid,
+            characteristicUUID: char.uuid,
+          });
+          return {
+            serviceUUID: service.uuid,
+            characteristicUUID: char.uuid,
+          };
+        }
+      }
+    }
+
+    throw new Error("Nenhuma characteristic com suporte a notificações encontrada.");
   }
 }
 
