@@ -24,6 +24,8 @@
 import { io } from 'socket.io-client';
 import SideBar from '@/components/SideBar.vue';
 import NavBarUser from '@/components/NavBarUser.vue';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default {
   components: {
@@ -41,6 +43,21 @@ export default {
     this.socket = io('https://libertlla.onrender.com/');
     this.socket.on('novaNotificacao', () => {
       console.log('Nova notificação recebida');
+
+      // Alerta toast com SweetAlert2
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'info',
+        title: 'Nova notificação recebida!',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        background: '#fff',
+        color: '#333',
+        iconColor: '#FF00AE',
+      });
+
       this.carregarNotificacoes();
     });
   },
