@@ -176,7 +176,7 @@ export default function BluetoothScreen() {
         <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
           <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity  onPress={() => router.push('/Usuario')}>
           <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
         </TouchableOpacity>
         <TouchableOpacity>
