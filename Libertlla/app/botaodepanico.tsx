@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   },
   box1: {
     width: '90%',
-    height: 150,
+    height: 160,
     marginVertical: 10,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   linha1: {
     fontSize: 18,
     textAlign: 'center',
+    lineHeight: 20,
   },
   textoPressione: {
     fontFamily: 'Montserrat-Bold',
@@ -204,7 +205,8 @@ const styles = StyleSheet.create({
   textoSegundos: {
     fontFamily: 'Montserrat-ExtraBold',
     fontSize: 33,
-    marginVertical: 4,
+    marginVertical: 2,
+    lineHeight: 40,
     textAlign: 'center',
     color: '#9B287B',
   },
@@ -213,6 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     textAlign: 'center',
     color: '#9B287B',
+    marginVertical: 2,
   },
   circuloMaior: {
     width: 160,
