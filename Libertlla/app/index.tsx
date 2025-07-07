@@ -9,11 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
-//import axios from "../services/axios"; // ajuste o caminho conforme necessário
-import axios from "axios"; // ou o caminho correto para o seu arquivo axios
-
+import axios from "axios";
 
 export default function Index() {
   const router = useRouter();
@@ -46,49 +46,50 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={{
-          uri: "https://i.scdn.co/image/ab6761610000e5eb9e528993a2820267b97f6aae",
-        }}
-        style={styles.imageSection}
-        imageStyle={{ resizeMode: "cover", opacity: 0.6 }}
-      />
+      {/* Fechar o teclado ao tocar fora */}
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <ImageBackground
+          source={require("../assets/images/walppaper_libertlla.png")}
+          style={styles.imageSection}
+          imageStyle={{ resizeMode: "cover" }}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.loginSection}
+          >
+            <Text style={styles.title}>
+              <Text style={styles.brand}>Libertlla</Text>
+            </Text>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.loginSection}
-      >
-        <Text style={styles.title}>
-          <Text style={styles.brand}>Libertlla</Text>
-        </Text>
+            <View style={styles.loginForm}>
+              <Text style={styles.label}>E-mail</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite o seu e-mail"
+                placeholderTextColor="#ffffff"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
 
-        <View style={styles.loginForm}>
-          <Text style={styles.label}>E-mail</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite o seu e-mail"
-            placeholderTextColor="#ffffff"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+              <Text style={styles.label}>Senha</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite a sua senha"
+                placeholderTextColor="#ffffff"
+                secureTextEntry
+                value={senha}
+                onChangeText={setSenha}
+              />
 
-          <Text style={styles.label}>Senha</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite a sua senha"
-            placeholderTextColor="#ffffff"
-            secureTextEntry
-            value={senha}
-            onChangeText={setSenha}
-          />
-
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Entrar</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+              <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Entrar</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+      </TouchableWithoutFeedback>
     </View>
   );
 }
@@ -96,31 +97,32 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
   },
   imageSection: {
     flex: 1,
-    backgroundColor: "#54123F",
+    justifyContent: "center", 
+    alignItems: "center", 
   },
   loginSection: {
-    flex: 1,
-    backgroundColor: "#54123F",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    width: "80%", 
+    borderRadius: 10,
     padding: 20,
+    alignItems: "center",
+    justifyContent: "center", 
   },
   title: {
     fontSize: 48,
     fontWeight: "bold",
     color: "#ffffff",
     fontFamily: "Montserrat",
-    marginBottom: 20,
+    marginTop: 0,
+    textAlign: "center", // Centraliza o título
   },
   brand: {
     fontWeight: "bold",
   },
   loginForm: {
-    width: "80%",
+    width: "100%",
   },
   label: {
     fontSize: 16,
