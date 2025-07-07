@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     borderColor: '#EFEFEF',
   },
   title: {
-    fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
     color: '#9B287B',
     fontSize: 16,
     marginBottom: 10,
@@ -102,31 +102,35 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    height: 40,
+    fontFamily: 'Montserrat-Regular',
+    height: 50,
     borderColor: '#DDD',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 8,
+    marginBottom: 16,
     width: '100%',
   },
   label: {
-    fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
     color: '#999',
   },
   value: {
     color: '#999',
+    fontFamily: 'Montserrat-Regular',
   },
   btn: {
     backgroundColor: '#9B287B',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    marginTop: 10,
     marginBottom: 10,
   },
   btnText: {
     color: '#FFF',
-    fontWeight: 'bold',
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 12,
   },
   contatoItem: {
     paddingVertical: 4,
@@ -138,14 +142,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   nomeLabel: {
-    fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
     color: '#999',
   },
   nomeValue: {
+    fontFamily: 'Montserrat-Regular',
     color: '#999',
     flex: 1,
   },
   telefoneValue: {
+    fontFamily: 'Montserrat-Regular',
     color: '#999',
     width: 100,
     textAlign: 'right',
