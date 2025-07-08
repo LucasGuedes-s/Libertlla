@@ -151,6 +151,10 @@ export default function Tela() {
           <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push('/horario')}>
+          <MaterialCommunityIcons name="clock-time-four-outline" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+
         <TouchableOpacity>
           <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
         </TouchableOpacity>
