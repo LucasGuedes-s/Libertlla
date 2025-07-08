@@ -26,13 +26,14 @@ _FLAG_READ = ubluetooth.FLAG_READ
 _FLAG_NOTIFY = ubluetooth.FLAG_NOTIFY
 _FLAG_WRITE = ubluetooth.FLAG_WRITE
 
+
 class BLEConexao:
     def __init__(self):
         self.ble = ubluetooth.BLE()
         self.ble.active(True)
+        self.conectado = False  # Corrigido: atributo estava ausente
         self.ble.irq(self._irq)
         self._connections = set()
-        self.conectado = False
 
         self._service = (
             _SERVICE_UUID,
@@ -95,11 +96,15 @@ class BLEConexao:
         for conn_handle in self._connections:
             self.ble.gatts_notify(conn_handle, self._char_handle, mensagem.encode())
 
+
 ble = BLEConexao()
 
 # === Loop principal ===
 tempo_ultimo = utime.ticks_ms()
 pontos = 1
+
+# Ajuste do intervalo de segundo
+INTERVALO_SEGUNDO = 950  # compensação de atraso
 
 while True:
     agora = utime.ticks_ms()
@@ -113,7 +118,7 @@ while True:
             tempo_ultimo = agora
 
     else:
-        if relogio_ativo and utime.ticks_diff(agora, tempo_ultimo_segundo) >= 1000:
+        if relogio_ativo and utime.ticks_diff(agora, tempo_ultimo_segundo) >= INTERVALO_SEGUNDO:
             segundos += 1
             if segundos == 60:
                 segundos = 0
