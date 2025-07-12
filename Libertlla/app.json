@@ -1,8 +1,6 @@
 {
   "expo": {
-    "jsEngine": "jsc"
-  },
-  "expo": {
+    "jsEngine": "jsc",
     "name": "Libertlla",
     "slug": "Libertlla",
     "version": "1.0.0",
@@ -25,11 +23,7 @@
         "backgroundColor": "#ffffff",
         "permissions": [
           "ACCESS_FINE_LOCATION",
-          "BLUETOOTH",
-          "BLUETOOTH_ADMIN",
-          "BLUETOOTH_SCAN",
-          "BLUETOOTH_CONNECT",
-          "ACCESS_FINE_LOCATION",
+          "ACCESS_COARSE_LOCATION",
           "BLUETOOTH",
           "BLUETOOTH_ADMIN",
           "BLUETOOTH_SCAN",
@@ -40,7 +34,9 @@
       "permissions": [
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_CONNECT",
+        "ACCESS_FINE_LOCATION",         
+        "ACCESS_COARSE_LOCATION"
       ],
       "package": "com.anonymous.Libertlla"
     },
@@ -65,7 +61,8 @@
       [
         "expo-sqlite"
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-location"
     ],
     "experiments": {
       "typedRoutes": true

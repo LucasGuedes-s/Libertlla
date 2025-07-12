@@ -3,6 +3,7 @@ import axios from 'axios';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
 
 export default function Tela() {
@@ -12,22 +13,52 @@ export default function Tela() {
   const [counter, setCounter] = useState(5);
   const intervalRef = useRef<number | null>(null);
 
-  // === Envio da notificação para API ===
+  // Função para formatar endereço ignorando campos vazios
+  const formatarEndereco = (endereco: Partial<Location.LocationGeocodedAddress>) => {
+    const partes = [
+      endereco.name,
+      endereco.street,
+      endereco.district,
+      endereco.city,
+      endereco.region,
+      endereco.postalCode,
+      endereco.country,
+    ].filter(Boolean);
+    return partes.join(', ');
+  };
+
+  // Envio da notificação para API com endereço formatado
   const enviarNotificacao = async () => {
     try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+
+      const latitude = location.coords.latitude;
+      const longitude = location.coords.longitude;
+
+      const [endereco] = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+      const enderecoFormatado = formatarEndereco(endereco);
+
       await axios.post('https://libertlla.onrender.com/notificacao', {
-        endereco: 'Rua das Rosas, 123',
-        data: "2025-06-18T00:00:00:000Z",
+        endereco: enderecoFormatado,
+        data: new Date().toISOString(),
         vitimaId: 1,
       });
-      Alert.alert("✅ Alerta enviado com sucesso!");
+
+      Alert.alert("✅ Alerta enviado com sucesso!", `Endereço: ${enderecoFormatado}`);
     } catch (error) {
       console.error("Erro ao enviar notificação:", error);
       Alert.alert("❌ Erro ao enviar alerta");
     }
   };
 
-  // === BLE: escuta notificações e dispara envio se 'ALERTA'
+  // BLE: escuta notificações e dispara envio se 'ALERTA'
   useFocusEffect(
     useCallback(() => {
       let subscription: { remove: () => void } | null = null;
