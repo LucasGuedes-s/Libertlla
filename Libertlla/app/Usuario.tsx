@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,49 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  Alert,
 } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
 
 export default function Tela() {
   const router = useRouter();
+
+  const [nomeContato, setNomeContato] = useState('');
+  const [telefoneContato, setTelefoneContato] = useState('');
+  const [contatos, setContatos] = useState<string[]>([]);
+
+  const userEmail = 'maria.silva@example.com';
+
+  useEffect(() => {
+   axios.get(`http://192.168.0.190:3000/vitima/${userEmail}`)
+      .then((res) => {
+        if (res.data.contatosdeEmergencia) {
+          setContatos(res.data.contatosdeEmergencia);
+        }
+      })
+      .catch((err) => {
+        console.error('Erro ao buscar contatos:', err);
+      });
+  }, []);
+
+  const adicionarContato = async () => {
+    const novoContato = `${nomeContato} - ${telefoneContato}`;
+    try {
+      const response = await axios.put( `http://192.168.0.190:3000/vitima/${userEmail}/contato`,
+        {
+          contato: novoContato,
+        }
+      );
+
+      setContatos(response.data.contatosdeEmergencia);
+      setNomeContato('');
+      setTelefoneContato('');
+    } catch (err) {
+      Alert.alert('Erro', 'Não foi possível adicionar contato');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,7 +60,7 @@ export default function Tela() {
         </Text>
         <Text>
           <Text style={styles.label}>Email: </Text>
-          <Text style={styles.value}>mariadasilva@gmail.com</Text>
+          <Text style={styles.value}>{userEmail}</Text>
         </Text>
       </View>
 
@@ -34,6 +71,8 @@ export default function Tela() {
           placeholder="Nome do contato"
           placeholderTextColor="#999"
           style={styles.input}
+          value={nomeContato}
+          onChangeText={setNomeContato}
         />
 
         <TextInput
@@ -41,22 +80,43 @@ export default function Tela() {
           placeholderTextColor="#999"
           style={styles.input}
           keyboardType="phone-pad"
+          value={telefoneContato}
+          onChangeText={setTelefoneContato}
         />
 
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity style={styles.btn} onPress={adicionarContato}>
           <Text style={styles.btnText}>Adicionar Contato</Text>
         </TouchableOpacity>
 
-            <View style={[styles.contatoItem, styles.contatoItemRow]}>
+        {contatos.map((contato, index) => {
+          const [nome, telefone] = contato.split(' - ');
+
+          return (
+            <View
+              key={index}
+              style={[styles.contatoItem, styles.contatoItemRow]}
+            >
               <Text style={styles.nomeLabel}>Nome: </Text>
-              <Text style={styles.nomeValue} numberOfLines={1} ellipsizeMode="tail"> Lucas</Text>
-              <Text style={styles.telefoneValue}> 84 99999999</Text>
+              <Text
+                style={styles.nomeValue}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {nome}
+              </Text>
+              <Text style={styles.telefoneValue}>{telefone}</Text>
             </View>
+          );
+        })}
       </View>
 
       <View style={styles.menu_container}>
         <TouchableOpacity onPress={() => router.push('/botaodepanico')}>
-          <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
+          <MaterialCommunityIcons
+            name="alarm-light"
+            size={30}
+            color="#E9ECEF"
+          />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
@@ -71,7 +131,7 @@ export default function Tela() {
           <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }
 
