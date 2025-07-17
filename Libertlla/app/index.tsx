@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
+import { saveUserData } from "../storege"; // Certifique-se de que o caminho está correto
 
 export default function Index() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function Index() {
 
       const { user } = response.data;
       console.log("Token recebido:", response.data);
+      saveUserData(user);
       router.push("/botaodepanico");
     } catch (error: any) {
       if (error.response?.status === 401) {
