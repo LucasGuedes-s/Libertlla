@@ -4,6 +4,10 @@ const controller = require('../controllers/vitima.controller')
 
 router.post('/login/vitima', controller.LoginVitma)
 
-router.get('/vitimas', controller.getVitimas)
+router.get('/vitima', controller.getVitimas)
+
+router.get('/vitima/:email', controller.getVitimaPorEmail);
+
+router.put('/vitima/:email/contato', controller.adicionarContato);
 
 module.exports = router;

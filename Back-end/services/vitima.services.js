@@ -46,4 +46,34 @@ async function getVitimas() {
     return vitimas;
 }
 
-module.exports = { LoginUser, getVitimas }
+async function getVitimaPorEmail(email) {
+  return await prisma.vitima.findUnique({
+    where: { email },
+    select: {
+      contatosdeEmergencia: true,
+    },
+  });
+}
+
+async function adicionarContato(email, novoContato){
+  const vitima = await prisma.vitima.findUnique({
+    where: { email },
+  });
+
+  if (!vitima) {
+    throw new Error('Vítima não encontrada');
+  }
+
+  const contatosAtualizados = [...(vitima.contatosdeEmergencia || []), novoContato];
+
+  const vitimaAtualizada = await prisma.vitima.update({
+    where: { email },
+    data: {
+      contatosdeEmergencia: contatosAtualizados,
+    },
+  });
+
+  return vitimaAtualizada;
+};
+
+module.exports = { LoginUser, getVitimas, getVitimaPorEmail, adicionarContato }

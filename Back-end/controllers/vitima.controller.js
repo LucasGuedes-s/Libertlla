@@ -22,4 +22,32 @@ async function getVitimas(req, res, next) {
         next(error);
     }
 }
-module.exports = { LoginVitma, getVitimas };
+
+async function getVitimaPorEmail(req, res) {
+  try {
+    const { email } = req.params;
+    const vitimaDados = await vitima.getVitimaPorEmail(email);
+    if (!vitimaDados) {
+      return res.status(404).json({ error: 'Vítima não encontrada' });
+    }
+    res.status(200).json(vitimaDados);
+  } catch (error) {
+    console.error('Erro ao buscar vítima:', error);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+}
+
+async function adicionarContato (req, res){
+  const { email } = req.params;
+  const { contato } = req.body;
+
+  try {
+    const vitimaAtualizada = await vitima.adicionarContato(email, contato);
+    res.json(vitimaAtualizada);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao adicionar contato.' });
+  }
+};
+
+module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, adicionarContato };
