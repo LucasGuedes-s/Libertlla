@@ -66,7 +66,8 @@ model Vitima{
   cidade               String?
   estado               String?
   etnia                String?
-  contatosdeEmergencia  String[] @db.VarChar(2048) 
+  contatosdeEmergencia  String[] @db.VarChar(2048)
+  processosJudiciais   String? @db.VarChar(2048)
   registros             Registro[] 
   ocorrencias           Ocorrencias[] // ✅ Correta relação 1 para muitos
   notificacao_botao     Notificacao_botao[] // Correta relação 1 para muitos
@@ -126,6 +127,7 @@ model Notificacao_botao{
   id         Int      @id @default(autoincrement())
   endereco   String
   data       DateTime @db.Date
+  token      String?
   vitimaId   Int?
   vitima     Vitima? @relation(fields: [vitimaId], references: [id])
 }
