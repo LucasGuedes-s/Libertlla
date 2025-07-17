@@ -13,7 +13,7 @@ export default function Tela() {
   const [counter, setCounter] = useState(5);
   const intervalRef = useRef<number | null>(null);
 
-  // Função para formatar endereço ignorando campos vazios
+  // Função para formatar endereço
   const formatarEndereco = (endereco: Partial<Location.LocationGeocodedAddress>) => {
     const partes = [
       endereco.name,
@@ -27,7 +27,7 @@ export default function Tela() {
     return partes.join(', ');
   };
 
-  // Envio da notificação para API com endereço formatado
+  // Envio da notificação para API
   const enviarNotificacao = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();

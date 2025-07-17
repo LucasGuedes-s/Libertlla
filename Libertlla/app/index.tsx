@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontFamily: "Montserrat",
     marginTop: 0,
-    textAlign: "center", // Centraliza o título
+    textAlign: "center",
   },
   brand: {
     fontWeight: "bold",
