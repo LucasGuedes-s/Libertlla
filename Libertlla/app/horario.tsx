@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import BluetoothService from '../assets/services/BluetoothService'; // ajuste o caminho conforme seu projeto
+import BluetoothService from '../assets/services/BluetoothService';
 import { Buffer } from 'buffer';
 
 global.Buffer = global.Buffer || Buffer;
@@ -17,7 +17,7 @@ export default function TelaConfiguracaoHoras() {
       setHoraAtual(new Date().toLocaleTimeString());
     }, 1000);
 
-    return () => clearInterval(intervalo); // limpa intervalo no unmount
+    return () => clearInterval(intervalo);
   }, []);
 
   function formatarHora(date: Date) {
