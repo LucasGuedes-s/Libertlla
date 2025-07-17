@@ -22,7 +22,7 @@ export default function Tela() {
   const userEmail = 'maria.silva@example.com';
 
   useEffect(() => {
-   axios.get(`http://192.168.0.190:3000/vitima/${userEmail}`)
+   axios.get(`https://libertlla.onrender.com/vitima/${userEmail}`)
       .then((res) => {
         if (res.data.contatosdeEmergencia) {
           setContatos(res.data.contatosdeEmergencia);
@@ -36,7 +36,7 @@ export default function Tela() {
   const adicionarContato = async () => {
     const novoContato = `${nomeContato} - ${telefoneContato}`;
     try {
-      const response = await axios.put( `http://192.168.0.190:3000/vitima/${userEmail}/contato`,
+      const response = await axios.put( `https://libertlla.onrender.com/vitima/${userEmail}/contato`,
         {
           contato: novoContato,
         }
