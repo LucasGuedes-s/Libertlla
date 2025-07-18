@@ -22,7 +22,7 @@ export default function Tela() {
   const userEmail = 'maria.silva@example.com';
 
   useEffect(() => {
-   axios.get(`https://libertlla.onrender.com/vitima/${userEmail}`)
+    axios.get(`https://libertlla.onrender.com/vitima/${userEmail}`)
       .then((res) => {
         if (res.data.contatosdeEmergencia) {
           setContatos(res.data.contatosdeEmergencia);
@@ -34,12 +34,17 @@ export default function Tela() {
   }, []);
 
   const adicionarContato = async () => {
-    const novoContato = `${nomeContato} - ${telefoneContato}`;
+    if (!nomeContato.trim() || !telefoneContato.trim()) {
+      Alert.alert('Campos obrigatórios', 'Preencha o nome e o telefone do contato.');
+      return;
+    }
+
+    const novoContato = `${nomeContato.trim()} - ${telefoneContato.trim()}`;
+
     try {
-      const response = await axios.put( `https://libertlla.onrender.com/vitima/${userEmail}/contato`,
-        {
-          contato: novoContato,
-        }
+      const response = await axios.put(
+        `https://libertlla.onrender.com/vitima/${userEmail}/contato`,
+        { contato: novoContato }
       );
 
       setContatos(response.data.contatosdeEmergencia);
@@ -49,6 +54,7 @@ export default function Tela() {
       Alert.alert('Erro', 'Não foi possível adicionar contato');
     }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
