@@ -6,6 +6,6 @@ router.post('/notificacao', controller.CriarNotificacao);
 
 router.get('/notificacoes', controller.BuscarNotificacoes);
 
-router.get('/notificacao/:id/status', notificacaoController.status);
+// router.get('/notificacao/:id/status', notificacaoController.status);
 
 module.exports = router;
