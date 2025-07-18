@@ -3,9 +3,9 @@ const notificacaoService = require('../services/notificacao.service');
 async function CriarNotificacao(req, res) {
   try {
     const notificacao = await notificacaoService.CriarNotificacaoService(req);
-    
-    // Emitir evento para todos os clientes conectados
-    req.io.emit('novaNotificacao', notificacao);
+
+    // Emitir evento opcional para sockets, se usado
+    req.io?.emit?.('novaNotificacao', notificacao);
 
     res.status(201).json(notificacao);
   } catch (error) {
@@ -16,7 +16,13 @@ async function CriarNotificacao(req, res) {
 
 async function BuscarNotificacoes(req, res) {
   try {
-    const notificacoes = await notificacaoService.BuscarNotificacoesService();
+    const { vitimaId } = req.query;
+
+    if (!vitimaId) {
+      return res.status(400).json({ erro: 'vitimaId é obrigatório' });
+    }
+
+    const notificacoes = await notificacaoService.BuscarNotificacoesService(vitimaId);
     res.status(200).json(notificacoes);
   } catch (error) {
     console.error(error);

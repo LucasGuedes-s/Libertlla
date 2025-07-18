@@ -1,19 +1,69 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-//import * as Location from 'expo-location';
+import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
+import { getUserData } from '../storege';
 
 export default function Tela() {
   const router = useRouter();
-
   const [isPressing, setIsPressing] = useState(false);
   const [counter, setCounter] = useState(5);
+  const [vitimaId, setVitimaId] = useState<number | null>(null);
+  const [ultimaNotificacaoId, setUltimaNotificacaoId] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  // Função para formatar endereço
+  // Recupera vitimaId a partir do e-mail armazenado
+  useEffect(() => {
+    const getVitimaId = async () => {
+      const user = await getUserData();
+      if (user && user.email) {
+        try {
+          const res = await axios.get(`https://libertlla.onrender.com/vitima/id?email=${encodeURIComponent(user.email)}`);
+          console.log('Resposta da API vitima (id):', res.data);
+
+          if (res.data?.id) {
+            setVitimaId(res.data.id);
+          } else {
+            console.warn('Usuária não encontrada no backend.');
+          }
+        } catch (error) {
+          console.error('Erro ao buscar ID da vítima:', error);
+        }
+      }
+    };
+
+    getVitimaId();
+  }, []);
+
+  useEffect(() => {
+    if (!vitimaId) return;
+
+    const polling = setInterval(async () => {
+      try {
+        const res = await axios.get('https://libertlla.onrender.com/notificacoes', {
+          params: { vitimaId }
+        });
+
+        const notificacoes = res.data;
+
+        if (notificacoes.length > 0) {
+          const nova = notificacoes[0];
+          if (nova.id !== ultimaNotificacaoId) {
+            setUltimaNotificacaoId(nova.id);
+            Alert.alert('🔔 Nova notificação', `Endereço: ${nova.endereco}`);
+          }
+        }
+      } catch (err) {
+        console.error('Erro no polling:', err);
+      }
+    }, 10000);
+
+    return () => clearInterval(polling);
+  }, [vitimaId, ultimaNotificacaoId]);
+
   const formatarEndereco = (endereco: Partial<Location.LocationGeocodedAddress>) => {
     const partes = [
       endereco.name,
@@ -27,9 +77,13 @@ export default function Tela() {
     return partes.join(', ');
   };
 
-  // Envio da notificação para API
   const enviarNotificacao = async () => {
     try {
+      if (!vitimaId) {
+        Alert.alert('Erro', 'Usuária não identificada');
+        return;
+      }
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');
@@ -37,18 +91,14 @@ export default function Tela() {
       }
 
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-
-      const latitude = location.coords.latitude;
-      const longitude = location.coords.longitude;
-
+      const { latitude, longitude } = location.coords;
       const [endereco] = await Location.reverseGeocodeAsync({ latitude, longitude });
-
       const enderecoFormatado = formatarEndereco(endereco);
 
       await axios.post('https://libertlla.onrender.com/notificacao', {
         endereco: enderecoFormatado,
         data: new Date().toISOString(),
-        vitimaId: 1,
+        vitimaId,
       });
 
       Alert.alert("✅ Alerta enviado com sucesso!", `Endereço: ${enderecoFormatado}`);
@@ -58,7 +108,7 @@ export default function Tela() {
     }
   };
 
-  // BLE: escuta notificações e dispara envio se 'ALERTA'
+  // BLE
   useFocusEffect(
     useCallback(() => {
       let subscription: { remove: () => void } | null = null;
@@ -100,7 +150,7 @@ export default function Tela() {
           subscription = null;
         }
       };
-    }, [])
+    }, [vitimaId])
   );
 
   const startCounter = () => {
