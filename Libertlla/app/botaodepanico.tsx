@@ -3,7 +3,7 @@ import axios from 'axios';
 import { View, Text, StyleSheet, Pressable, TouchableOpacity, Image, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-//import * as Location from 'expo-location';
+import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
 
 export default function Tela() {

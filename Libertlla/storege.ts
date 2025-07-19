@@ -66,6 +66,7 @@ export async function removeBluetoothDevice() {
 
 export async function saveUserData(data: UserData) {
   try {
+    console.log('[saveUserData] Salvando dados do usuário:', data);
     if (!data || typeof data !== 'object' || !data.nome || !data.email) {
       throw new Error('Dados de usuário inválidos.');
     }
@@ -87,6 +88,7 @@ export async function getUserData(): Promise<UserData | null> {
     }
 
     const json = await FileSystem.readAsStringAsync(USER_FILE);
+
     const parsed = JSON.parse(json);
 
     if (parsed && parsed.nome && parsed.email) {

@@ -11,18 +11,32 @@ import {
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import { getUserData } from '../storege';
 
 export default function Tela() {
   const router = useRouter();
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+
 
   const [nomeContato, setNomeContato] = useState('');
   const [telefoneContato, setTelefoneContato] = useState('');
   const [contatos, setContatos] = useState<string[]>([]);
 
+
   const userEmail = 'maria.silva@example.com';
 
   useEffect(() => {
-   axios.get(`https://libertlla.onrender.com/vitima/${userEmail}`)
+    // Carregar dados do usuário
+    getUserData().then((data) => {
+      if (data) {
+        console.log('Dados do usuário carregados:', data);
+        setNome(data.nome);
+        setEmail(data.email);
+      }
+    });
+    console.log(email)
+    axios.get(`https://libertlla.onrender.com/vitima/${email}`)
       .then((res) => {
         if (res.data.contatosdeEmergencia) {
           setContatos(res.data.contatosdeEmergencia);
@@ -36,7 +50,7 @@ export default function Tela() {
   const adicionarContato = async () => {
     const novoContato = `${nomeContato} - ${telefoneContato}`;
     try {
-      const response = await axios.put( `https://libertlla.onrender.com/vitima/${userEmail}/contato`,
+      const response = await axios.put(`https://libertlla.onrender.com/vitima/${userEmail}/contato`,
         {
           contato: novoContato,
         }
@@ -56,11 +70,11 @@ export default function Tela() {
         <Text style={styles.title}>Suas Informações</Text>
         <Text>
           <Text style={styles.label}>Nome: </Text>
-          <Text style={styles.value}>Maria da Silva</Text>
+          <Text style={styles.value}>{nome}</Text>
         </Text>
         <Text>
           <Text style={styles.label}>Email: </Text>
-          <Text style={styles.value}>{userEmail}</Text>
+          <Text style={styles.value}>{email}</Text>
         </Text>
       </View>
 

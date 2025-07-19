@@ -33,8 +33,7 @@ export default function Index() {
       });
 
       const { user } = response.data;
-      console.log("Token recebido:", response.data);
-      saveUserData(user);
+      saveUserData(response.data.usuario);
       router.push("/botaodepanico");
     } catch (error: any) {
       if (error.response?.status === 401) {
