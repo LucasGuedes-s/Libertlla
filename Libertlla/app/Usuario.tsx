@@ -12,31 +12,31 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { getUserData } from '../storege';
-
 export default function Tela() {
   const router = useRouter();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
 
-
   const [nomeContato, setNomeContato] = useState('');
   const [telefoneContato, setTelefoneContato] = useState('');
   const [contatos, setContatos] = useState<string[]>([]);
 
-
-  const userEmail = 'maria.silva@example.com';
-
   useEffect(() => {
-    // Carregar dados do usuário
     getUserData().then((data) => {
       if (data) {
         console.log('Dados do usuário carregados:', data);
         setNome(data.nome);
-        setEmail(data.email);
+        setEmail(data.email); 
       }
     });
-    console.log(email)
-    axios.get(`https://libertlla.onrender.com/vitima/${email}`)
+  }, []);
+
+  // Busca contatos depois que o email for definido
+  useEffect(() => {
+    if (!email) return;
+
+    axios
+      .get(`https://libertlla.onrender.com/vitima/${email}`)
       .then((res) => {
         if (res.data.contatosdeEmergencia) {
           setContatos(res.data.contatosdeEmergencia);
@@ -45,7 +45,7 @@ export default function Tela() {
       .catch((err) => {
         console.error('Erro ao buscar contatos:', err);
       });
-  }, []);
+  }, [email]);
 
   const adicionarContato = async () => {
     if (!nomeContato.trim() || !telefoneContato.trim()) {
@@ -56,7 +56,8 @@ export default function Tela() {
     const novoContato = `${nomeContato.trim()} - ${telefoneContato.trim()}`;
 
     try {
-      const response = await axios.put(`https://libertlla.onrender.com/vitima/${userEmail}/contato`,
+      const response = await axios.put(
+        `https://libertlla.onrender.com/vitima/${email}/contato`,
         {
           contato: novoContato,
         }
@@ -69,7 +70,6 @@ export default function Tela() {
       Alert.alert('Erro', 'Não foi possível adicionar contato');
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
