@@ -55,6 +55,14 @@ async function getVitimaPorEmail(email) {
   });
 }
 
+async function getIdVitima(email) {
+  const vitima = await prisma.vitima.findUnique({
+    where: { email },
+    select: { id: true }
+  });
+  return vitima ? vitima.id : null;
+}
+
 async function adicionarContato(email, novoContato){
   const vitima = await prisma.vitima.findUnique({
     where: { email },
@@ -76,4 +84,4 @@ async function adicionarContato(email, novoContato){
   return vitimaAtualizada;
 };
 
-module.exports = { LoginUser, getVitimas, getVitimaPorEmail, adicionarContato }
+module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato }

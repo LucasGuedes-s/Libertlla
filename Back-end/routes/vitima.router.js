@@ -8,6 +8,8 @@ router.get('/vitima', controller.getVitimas)
 
 router.get('/vitima/:email', controller.getVitimaPorEmail);
 
+router.get('/vitima/id', controller.getVitimaIdPorEmail);
+
 router.put('/vitima/:email/contato', controller.adicionarContato);
 
 module.exports = router;
