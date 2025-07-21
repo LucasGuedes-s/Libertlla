@@ -37,24 +37,21 @@
     }
   }
 
-  async function getVitimaIdPorEmail(req, res) {
+  async function getIdVitimaPorToken(req, res) {
     try {
-      const email = req.query.email;
-      if (!email) {
-        return res.status(400).json({ error: 'Email é obrigatório' });
-      }
+      const email = req.user.email; // <-- está acessando o dado do token
+      if (!email) return res.status(400).json({ error: 'Email não encontrado no token' });
 
       const id = await vitima.getIdVitima(email);
-      if (!id) {
-        return res.status(404).json({ error: 'Vítima não encontrada' });
-      }
+      if (!id) return res.status(404).json({ error: 'Vítima não encontrada' });
 
       res.status(200).json({ id });
     } catch (error) {
-      console.error('Erro ao buscar id da vítima:', error);
+      console.error(error);
       res.status(500).json({ error: 'Erro interno' });
     }
   }
+
 
   async function adicionarContato (req, res){
     const { email } = req.params;
@@ -69,4 +66,4 @@
     }
   };
 
-  module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getVitimaIdPorEmail ,adicionarContato };
+  module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato };

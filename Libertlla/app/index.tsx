@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { saveUserData } from "../storege"; // Certifique-se de que o caminho está correto
+import { saveUserData, saveToken } from "../storege";
 
 export default function Index() {
   const router = useRouter();
@@ -32,8 +32,12 @@ export default function Index() {
         },
       });
 
-      const { user } = response.data;
-      saveUserData(response.data.usuario);
+      // Ajuste conforme o retorno real do seu backend:
+      const { usuario, token } = response.data;
+
+      await saveUserData(usuario);
+      await saveToken(token);
+
       router.push("/botaodepanico");
     } catch (error: any) {
       if (error.response?.status === 401) {

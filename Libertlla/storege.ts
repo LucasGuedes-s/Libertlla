@@ -3,6 +3,7 @@ import * as FileSystem from 'expo-file-system';
 // Arquivos de armazenamento
 const DEVICE_FILE = FileSystem.documentDirectory + 'bluetoothDevice.json';
 const USER_FILE = FileSystem.documentDirectory + 'userData.json';
+const TOKEN_FILE = FileSystem.documentDirectory + 'token.txt';
 
 // Tipagem dos dados
 export type BluetoothDeviceData = {
@@ -11,6 +12,7 @@ export type BluetoothDeviceData = {
 };
 
 export type UserData = {
+  id: UserData | null;
   nome: string;
   email: string;
 };
@@ -110,5 +112,40 @@ export async function removeUserData() {
     console.log('[removeUserData] Dados do usuário removidos com sucesso.');
   } catch (error) {
     console.error('[removeUserData] Erro ao remover dados do usuário:', error);
+  }
+}
+
+/* =================== TOKEN =================== */
+
+export async function saveToken(token: string) {
+  try {
+    await FileSystem.writeAsStringAsync(TOKEN_FILE, token);
+    console.log('[saveToken] Token salvo com sucesso.');
+  } catch (error) {
+    console.error('[saveToken] Erro ao salvar token:', error);
+  }
+}
+
+export async function getToken(): Promise<string | null> {
+  try {
+    const exists = await FileSystem.getInfoAsync(TOKEN_FILE);
+    if (!exists.exists) {
+      console.log('[getToken] Nenhum token encontrado.');
+      return null;
+    }
+    const token = await FileSystem.readAsStringAsync(TOKEN_FILE);
+    return token;
+  } catch (error) {
+    console.error('[getToken] Erro ao ler token:', error);
+    return null;
+  }
+}
+
+export async function removeToken() {
+  try {
+    await FileSystem.deleteAsync(TOKEN_FILE, { idempotent: true });
+    console.log('[removeToken] Token removido com sucesso.');
+  } catch (error) {
+    console.error('[removeToken] Erro ao remover token:', error);
   }
 }

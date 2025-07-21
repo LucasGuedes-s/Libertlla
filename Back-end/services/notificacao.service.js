@@ -2,7 +2,10 @@
   const prisma = new PrismaClient();
 
   async function CriarNotificacaoService(req) {
-    const { endereco, vitimaId } = req.body;
+    const { endereco } = req.body;
+
+    // Captura o ID da vítima autenticada via JWT
+    const vitimaId = req.user.id;
 
     const data = new Date(); 
     data.setHours(0, 0, 0, 0); // Zera a hora
