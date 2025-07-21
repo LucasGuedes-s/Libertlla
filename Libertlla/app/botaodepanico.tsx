@@ -78,12 +78,8 @@ export default function Tela() {
   };
 
   const enviarNotificacao = async () => {
+    console.log("enviarNotificacao: Início");
     try {
-      if (!vitimaId) {
-        Alert.alert('Erro', 'Usuária não identificada');
-        return;
-      }
-
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');

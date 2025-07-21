@@ -1,37 +1,35 @@
-  const { PrismaClient } = require('@prisma/client');
-  const prisma = new PrismaClient();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-  async function CriarNotificacaoService(req) {
-    const { endereco } = req.body;
+async function CriarNotificacaoService(req) {
+  const { endereco } = req.body;
+  const vitimaId = req.user.id; // ✅ Pega o ID da vítima pelo token
 
-    // Captura o ID da vítima autenticada via JWT
-    const vitimaId = req.user.id;
+  const data = new Date();
+  data.setHours(0, 0, 0, 0); // Zera a hora
 
-    const data = new Date(); 
-    data.setHours(0, 0, 0, 0); // Zera a hora
+  const notificacao = await prisma.notificacao_botao.create({
+    data: {
+      endereco,
+      data,
+      vitimaId,
+    },
+  });
 
-    const notificacao = await prisma.notificacao_botao.create({
-      data: {
-        endereco,
-        data,
-        vitimaId,
-      },
-    });
+  return notificacao;
+}
 
-    return notificacao;
-  }
+async function BuscarNotificacoesService(vitimaId) {
+  const notificacoes = await prisma.notificacao_botao.findMany({
+    where: {
+      vitimaId: parseInt(vitimaId),
+    },
+    orderBy: {
+      data: 'desc',
+    },
+  });
 
-  async function BuscarNotificacoesService(vitimaId) {
-    const notificacoes = await prisma.notificacao_botao.findMany({
-      where: {
-        vitimaId: parseInt(vitimaId),
-      },
-      orderBy: {
-        data: 'desc',
-      },
-    });
+  return notificacoes;
+}
 
-    return notificacoes;
-  }
-
-  module.exports = { CriarNotificacaoService, BuscarNotificacoesService };
+module.exports = { CriarNotificacaoService, BuscarNotificacoesService };
