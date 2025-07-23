@@ -119,6 +119,7 @@ export async function removeUserData() {
 
 export async function saveToken(token: string) {
   try {
+    if (!token) throw new Error("Token inválido ou indefinido");
     await FileSystem.writeAsStringAsync(TOKEN_FILE, token);
     console.log('[saveToken] Token salvo com sucesso.');
   } catch (error) {

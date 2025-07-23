@@ -5,7 +5,7 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
-import { getUserData } from '../storege';
+import { getUserData, getToken } from '../storege';
 
 export default function Tela() {
   const router = useRouter();
@@ -15,28 +15,28 @@ export default function Tela() {
   const [ultimaNotificacaoId, setUltimaNotificacaoId] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  // Recupera vitimaId a partir do e-mail armazenado
-  useEffect(() => {
-    const getVitimaId = async () => {
-      const user = await getUserData();
-      if (user && user.email) {
-        try {
-          const res = await axios.get(`https://libertlla.onrender.com/vitima/id?email=${encodeURIComponent(user.email)}`);
-          console.log('Resposta da API vitima (id):', res.data);
+  // // Recupera vitimaId a partir do e-mail armazenado
+  // useEffect(() => {
+  //   const getVitimaId = async () => {
+  //     const user = await getUserData();
+  //     if (user && user.email) {
+  //       try {
+  //         const res = await axios.get(`https://libertlla.onrender.com/vitima/id?email=${encodeURIComponent(user.email)}`);
+  //         console.log('Resposta da API vitima (id):', res.data);
 
-          if (res.data?.id) {
-            setVitimaId(res.data.id);
-          } else {
-            console.warn('Usuária não encontrada no backend.');
-          }
-        } catch (error) {
-          console.error('Erro ao buscar ID da vítima:', error);
-        }
-      }
-    };
+  //         if (res.data?.id) {
+  //           setVitimaId(res.data.id);
+  //         } else {
+  //           console.warn('Usuária não encontrada no backend.');
+  //         }
+  //       } catch (error) {
+  //         console.error('Erro ao buscar ID da vítima:', error);
+  //       }
+  //     }
+  //   };
 
-    getVitimaId();
-  }, []);
+  //   getVitimaId();
+  // }, []);
 
   useEffect(() => {
     if (!vitimaId) return;
@@ -91,13 +91,40 @@ export default function Tela() {
       const [endereco] = await Location.reverseGeocodeAsync({ latitude, longitude });
       const enderecoFormatado = formatarEndereco(endereco);
 
-      await axios.post('https://libertlla.onrender.com/notificacao', {
-        endereco: enderecoFormatado,
-        data: new Date().toISOString(),
-        vitimaId,
-      });
+      const usuario = await getUserData();
+      const token = await getToken();
 
-      Alert.alert("✅ Alerta enviado com sucesso!", `Endereço: ${enderecoFormatado}`);
+      if (!usuario?.id) {
+        Alert.alert("Erro", "Usuário não encontrado.");
+        return;
+      }
+
+      if (!token) {
+        Alert.alert("Erro", "Token de notificação não encontrado.");
+        return;
+      }
+
+      await axios.post(
+        'https://libertlla.onrender.com/notificacao',
+        {
+          endereco: enderecoFormatado,
+          data: new Date().toISOString(),
+          vitimaId: usuario.id,
+          token: token,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Mantém o token no header para autenticação JWT
+          },
+        }
+      );
+
+      Alert.alert(
+        "✅ Alerta enviado com sucesso!",
+        `Endereço: ${enderecoFormatado}\nToken: enviado corretamente\nData: ${new Date().toLocaleString()}\nVitimaId: ${usuario.id}`
+      );
+
+
     } catch (error) {
       console.error("Erro ao enviar notificação:", error);
       Alert.alert("❌ Erro ao enviar alerta");

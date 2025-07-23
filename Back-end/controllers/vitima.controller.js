@@ -1,18 +1,24 @@
   const vitima = require('../services/vitima.services');
 
   async function LoginVitma(req, res, next) {
-      try {
-          const Login = await vitima.LoginUser(req.body);
-          res.setHeader('Authorization', `Bearer ${Login.token}`);
-          res.status(200).json({ 
-              usuario: Login.user
-          });
-          res.end()
-      } catch (error) {
-          console.error('Erro no login do usuário', error);
-          next(error);
-      }
+    try {
+      const Login = await vitima.LoginUser(req.body);
+
+      // Header (opcional, mas pode manter)
+      res.setHeader('Authorization', `Bearer ${Login.token}`);
+
+      // Body com token
+      res.status(200).json({ 
+        usuario: Login.user,
+        token: Login.token  // 👈 aqui está o que o front precisa!
+      });
+
+    } catch (error) {
+      console.error('Erro no login do usuário', error);
+      next(error);
+    }
   }
+
   async function getVitimas(req, res, next) {
       try {
           const vitimas = await vitima.getVitimas();
