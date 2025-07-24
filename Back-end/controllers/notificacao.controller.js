@@ -17,12 +17,6 @@ async function CriarNotificacao(req, res) {
 
 async function BuscarNotificacoes(req, res) {
   try {
-    const { vitimaId } = req.query;
-
-    if (!vitimaId) {
-      return res.status(400).json({ erro: 'vitimaId é obrigatório' });
-    }
-
     const notificacoes = await notificacaoService.BuscarNotificacoesService(vitimaId);
     res.status(200).json(notificacoes);
   } catch (error) {
