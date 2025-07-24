@@ -47,9 +47,15 @@ async function NotificarVitima(req, res) {
       return res.status(404).json({ erro: 'Notificação não encontrada' });
     }
 
+    if (!req.io) {
+      console.error('[NotificarVitima] req.io não está definido');
+      return res.status(500).json({ erro: 'Socket.IO não disponível' });
+    }
+
     console.log('[NotificarVitima] Emitindo socket para:', notificacao.vitimaId);
-    req.io.emit(`notificacao-vitima-${notificacao.vitimaId}`, {
-      mensagem: 'As autoridades foram acionadas e estão a caminho.',
+    req.io.to(`notificacao-vitima-${notificacao.vitimaId}`).emit('notificacao', {
+      titulo: '🚨 Alerta!',
+      mensagem: 'As autoridades estão a caminho!',
       notificacaoId: notificacao.id,
     });
 

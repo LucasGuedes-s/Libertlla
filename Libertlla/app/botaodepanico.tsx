@@ -6,37 +6,15 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
 import { getUserData, getToken } from '../storege';
+import socket from '../assets/services/socket';
 
 export default function Tela() {
   const router = useRouter();
   const [isPressing, setIsPressing] = useState(false);
   const [counter, setCounter] = useState(5);
-  const [vitimaId, setVitimaId] = useState<number | null>(null);
+  const [vitimaId] = useState<number | null>(null);
   const [ultimaNotificacaoId, setUltimaNotificacaoId] = useState<number | null>(null);
   const intervalRef = useRef<number | null>(null);
-
-  // // Recupera vitimaId a partir do e-mail armazenado
-  // useEffect(() => {
-  //   const getVitimaId = async () => {
-  //     const user = await getUserData();
-  //     if (user && user.email) {
-  //       try {
-  //         const res = await axios.get(`https://libertlla.onrender.com/vitima/id?email=${encodeURIComponent(user.email)}`);
-  //         console.log('Resposta da API vitima (id):', res.data);
-
-  //         if (res.data?.id) {
-  //           setVitimaId(res.data.id);
-  //         } else {
-  //           console.warn('Usuária não encontrada no backend.');
-  //         }
-  //       } catch (error) {
-  //         console.error('Erro ao buscar ID da vítima:', error);
-  //       }
-  //     }
-  //   };
-
-  //   getVitimaId();
-  // }, []);
 
   useEffect(() => {
     if (!vitimaId) return;
@@ -104,6 +82,14 @@ export default function Tela() {
         return;
       }
 
+      if (!socket.connected) {
+        await new Promise(resolve => socket.on('connect', resolve));
+      }
+      socket.emit('entrarNaSalaVitima', usuario.id);
+      console.log(`[Socket] Entrou na sala da vítima ${usuario.id}`);
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       await axios.post(
         'https://libertlla.onrender.com/notificacao',
         {
@@ -114,7 +100,7 @@ export default function Tela() {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Mantém o token no header para autenticação JWT
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -123,7 +109,6 @@ export default function Tela() {
         "✅ Alerta enviado com sucesso!",
         `Endereço: ${enderecoFormatado}\nToken: enviado corretamente\nData: ${new Date().toLocaleString()}\nVitimaId: ${usuario.id}`
       );
-
 
     } catch (error) {
       console.error("Erro ao enviar notificação:", error);
