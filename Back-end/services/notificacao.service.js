@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function CriarNotificacaoService(req) {
-  const { endereco } = req.body;
+  const { endereco, data } = req.body;
   const vitimaId = req.user.id; // Pega o ID da vítima pelo token
 
   const data = new Date();
