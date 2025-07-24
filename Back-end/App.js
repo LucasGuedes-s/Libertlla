@@ -83,6 +83,12 @@ app.use(vitimas);
 app.use(notificacao);
 
 io.on('connection', (socket) => {
+    // Vítima abre o App
+    socket.on('entrarNaSalaVitima', (vitimaId) => {
+        socket.join(`notificacao-vitima-${vitimaId}`);
+        console.log(`Socket ${socket.id} entrou na sala: notificacao-vitima-${vitimaId}`);
+    });
+
     // Quando um administrador se conecta
     socket.on('admin connect', (email) => {
         adminSockets.add(socket);

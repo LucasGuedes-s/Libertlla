@@ -7,4 +7,6 @@ router.post('/notificacao', validarJWT, controller.CriarNotificacao);
 
 router.get('/notificacoes', controller.BuscarNotificacoes);
 
+router.post('/notificacoes/:id/notificar', controller.NotificarVitima);
+
 module.exports = router;
