@@ -11,9 +11,23 @@
           :key="notificacao.id"
           class="notificacao-card"
         >
-          <h2>Nova ocorrência</h2>
-          <p><strong>Data:</strong> {{ formatarData(notificacao.data) }}</p>
-          <p><strong>Localização:</strong> {{ notificacao.endereco }}</p>
+          <div class="notificacao-conteudo">
+            <div class="info-texto">
+              <h2>Nova ocorrência</h2>
+              <p><strong>Data:</strong> {{ formatarData(notificacao.data) }}</p>
+              <p><strong>Localização:</strong> {{ notificacao.endereco }}</p>
+            </div>
+
+            <div class="acao-botao">
+              <button
+                class="btn-aceitar"
+                :disabled="notificacao.notificada"
+                @click="notificarVitima(notificacao)"
+              >
+                {{ notificacao.notificada ? 'Usuária notificada!' : 'Notificar usuária' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -25,6 +39,7 @@ import { io } from 'socket.io-client';
 import SideBar from '@/components/SideBar.vue';
 import NavBarUser from '@/components/NavBarUser.vue';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default {
@@ -36,15 +51,52 @@ export default {
     return {
       socket: null,
       notificacoes: [],
+      vitimaId: null,
     };
   },
   mounted() {
+    // Extrair vitimaId do token JWT salvo no localStorage
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        this.vitimaId = decoded.id;  // Ajuste caso seu payload use outro campo
+      } catch (e) {
+        console.error('Token inválido', e);
+      }
+    } else {
+      console.warn('Usuário não logado');
+    }
+
     this.carregarNotificacoes();
+
     this.socket = io('https://libertlla.onrender.com/');
+
+    if (this.vitimaId) {
+      // Entra na sala socket específica da vítima
+      this.socket.emit('entrarNaSalaVitima', this.vitimaId);
+
+      // Escuta notificações direcionadas para essa vítima
+      this.socket.on(`notificacao-vitima-${this.vitimaId}`, (data) => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'warning',
+          title: data.mensagem || 'Nova notificação!',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          background: '#fff',
+          color: '#333',
+          iconColor: '#FF00AE',
+        });
+        this.carregarNotificacoes();
+      });
+    }
+
+    // Notificação geral de nova notificação (se quiser manter)
     this.socket.on('novaNotificacao', () => {
       console.log('Nova notificação recebida');
-
-      // Alerta toast com SweetAlert2
       Swal.fire({
         toast: true,
         position: 'top-end',
@@ -57,7 +109,6 @@ export default {
         color: '#333',
         iconColor: '#FF00AE',
       });
-
       this.carregarNotificacoes();
     });
   },
@@ -80,6 +131,32 @@ export default {
         hour: '2-digit',
         minute: '2-digit',
       });
+    },
+    async notificarVitima(notificacao) {
+      try {
+        const resposta = await fetch(`https://libertlla.onrender.com/notificacoes/${notificacao.id}/notificar`, {
+          method: 'POST',
+        });
+
+        if (resposta.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Usuária foi notificada!',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          notificacao.notificada = true;
+        } else {
+          throw new Error('Falha ao notificar a usuária');
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao enviar notificação',
+          text: error.message,
+        });
+      }
     },
   },
 };
@@ -118,9 +195,37 @@ h2 {
   font-family: "Montserrat", sans-serif;
 }
 
-.notificacao-card p {
-  margin: 6px 0;
-  font-size: 15px;
-  color: #7E7E7E;
+.notificacao-conteudo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-texto {
+  flex: 1;
+}
+
+.acao-botao {
+  margin-left: 20px;
+}
+
+.btn-aceitar {
+  padding: 10px 20px;
+  background-color: #9B287B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.btn-aceitar:hover:enabled {
+  background-color: #FF00AE;
+}
+
+.btn-aceitar:disabled {
+  background-color: #cccccc;
+  cursor: default;
 }
 </style>

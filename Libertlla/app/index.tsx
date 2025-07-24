@@ -31,9 +31,11 @@ export default function Index() {
           senha,
         },
       });
+      console.log('[LOGIN] Resposta completa:', response.data);
 
-      // Ajuste conforme o retorno real do seu backend:
       const { usuario, token } = response.data;
+      console.log('[LOGIN] Usuário:', usuario);
+      console.log('[LOGIN] Token recebido:', token);
 
       await saveUserData(usuario);
       await saveToken(token);

@@ -16,6 +16,7 @@
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.7",
+    "jwt-decode": "^4.0.0",
     "pinia": "^2.3.1",
     "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.15.10",

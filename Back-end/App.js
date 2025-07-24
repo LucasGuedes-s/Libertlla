@@ -168,6 +168,14 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Vítima abre o App
+    socket.on('entrarNaSalaVitima', (vitimaId) => {
+        const sala = `notificacao-vitima-${vitimaId}`;
+        socket.join(sala);
+        console.log(`Socket ${socket.id} entrou na sala: notificacao-vitima-${vitimaId}`);
+        console.log('Salas do socket agora:', socket.rooms);
+    });
+
     // Quando um usuário se desconecta
     socket.on('disconnect', async () => {
     // Verifica se o socket desconectado é um administrador
