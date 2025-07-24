@@ -83,12 +83,6 @@ app.use(vitimas);
 app.use(notificacao);
 
 io.on('connection', (socket) => {
-    // Vítima abre o App
-    socket.on('entrarNaSalaVitima', (vitimaId) => {
-        socket.join(`notificacao-vitima-${vitimaId}`);
-        console.log(`Socket ${socket.id} entrou na sala: notificacao-vitima-${vitimaId}`);
-    });
-
     // Quando um administrador se conecta
     socket.on('admin connect', (email) => {
         adminSockets.add(socket);
@@ -172,6 +166,14 @@ io.on('connection', (socket) => {
             activeChats.delete(socket.id);
             chatMessages.delete(socket.id);
         }
+    });
+
+    // Vítima abre o App
+    socket.on('entrarNaSalaVitima', (vitimaId) => {
+        const sala = `notificacao-vitima-${vitimaId}`;
+        socket.join(sala);
+        console.log(`Socket ${socket.id} entrou na sala: notificacao-vitima-${vitimaId}`);
+        console.log('Salas do socket agora:', socket.rooms);
     });
 
     // Quando um usuário se desconecta

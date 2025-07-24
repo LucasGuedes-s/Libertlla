@@ -39,6 +39,7 @@ import { io } from 'socket.io-client';
 import SideBar from '@/components/SideBar.vue';
 import NavBarUser from '@/components/NavBarUser.vue';
 import Swal from 'sweetalert2';
+import { jwtDecode } from 'jwt-decode';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default {
@@ -50,11 +51,50 @@ export default {
     return {
       socket: null,
       notificacoes: [],
+      vitimaId: null,
     };
   },
   mounted() {
+    // Extrair vitimaId do token JWT salvo no localStorage
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        this.vitimaId = decoded.id;  // Ajuste caso seu payload use outro campo
+      } catch (e) {
+        console.error('Token inválido', e);
+      }
+    } else {
+      console.warn('Usuário não logado');
+    }
+
     this.carregarNotificacoes();
+
     this.socket = io('https://libertlla.onrender.com/');
+
+    if (this.vitimaId) {
+      // Entra na sala socket específica da vítima
+      this.socket.emit('entrarNaSalaVitima', this.vitimaId);
+
+      // Escuta notificações direcionadas para essa vítima
+      this.socket.on(`notificacao-vitima-${this.vitimaId}`, (data) => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'warning',
+          title: data.mensagem || 'Nova notificação!',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          background: '#fff',
+          color: '#333',
+          iconColor: '#FF00AE',
+        });
+        this.carregarNotificacoes();
+      });
+    }
+
+    // Notificação geral de nova notificação (se quiser manter)
     this.socket.on('novaNotificacao', () => {
       console.log('Nova notificação recebida');
       Swal.fire({
@@ -95,8 +135,8 @@ export default {
     async notificarVitima(notificacao) {
       try {
         const resposta = await fetch(`https://libertlla.onrender.com/notificacoes/${notificacao.id}/notificar`, {
-           method: 'POST' 
-          });
+          method: 'POST',
+        });
 
         if (resposta.ok) {
           Swal.fire({
@@ -105,7 +145,6 @@ export default {
             showConfirmButton: false,
             timer: 2000,
           });
-
           notificacao.notificada = true;
         } else {
           throw new Error('Falha ao notificar a usuária');
