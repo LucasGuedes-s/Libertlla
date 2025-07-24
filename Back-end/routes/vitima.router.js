@@ -5,7 +5,7 @@ const validarJWT = require('../middlewares/auth.js');
 
 router.post('/login/vitima', controller.LoginVitma)
 
-router.get('/vitima', controller.getVitimas)
+router.get('/vitimas', controller.getVitimas)
 
 router.get('/vitima/:email', controller.getVitimaPorEmail);
 
