@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,32 +8,26 @@ import {
   PermissionsAndroid,
   Platform,
   ToastAndroid,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
-import { useBluetooth } from '../assets/context/BluetoothContext';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { BleManager, Device, State } from 'react-native-ble-plx';
 import BluetoothService from '../assets/services/BluetoothService';
-import { getBluetoothDevice } from '../storege';
-import { Device } from 'react-native-ble-plx';
+import { getBluetoothDevice, BluetoothDeviceData } from '../storege';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+
+const bleManager = BluetoothService.getManager();
+
+type DeviceWithRSSI = Device & { rssi: number };
 
 export default function BluetoothScreen() {
-  const { isConnected, deviceId, connect, disconnect } = useBluetooth();
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [savedDevice, setSavedDevice] = useState<Device | null>(null);
+  const [devices, setDevices] = useState<DeviceWithRSSI[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
-  const [scanning, setScanning] = useState(false);
-
-  useEffect(() => {
-    const loadSavedDevice = async () => {
-      const saved = await getBluetoothDevice();
-      if (saved) {
-        // Convert BluetoothDeviceData to Device if possible, or just store the id and name
-        setSavedDevice({
-          id: saved.id,
-          name: saved.name,
-        } as Device);
-      }
-    };
-    loadSavedDevice();
-  }, []);
+  const [savedDevice, setSavedDevice] = useState<BluetoothDeviceData | null>(null);
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+  const manuallyDisconnected = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -43,28 +37,121 @@ export default function BluetoothScreen() {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       ]);
     }
+
+    return () => {
+      bleManager.stopDeviceScan();
+    };
   }, []);
 
-  const startScan = () => {
+  useEffect(() => {
+    const loadSavedDevice = async () => {
+      const saved = await getBluetoothDevice();
+      if (saved) setSavedDevice(saved);
+    };
+    loadSavedDevice();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      let reconnectInterval: number | null = null;
+
+      const tryReconnect = async () => {
+        if (!isActive || connectedDevice || manuallyDisconnected.current) return;
+
+        if (!savedDevice) return;
+
+        const btState = await bleManager.state();
+        if (btState !== State.PoweredOn) return;
+
+        const isConnected = await bleManager.isDeviceConnected(savedDevice.id);
+        if (isConnected) {
+          const devicesFound = await bleManager.devices([savedDevice.id]);
+          setConnectedDevice(devicesFound[0] || null);
+          return;
+        }
+
+        bleManager.startDeviceScan(null, null, async (error, scannedDevice) => {
+          if (error || !scannedDevice || !isActive) return;
+
+          if (scannedDevice.id === savedDevice.id) {
+            bleManager.stopDeviceScan();
+            try {
+              const reconnected = await BluetoothService.connectToDevice(savedDevice.id);
+              if (isActive && reconnected) {
+                setConnectedDevice(reconnected);
+                ToastAndroid.show('Reconectado automaticamente!', ToastAndroid.SHORT);
+
+                reconnected.onDisconnected(() => {
+                  setConnectedDevice(null);
+                });
+
+                if (reconnectInterval) clearInterval(reconnectInterval);
+              }
+            } catch (err) {
+              console.log('Falha ao reconectar:', err);
+            }
+          }
+        });
+      };
+
+      if (!connectedDevice) {
+        tryReconnect();
+        reconnectInterval = setInterval(tryReconnect, 5000);
+      }
+
+      return () => {
+        isActive = false;
+        if (reconnectInterval) clearInterval(reconnectInterval);
+        bleManager.stopDeviceScan();
+      };
+    }, [connectedDevice, savedDevice])
+  );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (appState === 'active' && nextAppState.match(/inactive|background/)) {
+        await BluetoothService.disconnect();
+        setConnectedDevice(null);
+      }
+      setAppState(nextAppState);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
+
+  const startScan = async () => {
+    manuallyDisconnected.current = false;
     setDevices([]);
-    setScanning(true);
 
-    BluetoothService.getManager().startDeviceScan(null, null, (error, device) => {
-      if (error) {
-        console.log('Erro no scan:', error);
-        setScanning(false);
-        return;
-      }
+    const btState = await bleManager.state();
+    if (btState !== State.PoweredOn) {
+      ToastAndroid.show('Bluetooth está desligado!', ToastAndroid.SHORT);
+      return;
+    }
 
-      if (device && device.name && !devices.some((d) => d.id === device.id)) {
-        setDevices((prevDevices) => [...prevDevices, device]);
-      }
+    bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error || !device?.name) return;
+
+      const rssi = device.rssi ?? -100;
+      setDevices((prev) => {
+        const index = prev.findIndex((d) => d.id === device.id);
+        if (index === -1) {
+          return [...prev, Object.assign(device, { rssi })];
+        } else {
+          const updated = [...prev];
+          updated[index].rssi = rssi;
+          return updated;
+        }
+      });
     });
 
     setTimeout(() => {
-      BluetoothService.getManager().stopDeviceScan();
-      setScanning(false);
-    }, 5000);
+      bleManager.stopDeviceScan();
+      ToastAndroid.show('Scan finalizado', ToastAndroid.SHORT);
+    }, 10000);
   };
 
   const connectToDevice = async (device: Device) => {
@@ -73,58 +160,94 @@ export default function BluetoothScreen() {
       return;
     }
 
+    if (connectedDevice?.id === device.id) {
+      ToastAndroid.show('Dispositivo já conectado', ToastAndroid.SHORT);
+      return;
+    }
+
     try {
       const connected = await BluetoothService.connectToDevice(device.id);
+      manuallyDisconnected.current = false;
       setConnectedDevice(connected);
 
       connected.onDisconnected(() => {
-        console.log('[Conexão] Dispositivo desconectado');
         setConnectedDevice(null);
       });
 
       ToastAndroid.show(`Conectado a ${device.name}`, ToastAndroid.SHORT);
-    } catch (error) {
-      console.log('Erro ao conectar:', error);
+    } catch {
       ToastAndroid.show('Erro ao conectar', ToastAndroid.SHORT);
     }
   };
 
-  const renderItem = ({ item }: { item: Device }) => (
-    <TouchableOpacity
-      style={styles.deviceItem}
-      onPress={() => connectToDevice(item)}
-    >
-      <Text style={styles.deviceName}>{item.name || 'Sem nome'}</Text>
-      <Text style={styles.deviceId}>{item.id}</Text>
-    </TouchableOpacity>
-  );
+  const disconnect = async () => {
+    manuallyDisconnected.current = true;
+    await BluetoothService.disconnect();
+    setConnectedDevice(null);
+    ToastAndroid.show('Desconectado', ToastAndroid.SHORT);
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Dispositivos Bluetooth</Text>
+      <View style={styles.box}>
+        <Text style={styles.title}>Dispositivo Bluetooth</Text>
+      </View>
 
-      <TouchableOpacity style={styles.scanButton} onPress={startScan}>
-        <Text style={styles.scanButtonText}>
-          {scanning ? 'Escaneando...' : 'Buscar dispositivos'}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.box}>
+        <TouchableOpacity style={styles.scanButton} onPress={startScan}>
+          <Text style={styles.scanButtonText}>Buscar dispositivos</Text>
+        </TouchableOpacity>
 
-      <FlatList
-        data={devices}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={styles.noDevices}>
-            {scanning ? 'Buscando dispositivos...' : 'Nenhum dispositivo encontrado'}
-          </Text>
-        }
-      />
+        {connectedDevice ? (
+          <>
+            <Text style={styles.connectedText}>
+              Conectado a: {connectedDevice.name || connectedDevice.id}
+            </Text>
+            <TouchableOpacity style={styles.disconnectButton} onPress={disconnect}>
+              <Text style={styles.disconnectText}>Desconectar</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text style={styles.noConnectedText}>Nenhum dispositivo conectado</Text>
+        )}
+      </View>
 
-      {connectedDevice && (
-        <Text style={styles.connectedText}>
-          Conectado a: {connectedDevice.name || 'Sem nome'}
-        </Text>
-      )}
+      <View style={styles.box}>
+        <FlatList
+          data={devices}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.deviceItem} onPress={() => connectToDevice(item)}>
+              <Text style={styles.deviceName}>{item.name || 'Sem nome'}</Text>
+              <Text style={styles.deviceId}>{item.id}</Text>
+              <Text style={styles.rssiText}>RSSI: {item.rssi} dBm</Text>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={<Text style={styles.noDevices}>Nenhum dispositivo encontrado</Text>}
+        />
+      </View>
+
+      <View style={styles.menu_container}>
+        <TouchableOpacity onPress={() => router.push('/botaodepanico')}>
+          <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
+          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/Usuario')}>
+          <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/horario')}>
+          <MaterialCommunityIcons name="clock-time-four-outline" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -132,48 +255,93 @@ export default function BluetoothScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  box: {
+    width: '90%',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EFEFEF',
+    marginBottom: 16,
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontFamily: 'Montserrat-Bold',
     textAlign: 'center',
+    color: '#9B287B',
   },
   scanButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
+    backgroundColor: '#9B287B',
+    padding: 10,
     borderRadius: 8,
-    marginBottom: 16,
+    alignItems: 'center',
+    marginVertical: 8,
   },
   scanButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  connectedText: {
+    fontFamily: 'Montserrat-Regular',
+    color: '#5C164E',
+    fontSize: 14,
+    marginVertical: 8,
+  },
+  disconnectButton: {
+    marginTop: 8,
+    padding: 10,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  disconnectText: {
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#7E7E7E',
+  },
+  noConnectedText: {
+    fontFamily: 'Montserrat-Regular',
+    color: '#999',
     textAlign: 'center',
-    fontSize: 16,
   },
   deviceItem: {
-    padding: 12,
     borderBottomWidth: 1,
-    borderColor: '#ccc',
+    borderBottomColor: '#EFEFEF',
+    paddingVertical: 10,
   },
   deviceName: {
+    fontFamily: 'Montserrat-SemiBold',
     fontSize: 16,
-    fontWeight: '500',
+    color: '#9B287B',
   },
   deviceId: {
+    fontFamily: 'Montserrat-Regular',
     fontSize: 12,
     color: '#666',
   },
-  noDevices: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 20,
+  rssiText: {
+    fontFamily: 'Montserrat-Regular',
+    fontSize: 12,
+    color: '#5C164E',
   },
-  connectedText: {
-    marginTop: 20,
+  noDevices: {
+    fontFamily: 'Montserrat-Regular',
+    fontSize: 14,
+    color: '#999',
     textAlign: 'center',
-    fontWeight: 'bold',
-    color: 'green',
+    marginTop: 10,
+  },
+  menu_container: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '70%',
+    paddingVertical: 12,
+    backgroundColor: '#9B287B',
+    borderRadius: 30,
+    marginTop: 10,
   },
 });
