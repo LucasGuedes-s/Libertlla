@@ -17,7 +17,7 @@ async function CriarNotificacao(req, res) {
 
 async function BuscarNotificacoes(req, res) {
   try {
-    const notificacoes = await notificacaoService.BuscarNotificacoesService(vitimaId);
+    const notificacoes = await notificacaoService.BuscarNotificacoesService();
     res.status(200).json(notificacoes);
   } catch (error) {
     console.error(error);

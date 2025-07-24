@@ -19,11 +19,8 @@ async function CriarNotificacaoService(req) {
   return notificacao;
 }
 
-async function BuscarNotificacoesService(vitimaId) {
+async function BuscarNotificacoesService() {
   const notificacoes = await prisma.notificacao_botao.findMany({
-    where: {
-      vitimaId: parseInt(vitimaId),
-    },
     orderBy: {
       data: 'desc',
     },

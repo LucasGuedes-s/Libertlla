@@ -115,7 +115,7 @@ export default {
   methods: {
     async carregarNotificacoes() {
       try {
-        const res = await fetch('https://libertlla.onrender.com/notificacoes');
+        const res = await fetch('http://localhost:3000/notificacoes');
         const dados = await res.json();
         console.log(dados);
         this.notificacoes = dados;
