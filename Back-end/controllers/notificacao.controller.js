@@ -1,6 +1,7 @@
 const notificacaoService = require('../services/notificacao.service');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { getSocketVitimaMap } = require('../utils/socketManager');
 
 async function CriarNotificacao(req, res) {
   try {
@@ -17,7 +18,7 @@ async function CriarNotificacao(req, res) {
 
 async function BuscarNotificacoes(req, res) {
   try {
-    const notificacoes = await notificacaoService.BuscarNotificacoesService(vitimaId);
+    const notificacoes = await notificacaoService.BuscarNotificacoesService();
     res.status(200).json(notificacoes);
   } catch (error) {
     console.error(error);
@@ -41,19 +42,26 @@ async function NotificarVitima(req, res) {
       return res.status(404).json({ erro: 'Notificação não encontrada' });
     }
 
+    const socketId = getSocketVitimaMap().get(notificacao.vitimaId);
+
     if (!req.io) {
       console.error('[NotificarVitima] req.io não está definido');
       return res.status(500).json({ erro: 'Socket.IO não disponível' });
     }
 
-    console.log('[NotificarVitima] Emitindo socket para:', notificacao.vitimaId);
-    req.io.to(`notificacao-vitima-${notificacao.vitimaId}`).emit('notificacao', {
-      titulo: '🚨 Alerta!',
-      mensagem: 'As autoridades estão a caminho!',
-      notificacaoId: notificacao.id,
-    });
+    if (socketId) {
+      req.io.to(socketId).emit('notificacao', {
+        titulo: '🚨 Alerta!',
+        mensagem: 'As autoridades estão a caminho!',
+        notificacaoId: notificacao.id,
+      });
 
-    return res.status(200).json({ mensagem: 'Notificação enviada à vítima com sucesso' });
+      console.log(`[NotificarVitima] Notificação enviada para socketId: ${socketId}`);
+    } else {
+      console.warn(`[NotificarVitima] Vítima ${notificacao.vitimaId} não está conectada`);
+    }
+
+    return res.status(200).json({ mensagem: 'Notificação processada com sucesso' });
   } catch (error) {
     console.error('[NotificarVitima] Erro:', error);
     return res.status(500).json({ erro: 'Erro ao notificar vítima' });

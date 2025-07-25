@@ -10,6 +10,8 @@ const path = require("path");
 const multer = require("multer");
 const dotenv = require("dotenv");
 dotenv.config();
+const { getSocketVitimaMap } = require('./utils/socketManager');
+
 
 const app = express();
 
@@ -68,8 +70,6 @@ let activeChats = new Map();   // Mapeia cliente → admin
 let chatMessages = new Map();  // Armazena mensagens do chat antes de salvar
 let adminEmails = new Map(); // Armazena o email do admin por socket.id
 
-
-// 🔹 Adiciona o `io` no `req` para acessar no controller
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -169,11 +169,10 @@ io.on('connection', (socket) => {
     });
 
     // Vítima abre o App
-    socket.on('entrarNaSalaVitima', (vitimaId) => {
-        const sala = `notificacao-vitima-${vitimaId}`;
-        socket.join(sala);
-        console.log(`Socket ${socket.id} entrou na sala: notificacao-vitima-${vitimaId}`);
-        console.log('Salas do socket agora:', socket.rooms);
+    socket.on('registrarVitima', (vitimaId) => {
+        console.log(`[registrarVitima] Vítima ${vitimaId} conectada`);
+        const socketVitimaMap = getSocketVitimaMap();
+        socketVitimaMap.set(vitimaId, socket.id);
     });
 
     // Quando um usuário se desconecta
@@ -199,6 +198,15 @@ io.on('connection', (socket) => {
         // Remover o email do admin da lista
         adminEmails.delete(socket.id);
     } else {
+        // 🔹 Se for uma vítima registrada, remova do map
+        const socketVitimaMap = getSocketVitimaMap();
+        for (const [vId, sId] of socketVitimaMap.entries()) {
+            if (sId === socket.id) {
+                socketVitimaMap.delete(vId);
+                console.log(`Vítima ${vId} desconectada, socket ${sId} removido`);
+                break;
+            }
+        }
         // Caso contrário, é um cliente que se desconectou
         if (activeChats.has(socket.id)) {
             const adminSocketId = activeChats.get(socket.id);
@@ -273,6 +281,10 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         res.status(500).json({ error: "Erro ao fazer upload do arquivo." });
     }
 });
+
+// Exporta as funcionalidades necessárias
+module.exports = { getSocketVitimaMap };
+
 // Iniciar o servidor
 server.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
