@@ -70,7 +70,7 @@ export default {
       const canvas = document.getElementById("violenceLineChart");
       canvas.width = 1200; // Definir largura maior
       canvas.height = 400; // Ajustar altura
-
+      
       const ctx = canvas.getContext("2d");
 
       new Chart(ctx, {
@@ -139,6 +139,8 @@ export default {
 .container {
   margin-left: 250px;
   padding: 20px;
+  max-width: calc(100vw - 250px);
+  box-sizing: border-box;
 }
 
 .titulo-principal {
@@ -154,33 +156,37 @@ export default {
   display: flex;
   margin-top: 80px;
   justify-content: space-between;
-  width: 90%; /* Garantir que o contêiner ocupe toda a largura disponível */
-  overflow: hidden; /* Evitar rolagem horizontal */
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .line-chart-container {
-  flex: 3; /* Gráfico de linhas ocupa 3 partes */
-  height: 400px; /* Ajustar a altura */
+  flex: 3;
+  height: 400px;
 }
 
 .line-chart-container canvas {
-  width: 90% !important;
+  width: 100% !important;
   height: 100% !important;
+  display: block;
 }
 
 .pie-chart-container {
-  flex: 2; /* Gráfico de pizza ocupa 2 partes */
-  height: 400px; /* Ajustar a altura */
+  flex: 2;
+  height: 400px;
 }
 
 .pie-chart-container canvas {
-  width: 90% !important;
+  width: 100% !important;
   height: 100% !important;
+  display: block;
 }
 
 @media (max-width: 900px) {
   .container {
-    margin-left: 0px;
+    margin-left: 0;
+    max-width: 100vw;
     padding: 20px;
   }
   .charts-container {
@@ -188,8 +194,8 @@ export default {
     width: 100%;
   }
   .line-chart-container, .pie-chart-container {
-    width: 100%; /* Para garantir que os gráficos ocupem toda a largura */
-    height: 300px; /* Ajustar para o layout pequeno */
+    width: 100%;
+    height: 300px;
     margin-bottom: 20px;
   }
 }
