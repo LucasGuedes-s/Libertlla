@@ -71,7 +71,7 @@ export default function Tela() {
 
       const usuario = await getUserData();
       const token = await getToken();
-
+      console.log(token)
       if (!usuario?.id) {
         Alert.alert("Erro", "Usuário não encontrado.");
         return;
@@ -81,15 +81,15 @@ export default function Tela() {
         Alert.alert("Erro", "Token de notificação não encontrado.");
         return;
       }
-
+      console.log("aqui")
       if (!socket.connected) {
-        await new Promise(resolve => socket.on('connect', resolve));
+        console.log("iniciando promise do socket")
+        new Promise<void>(resolve => socket.on('connect', () => resolve()));
       }
       socket.emit('entrarNaSalaVitima', usuario.id);
       console.log(`[Socket] Entrou na sala da vítima ${usuario.id}`);
 
-      await new Promise(resolve => setTimeout(resolve, 200));
-
+      console.log('Prestes a enviar noticação')
       await axios.post(
         'https://libertlla.onrender.com/notificacao',
         {
@@ -105,6 +105,7 @@ export default function Tela() {
         }
       );
 
+      console.log('Noticação enviada')
       Alert.alert(
         "✅ Alerta enviado com sucesso!",
         `Endereço: ${enderecoFormatado}\nToken: enviado corretamente\nData: ${new Date().toLocaleString()}\nVitimaId: ${usuario.id}`

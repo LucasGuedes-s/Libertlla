@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 async function CriarNotificacaoService(req) {
   const { endereco, data } = req.body;
-  const vitimaId = req.user.id; // Pega o ID da vítima pelo token
+  const vitimaId = req.user.id;
 
   //const data = new Date();
   //data.setHours(0, 0, 0, 0); // Zera a hora

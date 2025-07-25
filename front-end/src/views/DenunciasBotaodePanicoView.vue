@@ -134,20 +134,52 @@ export default {
     },
     async notificarVitima(notificacao) {
       try {
-        const resposta = await fetch(`https://libertlla.onrender.com/notificacoes/${notificacao.id}/notificar`, {
-          method: 'POST',
-        });
+        const token = localStorage.getItem('token');
+        if (!token) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Você precisa estar logado para notificar',
+          });
+          return;
+        }
+
+        const resposta = await fetch(
+          `https://libertlla.onrender.com/notificacoes/${notificacao.id}/notificar`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         if (resposta.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Usuária foi notificada!',
-            showConfirmButton: false,
-            timer: 2000,
-          });
+          const dados = await resposta.json();
+          if (dados.mensagem) {
+            Swal.fire({
+              icon: 'success',
+              title: dados.mensagem,
+              showConfirmButton: false,
+              timer: 2000,
+            });
+          } else {
+            Swal.fire({
+              icon: 'success',
+              title: 'Usuária foi notificada!',
+              showConfirmButton: false,
+              timer: 2000,
+            });
+          }
           notificacao.notificada = true;
         } else {
-          throw new Error('Falha ao notificar a usuária');
+          // Tentar ler a mensagem de erro do backend
+          const erroData = await resposta.json().catch(() => null);
+          Swal.fire({
+            icon: 'error',
+            title: 'Falha ao notificar a usuária',
+            text: erroData?.erro || 'Erro desconhecido',
+          });
         }
       } catch (error) {
         console.error(error);
@@ -157,8 +189,8 @@ export default {
           text: error.message,
         });
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
