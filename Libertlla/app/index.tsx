@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
+  Linking
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
@@ -93,6 +94,9 @@ export default function Index() {
               <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Entrar</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => Linking.openURL("http://localhost:8080/senha")}>
+                <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+              </TouchableOpacity>
             </View>
           </KeyboardAvoidingView>
         </ImageBackground>
@@ -107,15 +111,15 @@ const styles = StyleSheet.create({
   },
   imageSection: {
     flex: 1,
-    justifyContent: "center", 
-    alignItems: "center", 
+    justifyContent: "center",
+    alignItems: "center",
   },
   loginSection: {
-    width: "80%", 
+    width: "80%",
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
-    justifyContent: "center", 
+    justifyContent: "center",
   },
   title: {
     fontSize: 48,
@@ -160,4 +164,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Montserrat",
   },
+  forgotPassword: {
+  color: '#ffffff',
+  textAlign: 'center',
+  marginTop: 16,
+  fontFamily: 'Montserrat',
+},
 });

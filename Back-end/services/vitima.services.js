@@ -84,4 +84,24 @@ async function adicionarContato(email, novoContato){
   return vitimaAtualizada;
 };
 
-module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato }
+async function alterarSenha(email, novaSenha) {
+  const vitima = await prisma.vitima.findUnique({
+    where: { email },
+  });
+
+  if (!vitima) {
+    throw new Error('E-mail não encontrado');
+  }
+
+  const senhaCriptografada = await bcrypt.hash(novaSenha, 10);
+
+  const senhaAtualizada = await prisma.vitima.update({
+    where: { email },
+    data: { senha: senhaCriptografada },
+  });
+
+  return senhaAtualizada;
+}
+
+
+module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato, alterarSenha }

@@ -72,4 +72,19 @@
     }
   };
 
-  module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato };
+  async function alterarsenhacontroller(req, res) {
+  const { email, novaSenha } = req.body;
+
+  if (!email || !novaSenha) {
+    return res.status(400).json({ error: 'Email e nova senha são obrigatórios' });
+  }
+
+  try {
+    const resultado = await vitima.alterarSenha(email, novaSenha);
+    return res.status(200).json(resultado);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+};
+
+  module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato, alterarsenhacontroller };
