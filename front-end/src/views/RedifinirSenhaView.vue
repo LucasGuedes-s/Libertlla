@@ -63,7 +63,7 @@ export default {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/vitimas/recuperar_senha', {
+      const response = await axios.post('https://libertlla.onrender.com/vitimas/recuperar_senha', {
         email: this.email,
         novaSenha: this.novaSenha
       });
