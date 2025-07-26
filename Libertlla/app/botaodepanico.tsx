@@ -7,6 +7,8 @@ import * as Location from 'expo-location';
 import BluetoothService from '../assets/services/BluetoothService';
 import { getUserData, getToken } from '../storege';
 import socket from '../assets/services/socket';
+import MenuInferior from '../assets/components/menu_inferior'
+
 
 export default function Tela() {
   const router = useRouter();
@@ -227,28 +229,7 @@ export default function Tela() {
           />
         )}
       </View>
-
-      <View style={styles.menu_container}>
-        <TouchableOpacity>
-          <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Usuario')}>
-          <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/horario')}>
-          <MaterialCommunityIcons name="clock-time-four-outline" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-      </View>
+      <MenuInferior />  
     </View>
   );
 }

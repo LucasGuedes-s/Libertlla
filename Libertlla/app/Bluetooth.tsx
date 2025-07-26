@@ -16,6 +16,7 @@ import { BleManager, Device, State } from 'react-native-ble-plx';
 import BluetoothService from '../assets/services/BluetoothService';
 import { getBluetoothDevice, BluetoothDeviceData } from '../storege';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import MenuInferior from '../assets/components/menu_inferior'
 
 const bleManager = BluetoothService.getManager();
 
@@ -226,28 +227,7 @@ export default function BluetoothScreen() {
           ListEmptyComponent={<Text style={styles.noDevices}>Nenhum dispositivo encontrado</Text>}
         />
       </View>
-
-      <View style={styles.menu_container}>
-        <TouchableOpacity onPress={() => router.push('/botaodepanico')}>
-          <MaterialCommunityIcons name="alarm-light" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Usuario')}>
-          <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/horario')}>
-          <MaterialCommunityIcons name="clock-time-four-outline" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-      </View>
+      <MenuInferior />
     </View>
   );
 }
@@ -255,9 +235,9 @@ export default function BluetoothScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
+    backgroundColor: '#FFFFFF',
   },
   box: {
     width: '90%',

@@ -8,10 +8,11 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+// import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { getUserData } from '../storege';
+import MenuInferior from '../assets/components/menu_inferior'
 export default function Tela() {
   const router = useRouter();
   const [nome, setNome] = useState('');
@@ -129,29 +130,8 @@ export default function Tela() {
             </View>
           );
         })}
-      </View>
-
-      <View style={styles.menu_container}>
-        <TouchableOpacity onPress={() => router.push('/botaodepanico')}>
-          <MaterialCommunityIcons
-            name="alarm-light"
-            size={30}
-            color="#E9ECEF"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
-          <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/Usuario')}>
-          <MaterialIcons name="account-circle" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <MaterialIcons name="exit-to-app" size={30} color="#E9ECEF" />
-        </TouchableOpacity>
-      </View>
+      </View>   
+      <MenuInferior />  
     </SafeAreaView>
   );
 }
@@ -159,9 +139,9 @@ export default function Tela() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    paddingTop: 50,
   },
   box: {
     width: '90%',
@@ -236,16 +216,5 @@ const styles = StyleSheet.create({
     color: '#999',
     width: 100,
     textAlign: 'right',
-  },
-
-  menu_container: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '70%',
-    paddingVertical: 12,
-    backgroundColor: '#9B287B',
-    borderRadius: 30,
-    marginTop: 40,
   },
 });
