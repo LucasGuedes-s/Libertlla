@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const MenuInferior = () => {
@@ -14,6 +14,10 @@ const MenuInferior = () => {
 
       <TouchableOpacity onPress={() => router.push('/Bluetooth')}>
         <MaterialCommunityIcons name="bluetooth" size={30} color="#E9ECEF" />
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push('/processo')}>
+        <Ionicons name="document-text-outline" size={30} color="#E9ECEF" />
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push('/Usuario')}>
@@ -36,7 +40,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    width: '70%',
+    width: '80%',
     paddingVertical: 12,
     backgroundColor: '#9B287B',
     borderRadius: 30,

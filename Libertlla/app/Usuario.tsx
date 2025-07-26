@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { getUserData } from '../storege';
 import MenuInferior from '../assets/components/menu_inferior'
+
 export default function Tela() {
   const router = useRouter();
   const [nome, setNome] = useState('');
