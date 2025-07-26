@@ -42,6 +42,12 @@
                 </svg>
                 Relatórios
             </a>
+            <a href="/denunciasbotaodepanico">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2c-.55 0-1 .45-1 1v1.07c-2.28.46-4 2.48-4 4.93v3h10v-3c0-2.45-1.72-4.47-4-4.93V3c0-.55-.45-1-1-1zm-6 9v2H4v3h16v-3h-2v-2H6zm6 8a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/>
+    </svg>
+                Bot. Pânico
+            </a>
             <button class="logout-button" @click="logout">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin"
                     viewBox="0 0 16 16">

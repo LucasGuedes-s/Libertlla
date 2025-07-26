@@ -20,7 +20,7 @@
 
             <div class="acao-botao">
               <button
-                class="btn-aceitar"
+                class="btn-notificar"
                 :disabled="notificacao.notificada"
                 @click="notificarVitima(notificacao)"
               >
@@ -234,21 +234,23 @@ h2 {
 }
 
 .info-texto {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* espaçamento entre h2, data e localização */
+  color: #7E7E7E;
 }
 
 .acao-botao {
   margin-left: 20px;
 }
 
-.btn-aceitar {
-  padding: 10px 20px;
+.btn-notificar {
+  padding: 8px 20px;
   background-color: #9B287B;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
   transition: background-color 0.2s ease;
 }
 
