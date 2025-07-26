@@ -13,6 +13,6 @@ router.get('/vitima/id-token', validarJWT, controller.getIdVitimaPorToken);
 
 router.put('/vitima/:email/contato', controller.adicionarContato);
 
-router.post('/vitimas/recuperar_senha', controller.alterarsenhacontroller)
+router.put('/vitimas/recuperar_senha', controller.alterarsenhacontroller)
 
 module.exports = router;

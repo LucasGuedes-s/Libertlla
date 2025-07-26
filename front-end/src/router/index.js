@@ -6,6 +6,7 @@ import FormularioDenunciaView from '@/views/FormularioDenunciaView.vue'
 import MinhasOcorrenciasView from '@/views/MinhasOcorrencias.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import RedifinirSenhaView from '@/views/RedifinirSenhaView.vue'
+import RedifinirSenhaProfissionalView from '@/views/RedifinirSenhaProfissionalView.vue'
 
 Vue.use(VueRouter)
 
@@ -34,6 +35,11 @@ const routes = [
     path: '/senha',
     name: 'senha',
     component: RedifinirSenhaView
+  },
+  {
+    path: '/profissional_senha',
+    name: 'profissional_senha',
+    component: RedifinirSenhaProfissionalView
   },
   {
     path: '/dashboard',

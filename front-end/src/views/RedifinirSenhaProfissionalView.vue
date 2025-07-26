@@ -63,7 +63,7 @@ export default {
       }
 
       try {
-        const response = await axios.put('http://localhost:3000/vitimas/recuperar_senha', {
+        const response = await axios.put('http://localhost:3000/profissional/recuperar_senha', {
           email: this.email,
           novaSenha: this.novaSenha
         });
@@ -71,7 +71,10 @@ export default {
         Swal.fire({
           icon: 'success',
           title: 'Senha alterada com sucesso',
-          text: 'Volte agora para o APP!',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          this.$router.push('/login'); 
         });
 
         this.email = '';
@@ -96,7 +99,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 body {

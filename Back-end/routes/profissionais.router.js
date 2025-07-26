@@ -5,4 +5,6 @@ const validarJWT = require('../middlewares/auth.js')
 
 router.post('/cadastrar/profissional', [validarJWT], controller.postProfissional);
 
+router.put('/profissional/recuperar_senha', controller.alterarSenhaController);
+
 module.exports = router;

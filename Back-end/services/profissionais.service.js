@@ -19,4 +19,23 @@ async function postProfissional(user){
     return cadastro;
 }
 
-module.exports = {postProfissional};
+async function alterarSenhaProfissional(email, novaSenha) {
+  const profissional = await prisma.profissionais.findUnique({
+    where: { email },
+  });
+
+  if (!profissional) {
+    throw new Error('E-mail não encontrado');
+  }
+
+  const senhaCriptografada = await bcryptUtil.hash(novaSenha, 10); // USANDO utilitário
+
+  const profissionalAtualizado = await prisma.profissionais.update({
+    where: { email },
+    data: { senha: senhaCriptografada },
+  });
+
+  return profissionalAtualizado;
+}
+
+module.exports = {postProfissional, alterarSenhaProfissional};

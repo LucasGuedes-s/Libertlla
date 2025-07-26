@@ -15,4 +15,24 @@ async function postProfissional(req, res, next){
         return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
 }
-module.exports = {postProfissional};
+
+async function alterarSenhaController(req, res) {
+  const { email, novaSenha } = req.body;
+
+  if (!email || !novaSenha) {
+    return res.status(400).json({ error: 'Email e nova senha são obrigatórios' });
+  }
+
+  try {
+    const resultado = await Profissional.alterarSenhaProfissional(email, novaSenha);
+    return res.status(200).json(resultado);
+  } catch (error) {
+    if (error.message === 'E-mail não encontrado') {
+      return res.status(404).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: 'Erro interno ao atualizar senha' });
+  }
+}
+
+module.exports = {postProfissional, alterarSenhaController};

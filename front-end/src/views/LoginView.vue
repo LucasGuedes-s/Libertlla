@@ -11,6 +11,9 @@
         <label for="senha">Senha</label>
         <input type="password" name="senha" placeholder="Digite a sua senha" v-model="senha">
         <button type="submit" class="bnt_entrar" @click="login">Entrar</button>
+        <div class="esqueceu_senha">
+          <router-link to="/profissional_senha">Esqueceu a senha?</router-link>
+        </div>
       </form>
     </div>
   </div>
@@ -88,6 +91,17 @@
   font-family: "Montserrat", sans-serif;
   margin-top: 1.5rem;
 }
+.esqueceu_senha {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.esqueceu_senha a {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: "Montserrat", sans-serif;
+  cursor: pointer;
+}
 
 @media (max-width: 768px) {
   .container_login {
@@ -132,9 +146,9 @@ export default {
       token: null,
     }
   },
-  mounted(){
+  mounted() {
     this.store.logout()
-    
+
   },
   methods: {
     async login() {
