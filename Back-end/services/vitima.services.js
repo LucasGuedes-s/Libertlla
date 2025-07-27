@@ -108,7 +108,7 @@ async function AdicionarVitima(req) {
   try {
     console.log(req.body);
 
-    const senhaCriptografada = await bcrypt.hash('senha', 10); // Agora com await
+    const senhaCriptografada = await bcrypt.hash('senha', 10);
 
     const cadVitima = await prisma.vitima.create({
       data: {
