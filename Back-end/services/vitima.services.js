@@ -1,3 +1,5 @@
+const { enviarEmailAlteracaoSenha } = require('./email.services');
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 const bcrypt = require('../utils/bcrypt.util');
@@ -102,6 +104,39 @@ async function alterarSenha(email, novaSenha) {
 
   return senhaAtualizada;
 }
+async function AdicionarVitima(req) {
+  try {
+    console.log(req.body);
 
+    const senhaCriptografada = await bcrypt.hash('senha', 10); // Agora com await
 
-module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato, alterarSenha }
+    const cadVitima = await prisma.vitima.create({
+      data: {
+        nome: req.body.nome,
+        email: req.body.email,
+        telefone: req.body.telefone,
+        senha: senhaCriptografada,
+        dataNascimento: req.body.dataNascimento,
+        cpf: req.body.cpf,
+        genero: req.body.genero,
+        estadoCivil: req.body.estadoCivil,
+        profissao: req.body.profissao,
+        escolaridade: req.body.escolaridade,
+        endereco: req.body.endereco,
+        cidade: req.body.cidade,
+        estado: req.body.estado,
+        etnia: req.body.etnia,
+        contatosdeEmergencia: req.body.contatosdeEmergencia || [],
+        processosJudiciais: req.body.processosJudiciais || null,
+      },
+    });
+
+    await enviarEmailAlteracaoSenha(cadVitima.email, cadVitima.nome);
+
+    return cadVitima;
+  } catch (error) {
+    console.error('Erro ao adicionar vítima:', error);
+    throw error;
+  }
+}
+module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato, alterarSenha, AdicionarVitima }

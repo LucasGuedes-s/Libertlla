@@ -87,4 +87,14 @@
   }
 };
 
-  module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato, alterarsenhacontroller };
+async function AdicionarVitima(req, res) {
+  try {
+    const cadVitima = await vitima.AdicionarVitima(req);
+    res.status(201).json(cadVitima);
+  } catch (error) {
+    console.error('Erro ao adicionar vítima:', error);
+    res.status(500).json({ error: 'Erro interno' });
+  }
+}
+
+module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato, alterarsenhacontroller, AdicionarVitima};
