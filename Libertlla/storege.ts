@@ -150,3 +150,33 @@ export async function removeToken() {
     console.error('[removeToken] Erro ao remover token:', error);
   }
 }
+
+// Função para armazenar imagens do Processo Judicial localmente
+export const IMAGEM_PROCESSO_PATH = FileSystem.documentDirectory + 'processos/processo_salvo.jpg';
+
+export async function salvarImagemLocal(uri: string): Promise<string> {
+  try {
+    const pastaDestino = FileSystem.documentDirectory + 'processos/';
+
+    const pastaInfo = await FileSystem.getInfoAsync(pastaDestino);
+    if (!pastaInfo.exists) {
+      await FileSystem.makeDirectoryAsync(pastaDestino, { intermediates: true });
+    }
+
+    const arquivoInfo = await FileSystem.getInfoAsync(IMAGEM_PROCESSO_PATH);
+    if (arquivoInfo.exists) {
+      await FileSystem.deleteAsync(IMAGEM_PROCESSO_PATH, { idempotent: true });
+    }
+
+    await FileSystem.copyAsync({
+      from: uri,
+      to: IMAGEM_PROCESSO_PATH,
+    });
+
+    console.log('[salvarImagemLocal] Imagem salva em:', IMAGEM_PROCESSO_PATH);
+    return IMAGEM_PROCESSO_PATH;
+  } catch (error) {
+    console.error('[salvarImagemLocal] Erro ao salvar imagem:', error);
+    throw error;
+  }
+}

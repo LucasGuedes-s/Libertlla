@@ -1,140 +1,206 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
-  Button,
   Alert,
   StyleSheet,
   Image,
   ActivityIndicator,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import MenuInferior from '../assets/components/menu_inferior';
+  TouchableOpacity,
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import * as ImagePicker from 'expo-image-picker'
+import * as FileSystem from 'expo-file-system'
+import MenuInferior from '../assets/components/menu_inferior'
+import { salvarImagemLocal, IMAGEM_PROCESSO_PATH } from '../storege'
 
 export default function Processo() {
-  const [imagem, setImagem] = useState(null);
-  const [isSending, setIsSending] = useState(false);
-  const idVitima = 1;
+  const [imagem, setImagem] = useState<ImagePicker.ImagePickerAsset | null>(null)
+  const [isSending, setIsSending] = useState(false)
 
-  async function enviarImagem(imagemSelecionada) {
-    setIsSending(true);
-
-    const formData = new FormData();
-    formData.append('idVitima', idVitima.toString());
-    formData.append('processoImagem', {
-      uri: imagemSelecionada.uri,
-      name: 'processo.jpg',
-      type: 'image/jpeg',
-    });
-
-    try {
-      const res = await fetch('https://libertlla.onrender.com/enviar-processo', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setIsSending(false);
-
-      if (res.ok) {
-        Alert.alert('Sucesso', 'Imagem enviada com sucesso!');
-        setImagem(null);
-      } else {
-        Alert.alert('Erro', 'Erro ao enviar a imagem.');
+  useEffect(() => {
+    async function carregarImagemSalva() {
+      try {
+        const info = await FileSystem.getInfoAsync(IMAGEM_PROCESSO_PATH)
+        if (info.exists) {
+          setImagem({ uri: IMAGEM_PROCESSO_PATH + '?t=' + Date.now() } as ImagePicker.ImagePickerAsset)
+        }
+      } catch (error) {
+        console.error('[carregarImagemSalva] Erro:', error)
       }
-    } catch (err) {
-      console.error(err);
-      setIsSending(false);
-      Alert.alert('Erro', 'Falha de conexão.');
     }
-  }
+    carregarImagemSalva()
+  }, [])
 
   async function selecionarImagem() {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!permissionResult.granted) {
-      Alert.alert('Permissão necessária', 'Permita acesso à galeria.');
-      return;
+      Alert.alert('Permissão necessária', 'Permita acesso à galeria.')
+      return
     }
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'] as const,
       quality: 0.7,
-      allowsEditing: true,
-    });
+      allowsEditing: false,
+    })
 
-    if (!pickerResult.canceled) {
-      setImagem(pickerResult.assets[0]);
-      await enviarImagem(pickerResult.assets[0]);
+    if (!pickerResult.canceled && pickerResult.assets.length > 0) {
+      const imagemSelecionada = pickerResult.assets[0]
+
+      setIsSending(true)
+      try {
+        const caminhoSalvo = await salvarImagemLocal(imagemSelecionada.uri)
+        setImagem({ ...imagemSelecionada, uri: caminhoSalvo + '?t=' + Date.now() })
+      } catch {
+        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente.')
+      } finally {
+        setIsSending(false)
+      }
     }
   }
 
   async function tirarFoto() {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync()
     if (!permissionResult.granted) {
-      Alert.alert('Permissão necessária', 'Permita acesso à câmera.');
-      return;
+      Alert.alert('Permissão necessária', 'Permita acesso à câmera.')
+      return
     }
 
     const cameraResult = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'] as const,
       quality: 0.7,
-      allowsEditing: true,
-    });
+      allowsEditing: false,
+    })
 
-    if (!cameraResult.canceled) {
-      setImagem(cameraResult.assets[0]);
-      await enviarImagem(cameraResult.assets[0]);
+    if (!cameraResult.canceled && cameraResult.assets.length > 0) {
+      const imagemTirada = cameraResult.assets[0]
+
+      setIsSending(true)
+      try {
+        const caminhoSalvo = await salvarImagemLocal(imagemTirada.uri)
+        setImagem({ ...imagemTirada, uri: caminhoSalvo + '?t=' + Date.now() })
+      } catch {
+        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente.')
+      } finally {
+        setIsSending(false)
+      }
     }
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Enviar Processo Judicial</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.boxTitulo}>
+          <Text style={styles.titulo}>Enviar Processo Judicial</Text>
+          <Text style={styles.subtitulo}>Envie uma imagem do processo deixá-la em fácil exibição</Text>
+        </View>
 
-      {imagem && (
-        <Image
-          source={{ uri: imagem.uri }}
-          style={styles.preview}
-          resizeMode="contain"
-        />
-      )}
+        <View style={styles.boxImagem}>
+          {imagem?.uri ? (
+            <Image source={{ uri: imagem.uri }} style={styles.preview} resizeMode="contain" />
+          ) : (
+            <Text style={styles.placeholderTexto}>Nenhuma imagem selecionada</Text>
+          )}
+        </View>
 
-      <View style={styles.botaoContainer}>
-        <Button title="Selecionar Imagem" onPress={selecionarImagem} disabled={isSending} />
-        <View style={{ height: 10 }} />
-        <Button title="Tirar Foto" onPress={tirarFoto} disabled={isSending} />
+        <View style={styles.botoesContainer}>
+          <TouchableOpacity
+            style={[styles.botao, isSending && styles.botaoDisabled]}
+            onPress={selecionarImagem}
+            disabled={isSending}
+          >
+            <Text style={styles.textoBotao}>Selecionar Imagem</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.botao, isSending && styles.botaoDisabled]}
+            onPress={tirarFoto}
+            disabled={isSending}
+          >
+            <Text style={styles.textoBotao}>Tirar Foto</Text>
+          </TouchableOpacity>
+        </View>
+
+        {isSending && <ActivityIndicator size="large" color="#9B287B" style={{ marginTop: 10 }} />}
       </View>
 
-      {isSending && <ActivityIndicator size="large" color="#9B287B" />}
-
       <MenuInferior />
-    </View>
-  );
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingBottom: 80,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
-  title: {
-    fontSize: 32,
-    fontFamily: 'Montserrat',
-    color: '#9B287B',
-    fontWeight: '900',
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  boxTitulo: {
     marginBottom: 20,
+    alignItems: 'center',
+  },
+  titulo: {
+    fontSize: 28,
+    fontFamily: 'Montserrat-Bold',
+    color: '#9B287B',
+  },
+  subtitulo: {
+    fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
+    color: '#9B287B',
+    marginTop: 6,
     textAlign: 'center',
+  },
+  boxImagem: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    overflow: 'hidden',
+    padding: 10,
   },
   preview: {
     width: '100%',
-    height: 300,
+    height: '100%',
+    borderRadius: 10,
+  },
+  placeholderTexto: {
+    color: '#9B287B',
+    fontFamily: 'Montserrat-Regular',
+    fontSize: 16,
+  },
+  botoesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     marginBottom: 20,
-    borderRadius: 8,
+    gap: 15,
   },
-  botaoContainer: {
-    marginBottom: 10,
+  botao: {
+    backgroundColor: '#9B287B',
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 25,
+    elevation: 2,
   },
-});
+  botaoDisabled: {
+    backgroundColor: '#c08aca',
+  },
+  textoBotao: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+    textAlign: 'center',
+  },
+})
