@@ -18,11 +18,7 @@
           <!-- Ocorrências -->
           <div v-if="ocorrencias.length > 0" class="div_ocorrencias">
             <div class="formulario">
-              <div
-                class="info border rounded p-4 row"
-                v-for="ocorrencia in ocorrencias"
-                :key="ocorrencia.id"
-              >
+              <div class="info border rounded p-4 row" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
                 <div class="denuncia">
                   <label>Data:</label>
                   <p>{{ formatDate(ocorrencia.data_denuncia) }}</p>
@@ -42,9 +38,14 @@
 
                 <div class="buttons">
                   <router-link :to="`/ocorrencia/${ocorrencia.id}`" class="detalhar-btn">Detalhar</router-link>
-                  <button type="button" class="btn-vincular" @click="abrirModalVincularVitima(ocorrencia.id)">Vincular Vítima</button>
+                  <button type="button" class="btn-vincular" @click="abrirModalVincularVitima(ocorrencia.id)">Vincular
+                    Vítima</button>
                   <button type="button" class="pdf-btn" @click="gerarPDF(ocorrencia.id)">Gerar PDF</button>
-                  <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar Progresso</button>
+                  <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar
+                    Progresso</button>
+                  <button type="button" class="btn-modal" @click="abrirModalCadastrarVisita(ocorrencia.id)">
+                    Cadastrar Visita
+                  </button>
                 </div>
               </div>
             </div>
@@ -53,11 +54,7 @@
           <!-- Conversas -->
           <div v-if="conversas.length > 0" class="div_conversas">
             <div class="formulario">
-              <div
-                class="info border rounded p-4 row"
-                v-for="conversa in conversas"
-                :key="conversa.id"
-              >
+              <div class="info border rounded p-4 row" v-for="conversa in conversas" :key="conversa.id">
                 <div class="conversa">
                   <label>ID:</label>
                   <p>{{ conversa.id }}</p>
@@ -73,7 +70,8 @@
 
                 <div class="buttons">
                   <router-link :to="`/conversa/${conversa.id}`" class="detalhar-btn">Detalhar</router-link>
-                  <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar Progresso</button>
+                  <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar
+                    Progresso</button>
                 </div>
               </div>
             </div>
@@ -128,6 +126,44 @@
           </form>
         </div>
       </div>
+
+      <!-- Modal de cadastrar visita -->
+      <div v-if="modalCadastrarVisible" :key="modalKey" class="modal-overlay">
+        <div class="modal-content">
+          <div class="quadrado">
+            <h1 class="titulo mb-4">Cadastrar Visita</h1>
+          </div>
+          <form @submit.prevent="cadastrarVisita">
+            <label for="data">Data da Visita:</label>
+            <input type="date" id="data" v-model="dataVisita" required />
+
+            <label for="descricao">Descrição:</label>
+            <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
+
+            <label for="testemunhas">Testemunhas:</label>
+            <input type="text" id="testemunhas" v-model="testemunhas" placeholder="Nome das testemunhas" />
+
+            <div class="form-group adicionar-imagem">
+              <label for="anexos">Anexos:</label>
+              <input type="file" id="anexos" name="anexos" accept="image/*" multiple @change="handleFileChange" />
+            </div>
+
+            <div class="form-group adicionar-imagem">
+              <label for="assinaturas">Assinaturas:</label>
+              <input type="file" id="assinaturas" name="assinaturas" accept="image/*"
+                @change="handleAssinaturaChange" />
+            </div>
+
+            <div class="modal-actions">
+              <button type="submit" class="btn-salvar">Salvar</button>
+              <button type="button" class="btn-cancelar" @click="fecharModalVisita">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -146,8 +182,12 @@ export default {
       ocorrencias: [],
       conversas: [],
       modalVisible: false,
+      modalCadastrarVisible: false,
       modalKey: 0,
       descricao: "",
+      dataVisita: "",
+      testemunhas: "",
+      assinaturas: null,
       anexos: [],
       file: null,
       ocorrenciaSelecionada: null,
@@ -161,6 +201,7 @@ export default {
       loadingConversas: false,
     };
   },
+
   computed: {
     vitimasFiltradas() {
       return this.vitimas.filter(
@@ -170,24 +211,38 @@ export default {
       );
     },
   },
+
   mounted() {
     this.store = useAuthStore();
     this.carregarOcorrencias();
     this.getConversas();
   },
+
   methods: {
     abrirModalOcorrencia(id) {
+      this.resetCampos();
       this.ocorrenciaSelecionada = id;
-      this.conversaSelecionada = null;
       this.modalVisible = true;
       this.modalKey++;
     },
 
     abrirModalConversa(id) {
+      this.resetCampos();
       this.conversaSelecionada = id;
-      this.ocorrenciaSelecionada = null;
       this.modalVisible = true;
       this.modalKey++;
+    },
+
+    abrirModalCadastrarVisita(id) {
+      this.resetCampos(false);
+      this.ocorrenciaSelecionada = id;
+      this.modalCadastrarVisible = true;
+      this.modalKey++;
+    },
+
+    fecharModalVisita() {
+      this.modalCadastrarVisible = false;
+      this.resetCampos(false);
     },
 
     abrirModalVincularVitima(id) {
@@ -205,11 +260,114 @@ export default {
 
     fecharModal() {
       this.modalVisible = false;
+      this.resetCampos();
+    },
+
+    resetCampos(resetOcorrencia = true) {
       this.descricao = "";
+      this.dataVisita = "";
+      this.testemunhas = "";
+      this.assinaturas = null;
       this.anexos = [];
       this.file = null;
-      this.ocorrenciaSelecionada = null;
-      this.conversaSelecionada = null;
+      if (resetOcorrencia) {
+        this.ocorrenciaSelecionada = null;
+        this.conversaSelecionada = null;
+      }
+    },
+
+    handleFileChange(event) {
+      const files = Array.from(event.target.files);
+      this.anexos = files;
+    },
+
+    handleAssinaturaChange(event) {
+      this.assinaturas = event.target.files[0];
+    },
+
+    async uploadFiles(files) {
+      const urls = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+          const res = await axios.post("https://libertlla.onrender.com/upload", formData);
+          urls.push(res.data.fileUrl);
+        } catch (err) {
+          Swal.fire({
+            icon: "error",
+            title: "Erro no upload",
+            text: "Não foi possível enviar um ou mais arquivos.",
+          });
+        }
+      }
+      return urls;
+    },
+
+    async uploadFile(file) {
+      if (!file) return null;
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await axios.post("https://libertlla.onrender.com/upload", formData);
+        return res.data.fileUrl;
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Erro no upload da assinatura",
+          text: "Não foi possível enviar a assinatura.",
+        });
+        return null;
+      }
+    },
+
+    async cadastrarVisita() {
+      if (!this.dataVisita || !this.descricao.trim()) {
+        return Swal.fire({
+          icon: "warning",
+          title: "Campos obrigatórios",
+          text: "Preencha a data e a descrição da visita.",
+        });
+      }
+
+      const anexosUrls = await this.uploadFiles(this.anexos);
+      const assinaturaUrl = await this.uploadFile(this.assinaturas);
+
+      const payload = {
+        data: this.dataVisita,
+        descricao: this.descricao,
+        testemunhas: this.testemunhas,
+        anexos: anexosUrls,
+        assinatura: assinaturaUrl,
+      };
+
+      const token = this.store.token;
+
+      try {
+        await axios.post(
+          `https://libertlla.onrender.com/visita/ocorrencia/${this.ocorrenciaSelecionada}`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Visita cadastrada com sucesso!",
+        });
+
+        this.fecharModalVisita();
+        this.carregarOcorrencias();
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Erro",
+          text: err.response?.data?.error || "Erro ao cadastrar visita.",
+        });
+      }
     },
 
     async adicionarProgresso() {
@@ -221,11 +379,7 @@ export default {
         });
       }
 
-      let anexos = [];
-      if (this.file) {
-        const fileUrl = await this.uploadFile();
-        if (fileUrl) anexos.push(fileUrl);
-      }
+      let anexos = await this.uploadFiles(this.anexos);
 
       const url = this.ocorrenciaSelecionada
         ? `https://libertlla.onrender.com/progresso/ocorrencia/${this.ocorrenciaSelecionada}`
@@ -249,25 +403,6 @@ export default {
         });
       }
     },
-
-    async uploadFile() {
-      if (!this.file) return null;
-      const formData = new FormData();
-      formData.append("file", this.file);
-
-      try {
-        const res = await axios.post("https://libertlla.onrender.com/upload", formData);
-        return res.data.fileUrl;
-      } catch (err) {
-        Swal.fire({
-          icon: "error",
-          title: "Erro no upload",
-          text: "Não foi possível enviar o arquivo.",
-        });
-        return null;
-      }
-    },
-
     async gerarPDF(id) {
       try {
         const res = await axios({
@@ -301,7 +436,7 @@ export default {
         });
         this.ocorrencias = (res.data.processos || [])
           .filter((o) => o.status !== "Arquivada")
-          .sort((a, b) => new Date(b.data_denuncia) - new Date(a.data_denuncia)); 
+          .sort((a, b) => new Date(b.data_denuncia) - new Date(a.data_denuncia));
       } catch (err) {
         console.error("Erro ao buscar ocorrências:", err);
       } finally {
@@ -319,7 +454,7 @@ export default {
         });
         this.conversas = res.data.conversas
           .filter((c) => c.status !== "Arquivada")
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); 
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       } catch (err) {
         console.error("Erro ao buscar conversas:", err);
       } finally {
@@ -361,11 +496,8 @@ export default {
         });
       }
     },
-
-    handleFileChange(event) {
-      this.file = event.target.files[0];
-    },
   },
+
   components: {
     SideBar,
   },
@@ -525,6 +657,13 @@ label {
   margin-top: 60px;
 }
 
+.modal-content form label {
+  margin-top: 10px;
+  font-weight: 600;
+  color: rgba(152, 152, 152, 255);
+  font-family: "Montserrat", sans-serif;
+}
+
 .modal-actions {
   display: flex;
   justify-content: space-between;
@@ -570,6 +709,8 @@ input[type="file"] {
   border-radius: 4px;
   overflow: hidden;
   width: 100%;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 #adicionar_imagem {
@@ -650,6 +791,55 @@ button {
   100% {
     transform: rotate(360deg);
   }
+}
+
+input[type="text"],
+input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-family: "Montserrat", sans-serif;
+  color: #333;
+  box-sizing: border-box;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: none;
+  font-family: "Montserrat", sans-serif;
+  color: #333;
+}
+
+.dashboard input::placeholder,
+.dashboard textarea::placeholder {
+  color: rgba(152, 152, 152, 0.7);
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 1;
+  padding-left: 2px;
+}
+
+#descricao {
+  margin-bottom: 1px;
+}
+
+.form-group.adicionar-imagem {
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+#testemunhas {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 @media (max-width: 768px) {

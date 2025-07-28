@@ -50,6 +50,7 @@
                 </div>
             </div>
         </div>
+
         <div class="container mt-5">
             <h5 class="linha">Linha do tempo</h5>
             <div class="timeline">
@@ -58,15 +59,40 @@
                     <div class="timeline-box">
                         <div class="card">
                             <div class="card-body">
-                                <a class="card-title" :href="registro.anexos">Anexo</a>
+                                <p class="mb-1">
+                                    <span
+                                        v-if="registro.assinatura && registro.anexos && Array.isArray(registro.testemunhas) && registro.testemunhas.length"
+                                        class="badge text-white" style="background-color: #9B287B;">
+                                        Visita
+                                    </span>
+                                    <span v-else class="badge text-white" style="background-color: #9B287B;">
+                                        Progresso
+                                    </span>
+                                </p>
+
                                 <p class="card-text">{{ registro.descricoes }}</p>
+                                <p v-if="Array.isArray(registro.testemunhas) && registro.testemunhas.length"
+                                    class="card-text">
+                                    <strong class="form-label">Testemunhas:</strong> {{ registro.testemunhas.join(', ')
+                                    }}
+                                </p>
+                                <p v-if="registro.anexos">
+                                    <strong class="form-label">Anexo:</strong>
+                                    <a :href="registro.anexos" target="_blank"
+                                        class="card-title visualizar">Visualizar</a>
+                                </p>
+                                <p v-if="registro.assinatura">
+                                    <strong class="form-label">Assinatura:</strong>
+                                    <a :href="registro.assinatura" target="_blank"
+                                        class="card-title visualizar">Visualizar</a>
+                                </p>
                                 <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
                             </div>
+
                         </div>
                     </div>
                     <div class="timeline-dot"></div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -199,12 +225,6 @@ export default {
     margin-top: 20px;
 }
 
-@media (min-width: 1024px) {
-    .container {
-        max-width: 90%;
-    }
-}
-
 .card-header {
     background: #FFFFFF !important;
     border-bottom: 1px solid #D9D9D9;
@@ -261,13 +281,11 @@ textarea.form-control {
 .left .timeline-box {
     order: -1;
     text-align: right;
-    /* Coloca os itens à esquerda */
 }
 
 .right .timeline-box {
     order: 1;
     text-align: left;
-    /* Coloca os itens à direita */
 }
 
 .timeline-item .card {
@@ -278,7 +296,6 @@ textarea.form-control {
     padding: 10px 20px;
 }
 
-/* Adicionar margem para a linha do tempo centralizada */
 .timeline::after {
     content: "";
     position: absolute;
@@ -298,5 +315,15 @@ textarea.form-control {
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     font-size: 30px;
+}
+
+.visualizar {
+    color: black;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
 }
 </style>

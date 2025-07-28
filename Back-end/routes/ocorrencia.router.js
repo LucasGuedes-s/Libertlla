@@ -29,4 +29,6 @@ router.get("/todas/ocorrencias", controller.GetOcorrenciasTotais);
 
 router.post('/ocorrencias/:id/vincular-vitima', controller.vincularVitimaController);
 
+router.post('/visita/ocorrencia/:id', controller.adicionarVisitaOcorrencia);
+
 module.exports = router;

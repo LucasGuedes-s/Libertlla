@@ -228,4 +228,17 @@ async function vincularVitima(ocorrenciaId, vitimaId) {
   return ocorrenciaAtualizada;
 }
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima};
+async function adicionarVisitaOcorrencia(data, descricao, testemunhas, anexos, assinatura, ocorrenciaId) {
+  return await prisma.registro.create({
+    data: {
+      descricoes: descricao,
+      testemunhas,
+      anexos,
+      assinatura, 
+      data: new Date().toISOString(),
+      ocorrencia: { connect: { id: Number(ocorrenciaId) } }
+    }
+  });
+}
+
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia};

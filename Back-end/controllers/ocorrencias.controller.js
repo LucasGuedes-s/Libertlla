@@ -184,7 +184,31 @@ async function vincularVitimaController(req, res) {
   }
 }
 
+async function adicionarVisitaOcorrencia(req, res) {
+  try {
+    const { id } = req.params;
+    const { data, descricao, testemunhas, anexos, assinatura } = req.body;
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController};
+    const testemunhasArray = typeof testemunhas === 'string'
+      ? testemunhas.split(',').map(t => t.trim())
+      : testemunhas;
+
+    await Ocorrencia.adicionarVisitaOcorrencia(
+      data,
+      descricao,
+      testemunhasArray,
+      anexos,
+      assinatura,
+      id
+    );
+
+    return res.status(200).json({ message: "Visita da ocorrência adicionada com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao adicionar visita na ocorrência:", error);
+    return res.status(500).json({ error: "Houve um erro ao adicionar a visita na ocorrência." });
+  }
+}
+
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia};
 
 
