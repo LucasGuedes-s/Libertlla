@@ -234,11 +234,26 @@ async function adicionarVisitaOcorrencia(data, descricao, testemunhas, anexos, a
       descricoes: descricao,
       testemunhas,
       anexos,
-      assinatura, 
+      assinatura,
       data: new Date().toISOString(),
       ocorrencia: { connect: { id: Number(ocorrenciaId) } }
     }
   });
 }
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia};
+async function adicionarVisitaConversa(data, descricao, testemunhas, anexos, assinatura, chatId) {
+  return await prisma.registro.create({
+    data: {
+      descricoes: descricao,
+      testemunhas,
+      anexos,
+      assinatura,
+      data: new Date().toISOString(),
+      chat: {
+        connect: { id: chatId }
+      }
+    }
+  });
+}
+
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia, adicionarVisitaConversa };

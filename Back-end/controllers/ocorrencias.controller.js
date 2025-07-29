@@ -209,6 +209,31 @@ async function adicionarVisitaOcorrencia(req, res) {
   }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia};
+async function adicionarVisitaConversa(req, res) {
+  try {
+    const { id } = req.params;
+    const { data, descricao, testemunhas, anexos, assinatura } = req.body;
+
+    const testemunhasArray = typeof testemunhas === 'string'
+      ? testemunhas.split(',').map(t => t.trim())
+      : testemunhas;
+
+    await conversaService.adicionarVisitaConversa(
+      data,
+      descricao,
+      testemunhasArray,
+      anexos,
+      assinatura,
+      id
+    );
+
+    return res.status(200).json({ message: "Visita da conversa adicionada com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao adicionar visita na conversa:", error);
+    return res.status(500).json({ error: "Houve um erro ao adicionar a visita na conversa." });
+  }
+}
+
+module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia, adicionarVisitaConversa};
 
 

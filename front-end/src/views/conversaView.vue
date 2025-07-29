@@ -39,10 +39,36 @@
                     <div class="timeline-box">
                         <div class="card">
                             <div class="card-body">
-                                <a class="card-title" :href="registro.anexos">Anexo</a>
+                                <p class="mb-1">
+                                    <span
+                                        v-if="registro.assinatura && registro.anexos && Array.isArray(registro.testemunhas) && registro.testemunhas.length"
+                                        class="badge text-white" style="background-color: #9B287B;">
+                                        Visita
+                                    </span>
+                                    <span v-else class="badge text-white" style="background-color: #9B287B;">
+                                        Progresso
+                                    </span>
+                                </p>
+
                                 <p class="card-text">{{ registro.descricoes }}</p>
+                                <p v-if="Array.isArray(registro.testemunhas) && registro.testemunhas.length"
+                                    class="card-text">
+                                    <strong class="form-label">Testemunhas:</strong> {{ registro.testemunhas.join(', ')
+                                    }}
+                                </p>
+                                <p v-if="registro.anexos">
+                                    <strong class="form-label">Anexo:</strong>
+                                    <a :href="registro.anexos" target="_blank"
+                                        class="card-title visualizar">Visualizar</a>
+                                </p>
+                                <p v-if="registro.assinatura">
+                                    <strong class="form-label">Assinatura:</strong>
+                                    <a :href="registro.assinatura" target="_blank"
+                                        class="card-title visualizar">Visualizar</a>
+                                </p>
                                 <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
                             </div>
+
                         </div>
                     </div>
                     <div class="timeline-dot"></div>
@@ -79,13 +105,12 @@ export default {
             sidebarVisible: true,
             conversa: {
                 createdAt: '',
-                messages: '',
+                messages: [],
                 registros: []
             }
         };
     },
     mounted() {
-        console.log("Registros:", this.conversa.registros);
         this.getConversas();
     },
     methods: {
@@ -103,12 +128,10 @@ export default {
 
                 if (response.data && response.data.conversas) {
                     const conversas = response.data.conversas;
-                    console.log("Todas as conversas recebidas:", conversas);
 
                     if (conversas.length > 0) {
-                        this.conversa = conversas.find(conversa => conversa.id === this.id) || conversas[0];
-                        console.log("Conversa selecionada:", this.conversa);
-                        this.formatarMensagens();
+                        // Tenta encontrar conversa pelo id do prop, senão pega a primeira
+                        this.conversa = conversas.find(conversa => String(conversa.id) === String(this.id)) || conversas[0];
                     } else {
                         console.warn('Nenhuma conversa encontrada para o usuário.');
                     }
@@ -121,14 +144,14 @@ export default {
         },
 
         formatarMensagens() {
-            if (!this.conversa || !this.conversa.messages || this.conversa.messages.length === 0) {
+            if (!this.conversa || !Array.isArray(this.conversa.messages) || this.conversa.messages.length === 0) {
                 return "Nenhuma mensagem disponível.";
             }
-            console.log("Mensagens da conversa:", this.conversa.messages);
             return this.conversa.messages
                 .map(msg => `[${new Date(msg.timestamp).toLocaleString()}] ${msg.from}: ${msg.content}`)
                 .join("\n");
         },
+
         async arquivarConversa() {
             try {
                 const token = this.store.token;
@@ -180,9 +203,7 @@ textarea.form-control {
     min-height: 130%;
     height: 130%;
     max-height: 1000px;
-    /* Define um limite máximo */
     overflow-y: auto;
-    /* Permite rolagem caso necessário */
 }
 
 .wrapper {
@@ -215,12 +236,6 @@ textarea.form-control {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
-}
-
-@media (min-width: 1024px) {
-    .container {
-        max-width: 90%;
-    }
 }
 
 .card-header {
@@ -317,4 +332,78 @@ textarea.form-control {
     font-weight: 700;
     font-size: 30px;
 }
+
+
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.timeline-box {
+    width: 48%;
+    margin: 0 10px;
+    box-sizing: border-box;
+}
+
+.left .timeline-box {
+    order: -1;
+    text-align: right;
+}
+
+.right .timeline-box {
+    order: 1;
+    text-align: left;
+}
+
+.timeline-item .card {
+    width: 100%;
+}
+
+.timeline-item .card-body {
+    padding: 10px 20px;
+}
+
+.timeline::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    background: #ddd;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -1px;
+}
+
+.linha {
+    color: #D9D9D9;
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+}
+
+.visualizar {
+    color: black;
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
+}
+
+
 </style>

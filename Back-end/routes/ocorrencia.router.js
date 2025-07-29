@@ -31,4 +31,6 @@ router.post('/ocorrencias/:id/vincular-vitima', controller.vincularVitimaControl
 
 router.post('/visita/ocorrencia/:id', controller.adicionarVisitaOcorrencia);
 
+router.post('/visita/conversa/:id', controller.adicionarVisitaConversa);
+
 module.exports = router;

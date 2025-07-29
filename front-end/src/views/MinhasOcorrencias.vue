@@ -43,7 +43,7 @@
                   <button type="button" class="pdf-btn" @click="gerarPDF(ocorrencia.id)">Gerar PDF</button>
                   <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar
                     Progresso</button>
-                  <button type="button" class="btn-modal" @click="abrirModalCadastrarVisita(ocorrencia.id)">
+                  <button type="button" class="btn-modal" @click="abrirModalCadastrarVisitaOcorrencia(ocorrencia.id)">
                     Cadastrar Visita
                   </button>
                 </div>
@@ -72,6 +72,9 @@
                   <router-link :to="`/conversa/${conversa.id}`" class="detalhar-btn">Detalhar</router-link>
                   <button type="button" class="btn-modal" @click="abrirModalConversa(conversa.id)">Adicionar
                     Progresso</button>
+                  <button type="button" class="btn-modal" @click="abrirModalCadastrarVisitaConversa(conversa.id)">
+                    Cadastrar Visita
+                  </button>
                 </div>
               </div>
             </div>
@@ -134,9 +137,6 @@
             <h1 class="titulo mb-4">Cadastrar Visita</h1>
           </div>
           <form @submit.prevent="cadastrarVisita">
-            <label for="data">Data da Visita:</label>
-            <input type="date" id="data" v-model="dataVisita" required />
-
             <label for="descricao">Descrição:</label>
             <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
 
@@ -163,7 +163,6 @@
           </form>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -185,7 +184,6 @@ export default {
       modalCadastrarVisible: false,
       modalKey: 0,
       descricao: "",
-      dataVisita: "",
       testemunhas: "",
       assinaturas: null,
       anexos: [],
@@ -233,9 +231,18 @@ export default {
       this.modalKey++;
     },
 
-    abrirModalCadastrarVisita(id) {
+    abrirModalCadastrarVisitaOcorrencia(id) {
       this.resetCampos(false);
       this.ocorrenciaSelecionada = id;
+      this.conversaSelecionada = null;
+      this.modalCadastrarVisible = true;
+      this.modalKey++;
+    },
+
+    abrirModalCadastrarVisitaConversa(id) {
+      this.resetCampos(false);
+      this.conversaSelecionada = id;
+      this.ocorrenciaSelecionada = null;
       this.modalCadastrarVisible = true;
       this.modalKey++;
     },
@@ -265,7 +272,6 @@ export default {
 
     resetCampos(resetOcorrencia = true) {
       this.descricao = "";
-      this.dataVisita = "";
       this.testemunhas = "";
       this.assinaturas = null;
       this.anexos = [];
@@ -322,37 +328,34 @@ export default {
     },
 
     async cadastrarVisita() {
-      if (!this.dataVisita || !this.descricao.trim()) {
+      if (!this.descricao.trim()) {
         return Swal.fire({
           icon: "warning",
-          title: "Campos obrigatórios",
-          text: "Preencha a data e a descrição da visita.",
+          title: "Campo obrigatório",
+          text: "A descrição não pode estar vazia.",
         });
       }
 
-      const anexosUrls = await this.uploadFiles(this.anexos);
-      const assinaturaUrl = await this.uploadFile(this.assinaturas);
+      let anexos = await this.uploadFiles(this.anexos);
+      let assinatura = await this.uploadFile(this.assinaturas);
+
+      const url = this.ocorrenciaSelecionada
+        ? `http://localhost:3000/visita/ocorrencia/${this.ocorrenciaSelecionada}`
+        : `http://localhost:3000/visita/conversa/${this.conversaSelecionada}`;
 
       const payload = {
-        data: this.dataVisita,
+        data: new Date().toISOString(), // ✅ Data e hora automáticas
         descricao: this.descricao,
         testemunhas: this.testemunhas,
-        anexos: anexosUrls,
-        assinatura: assinaturaUrl,
+        anexos,
+        assinatura,
       };
 
-      const token = this.store.token;
-
       try {
-        await axios.post(
-          `https://libertlla.onrender.com/visita/ocorrencia/${this.ocorrenciaSelecionada}`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const token = this.store.token;
+        await axios.post(url, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         Swal.fire({
           icon: "success",
@@ -361,6 +364,7 @@ export default {
 
         this.fecharModalVisita();
         this.carregarOcorrencias();
+        this.getConversas();
       } catch (err) {
         Swal.fire({
           icon: "error",
@@ -403,6 +407,7 @@ export default {
         });
       }
     },
+
     async gerarPDF(id) {
       try {
         const res = await axios({
