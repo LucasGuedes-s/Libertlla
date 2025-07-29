@@ -45,7 +45,7 @@ export default function Processo() {
       const response = await fetch(`https://libertlla.onrender.com/vitimas/${vitimaId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ processoImagemUrl: urlImagem }),
+        body: JSON.stringify({ processosJudiciais: urlImagem }),
       })
 
       if (!response.ok) {

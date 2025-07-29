@@ -140,10 +140,10 @@ async function AdicionarVitima(req) {
   }
 }
 
-async function atualizarProcessoImagem(id, processoImagemUrl) {
+async function atualizarProcessoImagem(id, processosJudiciais) {
   const vitima = await prisma.vitima.update({
     where: { id: Number(id) },
-    data: { processoImagemUrl },
+    data: { processosJudiciais },
   });
   return vitima;
 }

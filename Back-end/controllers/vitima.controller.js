@@ -99,14 +99,14 @@ async function AdicionarVitima(req, res) {
 
 async function atualizarProcessoImagem(req, res) {
   const { id } = req.params;
-  const { processoImagemUrl } = req.body;
+  const { processosJudiciais } = req.body;
 
-  if (!processoImagemUrl) {
-    return res.status(400).json({ error: 'processoImagemUrl é obrigatório' });
+  if (!processosJudiciais) {
+    return res.status(400).json({ error: 'processosJudiciais é obrigatório' });
   }
 
   try {
-    const vitimaAtualizada = await vitima.atualizarProcessoImagem(id, processoImagemUrl);
+    const vitimaAtualizada = await vitima.atualizarProcessoImagem(id, processosJudiciais);
     if (!vitimaAtualizada) {
       return res.status(404).json({ error: 'Vítima não encontrada' });
     }
