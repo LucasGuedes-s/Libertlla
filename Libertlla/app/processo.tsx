@@ -48,7 +48,7 @@ export default function Processo() {
         body: JSON.stringify({ processosJudiciais: urlImagem }),
       })
 
-      if (!response.ok) {
+      if (!response.status) {
         throw new Error('Falha ao atualizar vítima')
       }
     } catch (error) {
