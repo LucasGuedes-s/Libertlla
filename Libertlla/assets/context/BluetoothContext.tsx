@@ -1,7 +1,6 @@
-// context/BluetoothContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import BluetoothService from '../services/BluetoothService';
-import * as storage from '../../storege';
+import * as storage from '../../storege'; // Aqui importamos as funções corretas
 
 type BluetoothContextType = {
   isConnected: boolean;
@@ -18,11 +17,11 @@ export const BluetoothProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     const tryReconnect = async () => {
-      const savedId = storage.getString('device_id');
-      if (savedId) {
+      const savedDevice = await storage.getBluetoothDevice(); // Usando a função getBluetoothDevice
+      if (savedDevice) {
         try {
-          await BluetoothService.connectToDevice(savedId);
-          setDeviceId(savedId);
+          await BluetoothService.connectToDevice(savedDevice.id); // Conectando com o dispositivo salvo
+          setDeviceId(savedDevice.id);
           setIsConnected(true);
         } catch (e) {
           console.warn('Falha ao reconectar Bluetooth:', e);
@@ -34,14 +33,14 @@ export const BluetoothProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const connect = async (id: string) => {
     await BluetoothService.connectToDevice(id);
-    storage.set('device_id', id);
+    await storage.saveBluetoothDevice({ id }); // Salvando o dispositivo no armazenamento
     setDeviceId(id);
     setIsConnected(true);
   };
 
   const disconnect = async () => {
     await BluetoothService.disconnect();
-    storage.delete('device_id');
+    await storage.removeBluetoothDevice(); // Removendo o dispositivo do armazenamento
     setDeviceId(null);
     setIsConnected(false);
   };

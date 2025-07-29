@@ -14,12 +14,10 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { BleManager, Device, State } from 'react-native-ble-plx';
 import BluetoothService from '../assets/services/BluetoothService';
-import { getBluetoothDevice, BluetoothDeviceData } from '../storege';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import MenuInferior from '../assets/components/menu_inferior'
+import { getBluetoothDevice, saveBluetoothDevice, BluetoothDeviceData } from '../storege';
+import MenuInferior from '../assets/components/menu_inferior';
 
 const bleManager = BluetoothService.getManager();
-
 type DeviceWithRSSI = Device & { rssi: number };
 
 export default function BluetoothScreen() {
@@ -28,7 +26,6 @@ export default function BluetoothScreen() {
   const [savedDevice, setSavedDevice] = useState<BluetoothDeviceData | null>(null);
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
   const manuallyDisconnected = useRef(false);
-  const router = useRouter();
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -57,9 +54,19 @@ export default function BluetoothScreen() {
       let isActive = true;
       let reconnectInterval: number | null = null;
 
+      const syncConnectedDevice = async () => {
+        if (BluetoothService.connectedDevice) {
+          const isStillConnected = await BluetoothService.connectedDevice.isConnected();
+          if (isStillConnected) {
+            setConnectedDevice(BluetoothService.connectedDevice);
+            return true;
+          }
+        }
+        return false;
+      };
+
       const tryReconnect = async () => {
         if (!isActive || connectedDevice || manuallyDisconnected.current) return;
-
         if (!savedDevice) return;
 
         const btState = await bleManager.state();
@@ -96,10 +103,13 @@ export default function BluetoothScreen() {
         });
       };
 
-      if (!connectedDevice) {
-        tryReconnect();
+      const initialize = async () => {
+        const synced = await syncConnectedDevice();
+        if (!synced) tryReconnect();
         reconnectInterval = setInterval(tryReconnect, 5000);
-      }
+      };
+
+      initialize();
 
       return () => {
         isActive = false;
@@ -136,6 +146,9 @@ export default function BluetoothScreen() {
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error || !device?.name) return;
 
+      // ** FILTRO: Ignorar o dispositivo já conectado **
+      if (connectedDevice && device.id === connectedDevice.id) return;
+
       const rssi = device.rssi ?? -100;
       setDevices((prev) => {
         const index = prev.findIndex((d) => d.id === device.id);
@@ -156,13 +169,6 @@ export default function BluetoothScreen() {
   };
 
   const connectToDevice = async (device: Device) => {
-    // Se já existe dispositivo salvo, valida se é o mesmo dispositivo
-    if (savedDevice && device.id !== savedDevice.id) {
-      ToastAndroid.show('Apenas o dispositivo salvo pode ser conectado', ToastAndroid.SHORT);
-      return;
-    }
-
-    // Se o dispositivo já está conectado
     if (connectedDevice?.id === device.id) {
       ToastAndroid.show('Dispositivo já conectado', ToastAndroid.SHORT);
       return;
@@ -173,6 +179,10 @@ export default function BluetoothScreen() {
       manuallyDisconnected.current = false;
       setConnectedDevice(connected);
 
+      // ✅ Salvar o novo dispositivo como padrão
+      await saveBluetoothDevice({ id: connected.id, name: connected.name ?? undefined });
+      setSavedDevice({ id: connected.id, name: connected.name ?? undefined });
+
       connected.onDisconnected(() => {
         setConnectedDevice(null);
       });
@@ -182,7 +192,6 @@ export default function BluetoothScreen() {
       ToastAndroid.show('Erro ao conectar', ToastAndroid.SHORT);
     }
   };
-
 
   const disconnect = async () => {
     manuallyDisconnected.current = true;
@@ -218,7 +227,8 @@ export default function BluetoothScreen() {
 
       <View style={styles.box}>
         <FlatList
-          data={devices}
+          // ** FILTRO EXTRA no momento da renderização, só por garantia **
+          data={devices.filter(d => connectedDevice ? d.id !== connectedDevice.id : true)}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.deviceItem} onPress={() => connectToDevice(item)}>
@@ -236,11 +246,11 @@ export default function BluetoothScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#FFFFFF' 
   },
   box: {
     width: '90%',
@@ -315,16 +325,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
-    marginTop: 10,
-  },
-  menu_container: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '70%',
-    paddingVertical: 12,
-    backgroundColor: '#9B287B',
-    borderRadius: 30,
     marginTop: 10,
   },
 });
