@@ -173,7 +173,7 @@ export default {
                     ? this.form.contatosdeEmergencia.split(',').map(c => c.trim())
                     : [];
 
-                await Axios.post('http://localhost:3000/vitima', {
+                await Axios.post('https://libertlla.onrender.com/vitima', {
                     ...this.form,
                     contatosdeEmergencia: contatosArray,
                 }, {

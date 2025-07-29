@@ -9,7 +9,7 @@ async function enviarEmailAlteracaoSenha(destinatario, nomeUsuario) {
     },
   });
 
-  const linkRedefinicao = `https://seusite.com/redefinir-senha?usuario=${encodeURIComponent(nomeUsuario)}`;
+  const linkRedefinicao = `https://libertlla-clinica-maria-luizas-projects.vercel.app/senha`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background: #f9f9f9; padding: 20px; border-radius: 10px; color: #333;">
