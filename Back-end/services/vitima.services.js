@@ -139,4 +139,13 @@ async function AdicionarVitima(req) {
     throw error;
   }
 }
-module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato, alterarSenha, AdicionarVitima }
+
+async function atualizarProcessoImagem(id, processoImagemUrl) {
+  const vitima = await prisma.vitima.update({
+    where: { id: Number(id) },
+    data: { processoImagemUrl },
+  });
+  return vitima;
+}
+
+module.exports = { LoginUser, getVitimas, getVitimaPorEmail, getIdVitima, adicionarContato, alterarSenha, AdicionarVitima, atualizarProcessoImagem }

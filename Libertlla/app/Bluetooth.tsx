@@ -156,11 +156,13 @@ export default function BluetoothScreen() {
   };
 
   const connectToDevice = async (device: Device) => {
-    if (!savedDevice || device.id !== savedDevice.id) {
+    // Se já existe dispositivo salvo, valida se é o mesmo dispositivo
+    if (savedDevice && device.id !== savedDevice.id) {
       ToastAndroid.show('Apenas o dispositivo salvo pode ser conectado', ToastAndroid.SHORT);
       return;
     }
 
+    // Se o dispositivo já está conectado
     if (connectedDevice?.id === device.id) {
       ToastAndroid.show('Dispositivo já conectado', ToastAndroid.SHORT);
       return;
@@ -180,6 +182,7 @@ export default function BluetoothScreen() {
       ToastAndroid.show('Erro ao conectar', ToastAndroid.SHORT);
     }
   };
+
 
   const disconnect = async () => {
     manuallyDisconnected.current = true;

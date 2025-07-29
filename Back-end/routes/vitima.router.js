@@ -15,6 +15,8 @@ router.put('/vitima/:email/contato', controller.adicionarContato);
 
 router.put('/vitimas/recuperar_senha', controller.alterarsenhacontroller)
 
+router.put('/vitimas/:id', controller.atualizarProcessoImagem);
+
 router.post('/vitima', controller.AdicionarVitima)
 
 module.exports = router;

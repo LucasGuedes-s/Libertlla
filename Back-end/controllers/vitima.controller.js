@@ -10,7 +10,7 @@
       // Body com token
       res.status(200).json({ 
         usuario: Login.user,
-        token: Login.token  // 👈 aqui está o que o front precisa!
+        token: Login.token
       });
 
     } catch (error) {
@@ -97,4 +97,25 @@ async function AdicionarVitima(req, res) {
   }
 }
 
-module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato, alterarsenhacontroller, AdicionarVitima};
+async function atualizarProcessoImagem(req, res) {
+  const { id } = req.params;
+  const { processoImagemUrl } = req.body;
+
+  if (!processoImagemUrl) {
+    return res.status(400).json({ error: 'processoImagemUrl é obrigatório' });
+  }
+
+  try {
+    const vitimaAtualizada = await vitima.atualizarProcessoImagem(id, processoImagemUrl);
+    if (!vitimaAtualizada) {
+      return res.status(404).json({ error: 'Vítima não encontrada' });
+    }
+
+    res.status(200).json({ message: 'Processo judicial atualizado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao atualizar processo judicial:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+}
+
+module.exports = { LoginVitma, getVitimas, getVitimaPorEmail, getIdVitimaPorToken, adicionarContato, alterarsenhacontroller, AdicionarVitima, atualizarProcessoImagem};

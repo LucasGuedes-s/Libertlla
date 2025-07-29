@@ -12,27 +12,84 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker'
 import * as FileSystem from 'expo-file-system'
 import MenuInferior from '../assets/components/menu_inferior'
-import { salvarImagemLocal, IMAGEM_PROCESSO_PATH } from '../storege'
+import { salvarImagemLocal, IMAGEM_PROCESSO_PATH, getUserData } from '../storege'
 
 export default function Processo() {
   const [imagem, setImagem] = useState<ImagePicker.ImagePickerAsset | null>(null)
   const [isSending, setIsSending] = useState(false)
+  const [vitimaId, setVitimaId] = useState<number | null>(null)
 
   useEffect(() => {
-    async function carregarImagemSalva() {
+    async function carregarTudo() {
       try {
+        const usuario = await getUserData()
+        if (!usuario?.id) {
+          Alert.alert('Erro', 'Usuário não encontrado.')
+          return
+        }
+        setVitimaId(Number(usuario.id))
+
         const info = await FileSystem.getInfoAsync(IMAGEM_PROCESSO_PATH)
         if (info.exists) {
           setImagem({ uri: IMAGEM_PROCESSO_PATH + '?t=' + Date.now() } as ImagePicker.ImagePickerAsset)
         }
       } catch (error) {
-        console.error('[carregarImagemSalva] Erro:', error)
+        console.error('[carregarTudo] Erro:', error)
       }
     }
-    carregarImagemSalva()
+    carregarTudo()
   }, [])
 
+  async function atualizarVitimaComProcesso(vitimaId: number, urlImagem: string) {
+    try {
+      const response = await fetch(`https://libertlla.onrender.com/vitimas/${vitimaId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ processoImagemUrl: urlImagem }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha ao atualizar vítima')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar vítima com processo:', error)
+    }
+  }
+
+  async function uploadImagemCloudflare(uri: string): Promise<string> {
+    const filename = uri.split('/').pop() || 'image.jpg'
+    const fileType = filename.split('.').pop() || 'jpg'
+
+    const formData = new FormData()
+    formData.append('file', {
+      uri,
+      name: filename,
+      type: `image/${fileType}`,
+    } as any)
+
+    const response = await fetch('https://libertlla.onrender.com/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Upload falhou')
+    }
+
+    const data = await response.json()
+
+    return data.fileUrl
+  }
+
   async function selecionarImagem() {
+    if (!vitimaId) {
+      Alert.alert('Erro', 'ID da vítima não definido.')
+      return
+    }
+
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!permissionResult.granted) {
       Alert.alert('Permissão necessária', 'Permita acesso à galeria.')
@@ -50,10 +107,17 @@ export default function Processo() {
 
       setIsSending(true)
       try {
-        const caminhoSalvo = await salvarImagemLocal(imagemSelecionada.uri)
-        setImagem({ ...imagemSelecionada, uri: caminhoSalvo + '?t=' + Date.now() })
-      } catch {
-        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente.')
+        const caminhoSalvoLocal = await salvarImagemLocal(imagemSelecionada.uri)
+        const urlCloudflare = await uploadImagemCloudflare(imagemSelecionada.uri)
+
+        setImagem({ ...imagemSelecionada, uri: caminhoSalvoLocal + '?t=' + Date.now() })
+
+        await atualizarVitimaComProcesso(vitimaId, urlCloudflare)
+
+        console.log('URL Cloudflare:', urlCloudflare)
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente e/ou enviar para a nuvem.')
+        console.error(error)
       } finally {
         setIsSending(false)
       }
@@ -61,6 +125,11 @@ export default function Processo() {
   }
 
   async function tirarFoto() {
+    if (!vitimaId) {
+      Alert.alert('Erro', 'ID da vítima não definido.')
+      return
+    }
+
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync()
     if (!permissionResult.granted) {
       Alert.alert('Permissão necessária', 'Permita acesso à câmera.')
@@ -78,10 +147,17 @@ export default function Processo() {
 
       setIsSending(true)
       try {
-        const caminhoSalvo = await salvarImagemLocal(imagemTirada.uri)
-        setImagem({ ...imagemTirada, uri: caminhoSalvo + '?t=' + Date.now() })
-      } catch {
-        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente.')
+        const caminhoSalvoLocal = await salvarImagemLocal(imagemTirada.uri)
+        const urlCloudflare = await uploadImagemCloudflare(imagemTirada.uri)
+
+        setImagem({ ...imagemTirada, uri: caminhoSalvoLocal + '?t=' + Date.now() })
+
+        await atualizarVitimaComProcesso(vitimaId, urlCloudflare)
+
+        console.log('URL Cloudflare:', urlCloudflare)
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível salvar a imagem localmente e/ou enviar para a nuvem.')
+        console.error(error)
       } finally {
         setIsSending(false)
       }
@@ -93,7 +169,9 @@ export default function Processo() {
       <View style={styles.content}>
         <View style={styles.boxTitulo}>
           <Text style={styles.titulo}>Enviar Processo Judicial</Text>
-          <Text style={styles.subtitulo}>Envie uma imagem do processo deixá-la em fácil exibição</Text>
+          <Text style={styles.subtitulo}>
+            Envie uma imagem do processo para deixá-la em fácil exibição
+          </Text>
         </View>
 
         <View style={styles.boxImagem}>
