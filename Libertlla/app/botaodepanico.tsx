@@ -123,39 +123,60 @@ export default function Tela() {
   useFocusEffect(
     useCallback(() => {
       let subscription: { remove: () => void } | null = null;
+      let cancelled = false;
 
-      async function setupNotification() {
+      const setupNotification = async () => {
         try {
+          // reconecta, se necessário
           if (!BluetoothService.connectedDevice) {
-            await BluetoothService.reconnectToSavedDevice();
+            const reconnected = await BluetoothService.reconnectToSavedDevice();
+            if (!reconnected) {
+              console.warn('Não foi possível reconectar ao dispositivo salvo');
+              return;
+            }
           }
 
-          if (BluetoothService.connectedDevice) {
-            const { serviceUUID, characteristicUUID } =
-              await BluetoothService.getNotifiableCharacteristicUUIDs();
+          const device = BluetoothService.connectedDevice;
+          if (!device) return;
 
-            subscription = await BluetoothService.startNotification(
-              serviceUUID,
-              characteristicUUID,
-              async (data: string) => {
-                console.log("BLE recebeu:", data);
-                if (data === "ALERTA") {
-                  await enviarNotificacao();
-                }
-                Alert.alert('Alerta via BLE', `Notificação recebida: ${data}`);
+          const isConnected = await device.isConnected();
+          if (!isConnected) {
+            console.warn('Dispositivo BLE não está conectado');
+            return;
+          }
+
+          const { serviceUUID, characteristicUUID } =
+            await BluetoothService.getNotifiableCharacteristicUUIDs();
+
+          if (cancelled) return;
+
+          const tempSubscription = await BluetoothService.startNotification(
+            serviceUUID,
+            characteristicUUID,
+            async (data: string) => {
+              console.log('BLE recebeu:', data);
+              if (data === 'ALERTA') {
+                await enviarNotificacao();
               }
-            );
-          } else {
-            Alert.alert('Bluetooth', 'Nenhum dispositivo BLE conectado');
+              Alert.alert('Alerta via BLE', `Notificação recebida: ${data}`);
+            }
+          );
+
+          if (!cancelled) {
+            subscription = tempSubscription;
+          } else if (tempSubscription) {
+            // se foi cancelado enquanto monitorava, remove imediatamente
+            tempSubscription.remove();
           }
-        } catch (e) {
-          console.warn('Erro ao configurar BLE:', e);
+        } catch (error) {
+          console.warn('Erro ao configurar BLE:', error);
         }
-      }
+      };
 
       setupNotification();
 
       return () => {
+        cancelled = true;
         if (subscription) {
           subscription.remove();
           subscription = null;
@@ -163,6 +184,7 @@ export default function Tela() {
       };
     }, [vitimaId])
   );
+
 
   const startCounter = () => {
     setIsPressing(true);
