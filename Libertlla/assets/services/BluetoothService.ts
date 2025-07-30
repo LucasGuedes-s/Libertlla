@@ -33,6 +33,7 @@ class BluetoothService {
   }
 
   async reconnectToSavedDevice() {
+    console.log("Cheguei aqui");
     const savedDevice = await getBluetoothDevice();
     console.log("Dispositivo salvo:", savedDevice);
 
@@ -68,37 +69,27 @@ class BluetoothService {
       throw new Error("Nenhum dispositivo conectado");
     }
 
-    const isConnected = await this.connectedDevice.isConnected();
-    if (!isConnected) {
-      console.warn("Tentativa de monitorar characteristic em dispositivo desconectado");
-      return null;
-    }
-
-    try {
-      const subscription = this.connectedDevice.monitorCharacteristicForService(
-        serviceUUID,
-        characteristicUUID,
-        (error, characteristic) => {
-          if (error) {
-            console.log("Erro ao monitorar characteristic:", error);
-            return;
-          }
-
-          if (characteristic?.value) {
-            const decoded = Buffer.from(characteristic.value, 'base64').toString('utf-8');
-            console.log("Notificação recebida:", decoded);
-            onData(decoded);
-          }
+    const subscription = this.connectedDevice.monitorCharacteristicForService(
+      serviceUUID,
+      characteristicUUID,
+      (error, characteristic) => {
+        if (error) {
+          console.log("Erro ao monitorar characteristic:", error);
+          return;
         }
-      );
 
-      return subscription;
-    } catch (err) {
-      console.error("Erro ao iniciar monitoramento:", err);
-      return null;
-    }
+        if (characteristic?.value) {
+          const decoded = Buffer.from(characteristic.value, 'base64').toString('utf-8');
+          console.log("Notificação recebida:", decoded);
+          onData(decoded);
+        }
+      }
+    );
+
+    return subscription;
   }
 
+  // Buscar automaticamente a primeira characteristic UUID
   async getNotifiableCharacteristicUUIDs(): Promise<{
     serviceUUID: string;
     characteristicUUID: string;
@@ -126,20 +117,6 @@ class BluetoothService {
     }
 
     throw new Error("Nenhuma characteristic com suporte a notificações encontrada.");
-  }
-
-  async initializeNotifications(onData: (data: string) => void) {
-    if (!this.connectedDevice) return;
-
-    const isConnected = await this.connectedDevice.isConnected();
-    if (!isConnected) return;
-
-    try {
-      const { serviceUUID, characteristicUUID } = await this.getNotifiableCharacteristicUUIDs();
-      await this.startNotification(serviceUUID, characteristicUUID, onData);
-    } catch (e) {
-      console.error('Erro ao inicializar notificações:', e);
-    }
   }
 }
 

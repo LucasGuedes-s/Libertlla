@@ -28,50 +28,33 @@ export default function BluetoothScreen() {
   const manuallyDisconnected = useRef(false);
 
   useEffect(() => {
-  const requestPermissions = async () => {
-    try {
-      if (Platform.OS === 'android') {
-        await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        ]);
-      }
-    } catch (err) {
-      console.error('Erro ao solicitar permissões:', err);
+    if (Platform.OS === 'android') {
+      PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      ]);
     }
-  };
 
-  requestPermissions();
-
-  return () => {
-    try {
+    return () => {
       bleManager.stopDeviceScan();
-    } catch (err) {
-      console.error('Erro ao parar scan:', err);
-    }
-  };
-}, []);
+    };
+  }, []);
 
-useEffect(() => {
-  const loadSavedDevice = async () => {
-    try {
+  useEffect(() => {
+    const loadSavedDevice = async () => {
       const saved = await getBluetoothDevice();
       if (saved) setSavedDevice(saved);
-    } catch (err) {
-      console.error('Erro ao carregar dispositivo salvo:', err);
-    }
-  };
-  loadSavedDevice();
-}, []);
+    };
+    loadSavedDevice();
+  }, []);
 
-useFocusEffect(
-  useCallback(() => {
-    let isActive = true;
-    let reconnectInterval: number | null = null;
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      let reconnectInterval: number | null = null;
 
-    const syncConnectedDevice = async () => {
-      try {
+      const syncConnectedDevice = async () => {
         if (BluetoothService.connectedDevice) {
           const isStillConnected = await BluetoothService.connectedDevice.isConnected();
           if (isStillConnected) {
@@ -79,15 +62,12 @@ useFocusEffect(
             return true;
           }
         }
-      } catch (err) {
-        console.error('Erro ao sincronizar conexão:', err);
-      }
-      return false;
-    };
+        return false;
+      };
 
-    const tryReconnect = async () => {
-      try {
-        if (!isActive || connectedDevice || manuallyDisconnected.current || !savedDevice) return;
+      const tryReconnect = async () => {
+        if (!isActive || connectedDevice || manuallyDisconnected.current) return;
+        if (!savedDevice) return;
 
         const btState = await bleManager.state();
         if (btState !== State.PoweredOn) return;
@@ -110,17 +90,6 @@ useFocusEffect(
                 setConnectedDevice(reconnected);
                 ToastAndroid.show('Reconectado automaticamente!', ToastAndroid.SHORT);
 
-                // ✅ iniciar monitoramento com segurança
-                await BluetoothService.initializeNotifications((data) => {
-                  console.log('Dado recebido (auto reconexão):', data);
-                });
-
-                reconnected.onDisconnected(() => {
-                  setConnectedDevice(null);
-                });
-
-                if (reconnectInterval) clearInterval(reconnectInterval);
-
                 reconnected.onDisconnected(() => {
                   setConnectedDevice(null);
                 });
@@ -128,55 +97,43 @@ useFocusEffect(
                 if (reconnectInterval) clearInterval(reconnectInterval);
               }
             } catch (err) {
-              console.error('Falha ao reconectar:', err);
+              console.log('Falha ao reconectar:', err);
             }
           }
         });
-      } catch (err) {
-        console.error('Erro no processo de reconexão:', err);
-      }
-    };
+      };
 
-    const initialize = async () => {
-      try {
+      const initialize = async () => {
         const synced = await syncConnectedDevice();
         if (!synced) tryReconnect();
         reconnectInterval = setInterval(tryReconnect, 5000);
-      } catch (err) {
-        console.error('Erro na inicialização:', err);
-      }
-    };
+      };
 
-    initialize();
+      initialize();
 
-    return () => {
-      isActive = false;
-      if (reconnectInterval) clearInterval(reconnectInterval);
-      bleManager.stopDeviceScan();
-    };
-  }, [connectedDevice, savedDevice])
-);
+      return () => {
+        isActive = false;
+        if (reconnectInterval) clearInterval(reconnectInterval);
+        bleManager.stopDeviceScan();
+      };
+    }, [connectedDevice, savedDevice])
+  );
 
-useEffect(() => {
-  const subscription = AppState.addEventListener('change', async (nextAppState) => {
-    try {
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState === 'active' && nextAppState.match(/inactive|background/)) {
         await BluetoothService.disconnect();
         setConnectedDevice(null);
       }
       setAppState(nextAppState);
-    } catch (err) {
-      console.error('Erro ao lidar com mudança de estado do app:', err);
-    }
-  });
+    });
 
-  return () => {
-    subscription.remove();
-  };
-}, [appState]);
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
 
-const startScan = async () => {
-  try {
+  const startScan = async () => {
     manuallyDisconnected.current = false;
     setDevices([]);
 
@@ -188,6 +145,8 @@ const startScan = async () => {
 
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error || !device?.name) return;
+
+      // * FILTRO: Ignorar o dispositivo já conectado *
       if (connectedDevice && device.id === connectedDevice.id) return;
 
       const rssi = device.rssi ?? -100;
@@ -207,48 +166,39 @@ const startScan = async () => {
       bleManager.stopDeviceScan();
       ToastAndroid.show('Scan finalizado', ToastAndroid.SHORT);
     }, 10000);
-  } catch (err) {
-    console.error('Erro ao iniciar scan:', err);
-  }
-};
+  };
 
-const connectToDevice = async (device: Device) => {
-  try {
+  const connectToDevice = async (device: Device) => {
     if (connectedDevice?.id === device.id) {
       ToastAndroid.show('Dispositivo já conectado', ToastAndroid.SHORT);
       return;
     }
 
-    const connected = await BluetoothService.connectToDevice(device.id);
-    manuallyDisconnected.current = false;
-    await BluetoothService.initializeNotifications((data) => {
-      console.log('Dado recebido (manual):', data);
-    });
+    try {
+      const connected = await BluetoothService.connectToDevice(device.id);
+      manuallyDisconnected.current = false;
+      setConnectedDevice(connected);
 
-    await saveBluetoothDevice({ id: connected.id, name: connected.name ?? undefined });
-    setSavedDevice({ id: connected.id, name: connected.name ?? undefined });
+      // ✅ Salvar o novo dispositivo como padrão
+      await saveBluetoothDevice({ id: connected.id, name: connected.name ?? undefined });
+      setSavedDevice({ id: connected.id, name: connected.name ?? undefined });
 
-    connected.onDisconnected(() => {
-      setConnectedDevice(null);
-    });
+      connected.onDisconnected(() => {
+        setConnectedDevice(null);
+      });
 
-    ToastAndroid.show(`Conectado a ${device.name}`, ToastAndroid.SHORT);
-  } catch (err) {
-    console.error('Erro ao conectar ao dispositivo:', err);
-    ToastAndroid.show('Erro ao conectar', ToastAndroid.SHORT);
-  }
-};
+      ToastAndroid.show(`Conectado a ${device.name}`, ToastAndroid.SHORT);
+    } catch {
+      ToastAndroid.show('Erro ao conectar', ToastAndroid.SHORT);
+    }
+  };
 
-const disconnect = async () => {
-  try {
+  const disconnect = async () => {
     manuallyDisconnected.current = true;
     await BluetoothService.disconnect();
     setConnectedDevice(null);
     ToastAndroid.show('Desconectado', ToastAndroid.SHORT);
-  } catch (err) {
-    console.error('Erro ao desconectar:', err);
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -277,7 +227,7 @@ const disconnect = async () => {
 
       <View style={styles.box}>
         <FlatList
-          // ** FILTRO EXTRA no momento da renderização, só por garantia **
+          // * FILTRO EXTRA no momento da renderização, só por garantia *
           data={devices.filter(d => connectedDevice ? d.id !== connectedDevice.id : true)}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
