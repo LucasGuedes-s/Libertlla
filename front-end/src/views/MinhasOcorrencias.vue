@@ -4,7 +4,9 @@
       <SideBar />
 
       <div class="container">
-        <div class="titulo-principal">Minhas Ocorrências</div>
+        <div class="titulo-principal">Minhas Ocorrências
+          <button class="button_desarquivar" @click="abrirModalArquivadas">Arquivadas</button>
+        </div>
 
         <div v-if="loadingOcorrencias || loadingConversas" class="loading-wrapper">
           <div class="spinner"></div>
@@ -164,11 +166,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Ocorrências Arquivadas -->
+    <modalArquivadas v-if="modalArquivadasVisivel" :visivel="modalArquivadasVisivel" :modalKey="modalKey"
+      :ocorrencias="ocorrenciasArquivadas" :conversas="conversasArquivadas" :carregando="loadingArquivadas"
+      @desarquivar="desarquivarOcorrencia" @desarquivarConversa="desarquivarConversa" @fechar="fecharModalArquivadas" />
+
   </div>
 </template>
 
 <script>
 import SideBar from "@/components/SideBar.vue";
+import modalArquivadas from "@/components/modais/modalArquivadas.vue";
 import axios from "axios";
 import { useAuthStore } from "@/store.js";
 import { formatDate } from "@/utils/dataformatar";
@@ -197,6 +206,10 @@ export default {
       filtroVitima: "",
       loadingOcorrencias: false,
       loadingConversas: false,
+      modalArquivadasVisivel: false,
+      ocorrenciasArquivadas: [],
+      conversasArquivadas: [],
+      loadingArquivadas: false,
     };
   },
 
@@ -291,6 +304,101 @@ export default {
       this.assinaturas = event.target.files[0];
     },
 
+    async abrirModalArquivadas() {
+      this.modalArquivadasVisivel = true;
+      this.loadingArquivadas = true;
+
+      try {
+        await Promise.all([
+          this.buscarOcorrenciasArquivadas(),
+          this.buscarConversasArquivadas()
+        ]);
+      } catch (error) {
+        console.error("Erro ao buscar arquivadas", error);
+      } finally {
+        this.loadingArquivadas = false;
+      }
+    },
+
+    fecharModalArquivadas() {
+      this.modalArquivadasVisivel = false;
+    },
+
+    async buscarOcorrenciasArquivadas() {
+      try {
+        const email = this.store.usuario.usuario.email;
+        const token = this.store.token;
+
+        const res = await axios.get(`https://libertlla.onrender.com/ocorrencias/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        this.ocorrenciasArquivadas = (res.data.processos || [])
+          .filter((o) => o.status === "Arquivada")
+          .sort((a, b) => new Date(b.data_denuncia) - new Date(a.data_denuncia));
+      } catch (error) {
+        console.error("Erro ao buscar ocorrências arquivadas:", error);
+        Swal.fire("Erro", "Não foi possível carregar as ocorrências arquivadas.", "error");
+      }
+    },
+
+    async buscarConversasArquivadas() {
+      try {
+        const email = this.store.usuario.usuario.email;
+        const token = this.store.token;
+
+        const res = await axios.get(`https://libertlla.onrender.com/conversas/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        this.conversasArquivadas = (res.data.conversas || [])
+          .filter((c) => c.status === "Arquivada")
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } catch (error) {
+        console.error("Erro ao buscar conversas arquivadas:", error);
+        Swal.fire("Erro", "Não foi possível carregar as conversas arquivadas.", "error");
+      }
+    },
+
+    async desarquivarOcorrencia(id) {
+      try {
+        const token = this.store.token;
+
+        await axios.put(
+          `http://localhost:3000/ocorrencias/${id}/desarquivar`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        Swal.fire("Sucesso", "Ocorrência desarquivada com sucesso!", "success");
+        this.ocorrenciasArquivadas = this.ocorrenciasArquivadas.filter((o) => o.id !== id);
+        this.carregarOcorrencias();
+      } catch (error) {
+        console.error("Erro ao desarquivar ocorrência:", error);
+        Swal.fire("Erro", "Não foi possível desarquivar a ocorrência.", "error");
+      }
+    },
+
+    async desarquivarConversa(id) {
+      try {
+        const token = this.store.token;
+
+        await axios.put(
+          `http://localhost:3000/conversa/${id}/desarquivar`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        Swal.fire("Sucesso", "Conversa desarquivada com sucesso!", "success");
+
+        this.conversasArquivadas = this.conversasArquivadas.filter((c) => c.id !== id);
+
+        this.getConversas();
+      } catch (error) {
+        console.error("Erro ao desarquivar conversa:", error);
+        Swal.fire("Erro", "Não foi possível desarquivar a conversa.", "error");
+      }
+    },
     async uploadFiles(files) {
       const urls = [];
       for (const file of files) {
@@ -340,8 +448,8 @@ export default {
       let assinatura = await this.uploadFile(this.assinaturas);
 
       const url = this.ocorrenciaSelecionada
-        ? `http://localhost:3000/visita/ocorrencia/${this.ocorrenciaSelecionada}`
-        : `http://localhost:3000/visita/conversa/${this.conversaSelecionada}`;
+        ? `https://libertlla.onrender.com/visita/ocorrencia/${this.ocorrenciaSelecionada}`
+        : `https://libertlla.onrender.com/visita/conversa/${this.conversaSelecionada}`;
 
       const payload = {
         data: new Date().toISOString(), // ✅ Data e hora automáticas
@@ -505,6 +613,7 @@ export default {
 
   components: {
     SideBar,
+    modalArquivadas,
   },
 };
 </script>
@@ -523,6 +632,7 @@ export default {
   margin-top: -17px;
   margin-left: 7px;
   color: #9B287B;
+  display: flex;
 }
 
 .div_ocorrencias {
@@ -591,7 +701,6 @@ label {
   margin-bottom: 20px;
 }
 
-
 .info_denuncia h3 {
   margin-bottom: 10px;
 }
@@ -651,8 +760,8 @@ label {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
+
 
 .modal-content form {
   flex: 1;
@@ -684,17 +793,18 @@ textarea {
   resize: none;
 }
 
+
+
 .quadrado {
   background-color: #54123F;
   color: white;
   width: 100%;
   height: 60px;
-  top: 0px;
-  left: 0px;
   display: flex;
-  position: absolute;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .quadrado .titulo {
@@ -846,6 +956,68 @@ textarea {
   margin-top: 5px;
   margin-bottom: 5px;
 }
+
+.button_desarquivar {
+  background-color: #9B287B;
+  color: rgba(245, 245, 245, 255);
+  border: 1px solid rgba(245, 245, 245, 255);
+  border-radius: 14px;
+  font-size: 15px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.modal-arquivadas-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.info_arquivadas {
+  border-color: #d3d3d3b6;
+  border-style: solid;
+  padding: 20px;
+}
+
+.primeira-ocorrencia {
+  margin-top: 60px;
+}
+
+.titulo-ocorrencia {
+  color: #9b287b !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.btn-desarquivar {
+  width: 100%;
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  color: #7e7e7e;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.btn-fecharDesarquivadas {
+  width: 100%;
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  color: #7e7e7e;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
 
 @media (max-width: 768px) {
   .dashboard {

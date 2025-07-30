@@ -195,6 +195,27 @@ async function arquivarConversa(conversaId) {
   }
 }
 
+async function desarquivarOcorrencia(id) {
+  const ocorrencia = await prisma.ocorrencias.findUnique({
+    where: { id: Number(id) },
+  });
+
+  const ocorrenciaAtualizada = await prisma.ocorrencias.update({
+    where: { id: Number(id) },
+    data: { status: 'Andamento' },
+  });
+
+  return ocorrenciaAtualizada;
+};
+
+async function desarquivarConversa(conversaId) {
+  const conversa = await prisma.conversa.update({
+    where: { id: conversaId },
+    data: { status: 'Andamento' },
+  });
+  return conversa;
+}
+
 async function adicionarProgressoChat(descricao, anexos, chatId) {
   return await prisma.Registro.create({
     data: {
@@ -256,4 +277,4 @@ async function adicionarVisitaConversa(data, descricao, testemunhas, anexos, ass
   });
 }
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia, adicionarVisitaConversa };
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, desarquivarOcorrencia, desarquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia, adicionarVisitaConversa };

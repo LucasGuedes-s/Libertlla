@@ -83,6 +83,10 @@
             <label class="form-label">Provas:</label>
             <input class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
           </div>
+          <div class="mb-3">
+            <label class="form-label">Endereço da vítima:</label>
+            <input class="form-control" v-model="ocorrencia.endereco_vitima" readonly />
+          </div>
         </div>
 
         <div class="modal-button">
@@ -134,7 +138,7 @@
 
 .dashboard {
   margin-left: 250px;
-  margin-top: 30px; 
+  margin-top: 30px;
   padding: 20px;
   border-radius: 10px;
 }
@@ -162,20 +166,17 @@
   color: #8b2276;
 }
 
-
 .card_contagem p {
   font-size: 32px;
   font-weight: bold;
   color: #FF00AE;
 }
 
-
 .div_ocorrencias {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 }
-
 
 .ocorrencias_chat,
 .ocorrencias_formulario {
@@ -187,14 +188,12 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-
 .div_ocorrencias h2 {
   font-size: 20px;
   margin-bottom: 20px;
   color: #8b2276;
   font-weight: bold;
 }
-
 
 .info_denuncia {
   background-color: white;
@@ -204,17 +203,14 @@
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
-
 .info_denuncia h3 {
   margin-bottom: 10px;
 }
-
 
 .info_denuncia p {
   margin-bottom: 8px;
   color: #7E7E7E
 }
-
 
 .buttons {
   grid-column: 1 / -1;
@@ -222,7 +218,6 @@
   justify-content: space-between;
   gap: 10px;
 }
-
 
 .detalhar-btn,
 .aceitar-btn {
@@ -449,7 +444,7 @@ export default {
     return {
       formatDate,
       ocorrencias: [],
-      ocorrencia: {}, 
+      ocorrencia: {},
       modalVisible: false,
       chatAtivo: false,
       modalkey: 0,

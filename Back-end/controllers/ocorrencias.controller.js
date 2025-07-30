@@ -1,11 +1,11 @@
-const  Ocorrencia = require("../services/ocorrencias.service");
-const conversaService = require('../services/ocorrencias.service'); 
+const Ocorrencia = require("../services/ocorrencias.service");
+const conversaService = require('../services/ocorrencias.service');
 
 // Registrar uma ocorrência
 async function PostOcorrencias(req, res) {
   try {
     const ocorrencias = await Ocorrencia.CadrastrarOcorrencias(req.body.ocorrencias);
-    
+
     req.io.emit('nova_ocorrencia', ocorrencias);
 
     res.status(200).json({ message: 'Ocorrência registrada com sucesso', ocorrencia: ocorrencias });
@@ -16,115 +16,115 @@ async function PostOcorrencias(req, res) {
 };
 
 async function getOcorrenciasProfissional(req, res, next) {
-    try {
-        const processos = await Ocorrencia.getOcorrenciasProfissional(req.params.email)
-        res.status(200).json({
-            processos
-        })
-        next()
-    } catch (error) {
-        console.error(error)
-        console.error('Erro no get em processos do profissional')
-    }
+  try {
+    const processos = await Ocorrencia.getOcorrenciasProfissional(req.params.email)
+    res.status(200).json({
+      processos
+    })
+    next()
+  } catch (error) {
+    console.error(error)
+    console.error('Erro no get em processos do profissional')
+  }
 }
 
 async function getConversas(req, res, next) {
-    const { profissionalEmail } = req.params; 
-  
-    try {
-      const conversas = await conversaService.getConversasProfissional(profissionalEmail); 
-      
-      res.status(200).json({
-        conversas
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar conversas do profissional' });
-    }
+  const { profissionalEmail } = req.params;
+
+  try {
+    const conversas = await conversaService.getConversasProfissional(profissionalEmail);
+
+    res.status(200).json({
+      conversas
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar conversas do profissional' });
+  }
 }
 
 async function GetOcorrencias(req, res, next) {
-    try {
-        const ocorrencias = await Ocorrencia.GetOcorrencias()
-        res.status(200).json({
-            ocorrencias
-        })
-        next()
-    } catch (error) {
-        console.error(error)
-        console.error('Erro ao receber ocorrencias')
-    }
+  try {
+    const ocorrencias = await Ocorrencia.GetOcorrencias()
+    res.status(200).json({
+      ocorrencias
+    })
+    next()
+  } catch (error) {
+    console.error(error)
+    console.error('Erro ao receber ocorrencias')
+  }
 }
 async function GetOcorrenciasTotais(req, res, next) {
-    try {
-        const ocorrencias = await Ocorrencia.GetOcorrenciaTotais()
-        res.status(200).json({
-            ocorrencias
-        })
-        next()
-    } catch (error) {
-        console.error(error)
-        console.error('Erro ao receber ocorrencias')
-    }
+  try {
+    const ocorrencias = await Ocorrencia.GetOcorrenciaTotais()
+    res.status(200).json({
+      ocorrencias
+    })
+    next()
+  } catch (error) {
+    console.error(error)
+    console.error('Erro ao receber ocorrencias')
+  }
 }
 async function GetTodasOcorrencias(req, res, next) {
-    try {
-        const { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas } = await Ocorrencia.GetTodasOcorrencias();
-        res.status(200).json({ totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas });
+  try {
+    const { totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas } = await Ocorrencia.GetTodasOcorrencias();
+    res.status(200).json({ totalDenuncias, totalConversas, totalOcorrencias, totalAtendidas });
 
-        next();
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erro ao buscar total de denúncias' });
-    }
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar total de denúncias' });
+  }
 }
 
 async function GetOcorrenciaEspecifica(req, res, next) {
-    try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).json({ error: "ID inválido." });
-        }
-
-        const ocorrencia = await Ocorrencia.GetOcorrenciaEspecifica(id);
-        if (!ocorrencia) {
-            return res.status(404).json({ error: "Ocorrência não encontrada." });
-        }
-
-
-        res.status(200).json({ ocorrencia });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Erro ao buscar a ocorrência." });
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "ID inválido." });
     }
+
+    const ocorrencia = await Ocorrencia.GetOcorrenciaEspecifica(id);
+    if (!ocorrencia) {
+      return res.status(404).json({ error: "Ocorrência não encontrada." });
+    }
+
+
+    res.status(200).json({ ocorrencia });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar a ocorrência." });
+  }
 }
 
 async function updateOcorrencia(req, res, next) {
-    try {
-        const ocorrencias = await Ocorrencia.updateOcorrencia(req)
-        res.status(200).json({
-            ocorrencias
-        })
-        next()
-    } catch (error) {
-        console.error(error)
-        console.error('Erro ao realizar alteração na ocorrencia/processo')
-    }
+  try {
+    const ocorrencias = await Ocorrencia.updateOcorrencia(req)
+    res.status(200).json({
+      ocorrencias
+    })
+    next()
+  } catch (error) {
+    console.error(error)
+    console.error('Erro ao realizar alteração na ocorrencia/processo')
+  }
 }
 
 async function arquivarOcorrencia(req, res, next) {
-    try {
-        const { ocorrenciaId } = req.body; 
-        const ocorrencias = await Ocorrencia.arquivarOcorrencia(ocorrenciaId); 
-        res.status(200).json({
-            ocorrencias
-        });
-        next();
-    } catch (error) {
-        console.error(error);
-        console.error("Erro ao arquivar ocorrência");
-        res.status(500).json({ error: "Erro ao arquivar ocorrência." });
-    }
+  try {
+    const { ocorrenciaId } = req.body;
+    const ocorrencias = await Ocorrencia.arquivarOcorrencia(ocorrenciaId);
+    res.status(200).json({
+      ocorrencias
+    });
+    next();
+  } catch (error) {
+    console.error(error);
+    console.error("Erro ao arquivar ocorrência");
+    res.status(500).json({ error: "Erro ao arquivar ocorrência." });
+  }
 }
 async function arquivarConversa(req, res, next) {
   try {
@@ -140,6 +140,28 @@ async function arquivarConversa(req, res, next) {
   } catch (error) {
     console.error("Erro ao arquivar conversa:", error);
     return res.status(500).json({ error: "Erro ao arquivar conversa." });
+  }
+}
+
+async function desarquivarOcorrenciaController(req, res) {
+  const { id } = req.params;
+
+  try {
+    const ocorrencia = await Ocorrencia.desarquivarOcorrencia(id);
+    res.status(200).json({ message: 'Ocorrência desarquivada com sucesso', ocorrencia });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+async function desarquivarConversaController(req, res) {
+  try {
+    const { id } = req.params;
+    const conversaAtualizada = await conversaService.desarquivarConversa(id);
+    return res.status(200).json(conversaAtualizada);
+  } catch (error) {
+    console.error('Erro ao desarquivar conversa:', error);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 }
 
@@ -234,6 +256,6 @@ async function adicionarVisitaConversa(req, res) {
   }
 }
 
-module.exports = {PostOcorrencias, GetOcorrencias,getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica,arquivarOcorrencia, arquivarConversa, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia, adicionarVisitaConversa};
+module.exports = { PostOcorrencias, GetOcorrencias, getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, arquivarOcorrencia, arquivarConversa, desarquivarOcorrenciaController, desarquivarConversaController, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia, adicionarVisitaConversa };
 
 

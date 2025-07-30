@@ -25,6 +25,10 @@ router.put("/ocorrencias/arquivar", [validarJWT], controller.arquivarOcorrencia)
 
 router.put('/conversas/arquivar', [validarJWT], controller.arquivarConversa);
 
+router.put('/ocorrencias/:id/desarquivar', controller.desarquivarOcorrenciaController);
+
+router.put('/conversa/:id/desarquivar', controller.desarquivarConversaController);
+
 router.get("/todas/ocorrencias", controller.GetOcorrenciasTotais);
 
 router.post('/ocorrencias/:id/vincular-vitima', controller.vincularVitimaController);

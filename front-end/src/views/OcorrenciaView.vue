@@ -48,6 +48,12 @@
                                 readonly></textarea>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="enderecoVitima" class="form-label">Endereço da vítima:</label>
+                            <input type="text" id="enderecoVitima" class="form-control"
+                                v-model="ocorrencia.endereco_vitima" readonly />
+                        </div>
+
                         <div class="button">
                             <button class="apertarBotao" @click="arquivarOcorrencia">Arquivar</button>
                         </div>
@@ -127,7 +133,7 @@
                                     </p>
                                     <span class="text-muted">{{
                                         new Date(registro.data).toLocaleString()
-                                        }}</span>
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -167,6 +173,7 @@ export default {
                 provas: '',
                 descricao: '',
                 local: '',
+                endereco_vitima: '',
                 registros: []
             },
             filtro: {
@@ -218,6 +225,7 @@ export default {
                         provas: Array.isArray(dados.provas) ? dados.provas.join(', ') : '',
                         descricao: dados.descricao || '',
                         local: dados.local || '',
+                        endereco_vitima: dados.endereco_vitima || '',
                         registros: dados.registros || []
                     };
                 }
@@ -440,7 +448,7 @@ textarea.form-control {
         gap: 10px;
         margin-top: 50px;
         margin-left: 10px;
-        width:95%;
+        width: 95%;
     }
 
     .botaolimpar {
