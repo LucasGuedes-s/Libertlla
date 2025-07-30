@@ -5,66 +5,66 @@
         <h1 class="titulo mb-4">Denúncias Arquivadas</h1>
       </div>
 
-      <div class="loading-wrapper" v-if="carregando">
-        <div class="spinner"></div>
-        <p>Carregando ocorrências...</p>
+      <div class="conteudo-modal">
+        <div class="loading-wrapper" v-if="carregando">
+          <div class="spinner"></div>
+          <p>Carregando ocorrências...</p>
+        </div>
+
+        <div v-else-if="!ocorrencias.length && !conversas.length" class="nenhuma-encontrada-wrapper">
+          <p class="nenhuma-encontrada">Nenhuma ocorrência ou conversa arquivada encontrada.</p>
+        </div>
+
+        <template v-else>
+          <!-- Ocorrências -->
+          <div class="ocorrencias-wrapper" v-if="ocorrencias.length">
+            <div class="info_arquivadas" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+              <div class="denuncia">
+                <h1 class="titulo-ocorrencia">Ocorrência {{ ocorrencia.id }}</h1>
+              </div>
+              <div class="denuncia">
+                <label>Data:</label>
+                <p>{{ formatDate(ocorrencia.data_denuncia) }}</p>
+              </div>
+              <div class="denuncia">
+                <label>Tipo de Violência:</label>
+                <p>{{ ocorrencia.tipo_violencia }}</p>
+              </div>
+              <div class="denuncia">
+                <label>Descrição:</label>
+                <p>{{ ocorrencia.descricao }}</p>
+              </div>
+
+              <button class="btn-desarquivar" @click="$emit('desarquivar', ocorrencia.id)">
+                Desarquivar
+              </button>
+            </div>
+          </div>
+
+          <!-- Conversas -->
+          <div v-if="conversas.length">
+            <div class="info_arquivadas" v-for="conversa in conversas" :key="conversa.id">
+              <div class="denuncia">
+                <h1 class="titulo-ocorrencia">Conversa</h1>
+              </div>
+              <div class="denuncia">
+                <label>ID da Conversa:</label>
+                <p>{{ conversa.id }}</p>
+              </div>
+              <div class="denuncia">
+                <label>Tipo de Denúncia:</label>
+                <p>Chat</p>
+              </div>
+
+              <button class="btn-desarquivar" @click="$emit('desarquivarConversa', conversa.id)">
+                Desarquivar
+              </button>
+            </div>
+          </div>
+        </template>
       </div>
 
-      <div v-else-if="!ocorrencias.length && !conversas.length" class="nenhuma-encontrada-wrapper">
-        <p class="nenhuma-encontrada">Nenhuma ocorrência ou conversa arquivada encontrada.</p>
-      </div>
-
-      <template v-else>
-        <div class="ocorrencias-wrapper" v-if="ocorrencias.length">
-          <div class="info_arquivadas border rounded p-4 mb-3" :class="{ 'primeira-ocorrencia': index === 0 }"
-            v-for="(ocorrencia, index) in ocorrencias" :key="ocorrencia.id">
-            <div class="denuncia">
-              <h1 class="titulo-ocorrencia">Ocorrência {{ ocorrencia.id }}</h1>
-            </div>
-            <div class="denuncia">
-              <label>Data:</label>
-              <p>{{ formatDate(ocorrencia.data_denuncia) }}</p>
-            </div>
-            <div class="denuncia">
-              <label>Tipo de Violência:</label>
-              <p>{{ ocorrencia.tipo_violencia }}</p>
-            </div>
-            <div class="denuncia">
-              <label>Descrição:</label>
-              <p>{{ ocorrencia.descricao }}</p>
-            </div>
-
-            <button class="btn-desarquivar" @click="$emit('desarquivar', ocorrencia.id)">
-              Desarquivar
-            </button>
-          </div>
-        </div>
-        
-        <div v-if="conversas.length">
-          <div class="info_arquivadas border rounded p-4 mb-3" :class="{ 'primeira-ocorrencia': index === 0 }"
-            v-for="(conversa, index) in conversas" :key="conversa.id">
-            <div class="denuncia">
-              <h1 class="titulo-ocorrencia">Conversa</h1>
-            </div>
-            <div class="denuncia">
-              <label>ID da Conversa:</label>
-              <p>{{ conversa.id }}</p>
-            </div>
-            <div class="denuncia">
-              <label>Tipo de Denúncia:</label>
-              <p>Chat</p>
-            </div>
-
-            <button class="btn-desarquivar" @click="$emit('desarquivarConversa', conversa.id)">
-              Desarquivar
-            </button>
-          </div>
-        </div>
-      </template>
-
-      <div class="modal-actions">
         <button class="btn-fecharDesarquivadas" @click="$emit('fechar')">Fechar</button>
-      </div>
     </div>
   </div>
 </template>
@@ -104,26 +104,34 @@ export default {
 
 .modal-content {
   background: white;
-  padding: 20px;
+  padding: 0;
   border-radius: 8px;
   width: 90vw;
   max-width: 600px;
   max-height: 90vh;
-  overflow: auto;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+}
+
+.conteudo-modal {
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .quadrado {
   background-color: #54123F;
   color: white;
   width: 100%;
-  height: 60px;
+  padding: 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  z-index: 2;
+  position: relative;
 }
 
 .quadrado .titulo {
@@ -131,17 +139,19 @@ export default {
   font-size: 24px;
   color: white;
   font-family: "Montserrat", sans-serif;
-  padding-top: 20px;
+}
+
+.ocorrencias-wrapper {
+  position: relative;
+  z-index: 1;
 }
 
 .info_arquivadas {
-  border-color: #d3d3d3b6;
-  border-style: solid;
+  border: 1px solid #d3d3d3b6;
+  border-radius: 6px;
   padding: 20px;
-}
-
-.primeira-ocorrencia {
-  margin-top: 60px;
+  margin-bottom: 20px;
+  background-color: #fefefe;
 }
 
 .denuncia {
@@ -171,8 +181,7 @@ export default {
   font-size: 20px;
 }
 
-.btn-desarquivar,
-.btn-fecharDesarquivadas {
+.btn-desarquivar{
   width: 100%;
   background-color: #f5f5f5;
   border: 1px solid #d9d9d9;
@@ -182,18 +191,23 @@ export default {
   padding: 10px 20px;
   font-family: "Montserrat", sans-serif;
 }
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+.btn-fecharDesarquivadas{
+   margin: -10px 20px 20px 20px; 
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  color: #7e7e7e;
+  border-radius: 5px;
+  font-size: 14px;
+  padding: 10px 20px;
+  font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 }
 
 .loading-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 80px;
+  margin-top: 40px;
   margin-bottom: 30px;
   gap: 10px;
   flex-direction: row;
@@ -221,7 +235,7 @@ export default {
 .nenhuma-encontrada-wrapper {
   text-align: center;
   padding: 40px 20px;
-  margin-top: 40px; 
+  margin-top: 40px;
 }
 
 .nenhuma-encontrada {
@@ -233,5 +247,4 @@ export default {
   border-radius: 6px;
   border: 1px solid #e0e0e0;
 }
-
 </style>

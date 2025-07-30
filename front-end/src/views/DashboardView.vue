@@ -50,50 +50,8 @@
       </div>
     </div>
 
-    <!-- Modal -->
-    <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
-      <div class="modal-content">
-        <div class="quadrado">
-          <h1 class="titulo mb-4">Ocorrência - {{ ocorrencia.id }}</h1>
-        </div>
-
-        <div class="card-body">
-          <div class="mb-3">
-            <label class="form-label">Data:</label>
-            <input class="form-control" :value="formatDate(ocorrencia.data_denuncia)" readonly />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Tipo de violência:</label>
-            <input class="form-control" v-model="ocorrencia.tipo_violencia" readonly />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Relação com a Pessoa Denunciada:</label>
-            <input class="form-control" v-model="ocorrencia.agressor" readonly />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Local do Ocorrido:</label>
-            <input class="form-control" v-model="ocorrencia.local" readonly />
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Descrição:</label>
-            <input class="form-control" rows="3" v-model="ocorrencia.descricao" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Provas:</label>
-            <input class="form-control" rows="3" v-model="ocorrencia.provas" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Endereço da vítima:</label>
-            <input class="form-control" v-model="ocorrencia.endereco_vitima" readonly />
-          </div>
-        </div>
-
-        <div class="modal-button">
-          <button class="abrirModal" @click="fecharModal">Fechar</button>
-        </div>
-      </div>
-    </div>
+    <!-- Modal de Visualizar Ocorrencia -->
+    <ModalVisulalizarOcorrencia :modalVisible="modalVisible" :ocorrencia="ocorrencia" @fechar="modalVisible = false" />
 
     <!-- Chat Container -->
     <div class="chat-container" v-if="isChatActive" ref="chatContainer">
@@ -112,6 +70,238 @@
   </div>
 </template>
 
+<script>
+import SideBar from '@/components/SideBar.vue';
+import ModalVisulalizarOcorrencia from '@/components/modais/ModalVisulalizarOcorrencia.vue';
+import axios from 'axios';
+import { useAuthStore } from '@/store.js'
+import { io } from "socket.io-client";
+import { formatDate } from '@/utils/dataformatar';
+import Swal from 'sweetalert2';
+import router from '@/router';
+import NavBarUser from '@/components/NavBarUser.vue';
+
+export default {
+  setup() {
+    const store = useAuthStore();
+    return {
+      store
+    };
+  },
+  data() {
+    return {
+      formatDate,
+      ocorrencias: [],
+      ocorrencia: {},
+      modalVisible: false,
+      chatAtivo: false,
+      modalkey: 0,
+      socket: null,
+      inputMessage: "",
+      messages: [],
+      solicitacoes: [],
+      isChatActive: false,
+      activeClient: null, // ID do cliente com o qual está interagindo
+      totalDenuncias: 0,
+      totalOcorrencias: 0,
+      totalConversas: 0,
+      totalAtendidas: 0,
+      intervalId: null
+    };
+  },
+  mounted() {
+    if (this.store.token == null) {
+      window.location.href = '/nao-autorizado';
+    }
+    else {
+      this.buscarOcorrencias();
+      this.buscarTotalDenuncias();
+    }
+
+    this.socket = io("https://libertlla.onrender.com");
+
+    this.socket.on("nova_ocorrencia", () => {
+      this.buscarOcorrencias(); // Atualiza a lista
+    });
+
+    const adminEmail = this.store.usuario.usuario.email
+    // Envia sinal de que é o admin
+    this.socket.emit('admin connect', adminEmail);
+
+    // Recebe solicitações de chat
+    this.socket.on("chat request", (request) => {
+      this.solicitacoes.push(request);
+    });
+
+    // Remove solicitações atendidas
+    this.socket.on("chat taken", ({ clientSocketId }) => {
+      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
+    });
+
+    // Recebe mensagens do servidor
+    this.socket.on("chat message", (msg) => {
+      this.messages.push(msg);
+    });
+
+    // Notifica o administrador se o chat terminar
+    this.socket.on("chat ended", ({ clientSocketId }) => {
+      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
+      console.log(this.solicitacoes)
+      Swal.fire({
+        icon: 'error',
+        title: 'Usuário foi desconectado',
+        timer: 4000,
+      });
+
+      this.endChat();
+    });
+
+  },
+  methods: {
+    async abrirModal(id) {
+      try {
+        const token = this.store.token;
+        const response = await axios.get(`https://libertlla.onrender.com/ocorrencia/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.ocorrencia) {
+          this.ocorrencia = response.data.ocorrencia;
+          this.ocorrencia.id = id;
+          this.modalVisible = true;
+          this.modalkey++;
+        } else {
+          console.warn("Nenhuma ocorrência encontrada para o ID:", id);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar ocorrência:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao carregar detalhes da ocorrência',
+          text: 'Tente novamente mais tarde.',
+        });
+      }
+    },
+    fecharModal() {
+      this.modalVisible = false;
+      this.ocorrencia = {};
+    },
+    async buscarOcorrencias() {
+      try {
+        const token = this.store.token;
+        if (!token) {
+          this.$router.push('/nao-autorizado');
+          return;
+        }
+        const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        this.ocorrencias = response.data.ocorrencias;
+      } catch (error) {
+        console.error('Erro ao buscar ocorrências:', error);
+        if (error.response && error.response.status === 403) {
+          this.$router.push('/nao-autorizado');
+        }
+      }
+    },
+    async aceitarDenuncia(id) {
+      try {
+        const user = this.store.usuario.usuario;
+        const email = user.email;
+        const token = this.store.token;
+
+        await axios.post("https://libertlla.onrender.com/aceitar/ocorrencia", {
+          ocorrenciaId: id,
+          profissionalEmail: email
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        this.buscarOcorrencias();
+        Swal.fire({
+          icon: 'success',
+          title: 'Ocorrência aceita com sucesso',
+          timer: 4000,
+        });
+      } catch (error) {
+        console.error('Erro ao aceitar denúncia:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao aceitar denúncia',
+          text: 'Tente novamente mais tarde.',
+        });
+      }
+    },
+    async buscarTotalDenuncias() {
+      try {
+        const token = this.store.token;
+        const response = await axios.get("https://libertlla.onrender.com/todasocorrencias", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.totalDenuncias = response.data.totalDenuncias;
+        this.totalOcorrencias = response.data.totalOcorrencias;
+        this.totalConversas = response.data.totalConversas;
+        this.totalAtendidas = response.data.totalAtendidas;
+      } catch (error) {
+        console.error("Erro ao buscar total de denúncias:", error);
+      }
+    },
+    acceptChat(socketId) {
+      if (this.chatAtivo) {
+        Swal.fire({
+          icon: "warning",
+          title: "Você já está em um atendimento!",
+          text: "Termine o chat atual antes de aceitar outro.",
+        });
+      } else {
+        this.socket.emit("accept chat", socketId);
+        this.isChatActive = true;
+        this.chatAtivo = true; // Marca como ocupado
+        this.activeClient = socketId;
+        this.requests = [];
+        this.scrollToChat();
+      }
+    },
+    sendMessage() {
+      if (this.inputMessage.trim()) {
+        const message = { from: 'Admin', content: this.inputMessage };
+        this.socket.emit("chat message", message);
+        this.messages.push(message);
+        this.inputMessage = "";
+      }
+    },
+    endChat() {
+      this.isChatActive = false;
+      //this.socket.emit("disconnect", socketId);
+      this.chatAtivo = false; // Marca como ocupado
+      this.activeClient = null;
+      this.messages = [];
+    }
+  },
+  scrollToChat() {
+    this.$nextTick(() => {
+      const chatContainer = this.$refs.chatContainer;
+      if (chatContainer) {
+        chatContainer.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.emit("end chat");
+      this.socket.disconnect();
+    }
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  },
+  components: {
+    SideBar,
+    NavBarUser,
+    ModalVisulalizarOcorrencia
+  },
+};
+</script>
 
 <style scooped>
 .navbaruse {
@@ -246,7 +436,6 @@
 
 .chat-container h3 {
   background-color: #802062;
-  /* Fundo do cabeçalho */
   color: #fff;
   text-align: center;
   padding: 15px;
@@ -311,94 +500,6 @@
   background-color: #993374;
 }
 
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  font-family: 'Montserrat', sans-serif;
-  color: #7E7E7E;
-}
-
-.modal-content {
-  background: white !important;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90vw;
-  max-width: 800px;
-  height: auto;
-  max-height: 90vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-top: 80px;
-}
-
-.modal-content form {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-top: 60px;
-}
-
-.card-body .form-control {
-  font-family: 'Montserrat', sans-serif;
-  color: rgba(152, 152, 152, 255);
-}
-
-.abrirModal {
-  flex: 1;
-  padding: 10px 20px;
-  background-color: #F5F5F5;
-  border: 1px solid #D9D9D9;
-  color: #7E7E7E;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-}
-
-.modal-button {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.quadrado {
-  background-color: #54123F;
-  color: white;
-  width: 100%;
-  height: 60px;
-  top: 0px;
-  left: 0px;
-  display: flex;
-  position: absolute;
-  align-items: center;
-  justify-content: center;
-}
-
-.quadrado .titulo {
-  margin: 0;
-  font-size: 24px;
-  color: white;
-  padding: 0;
-  text-align: center;
-  padding-top: 20px;
-  font-family: "Montserrat", sans-serif;
-}
-
-
 @media (max-width: 768px) {
   .dashboard {
     margin-left: 0;
@@ -422,238 +523,3 @@
   }
 }
 </style>
-
-<script>
-import SideBar from '@/components/SideBar.vue';
-import axios from 'axios';
-import { useAuthStore } from '@/store.js'
-import { io } from "socket.io-client";
-import { formatDate } from '@/utils/dataformatar';
-import Swal from 'sweetalert2';
-import router from '@/router';
-import NavBarUser from '@/components/NavBarUser.vue';
-
-export default {
-  setup() {
-    const store = useAuthStore();
-    return {
-      store
-    };
-  },
-  data() {
-    return {
-      formatDate,
-      ocorrencias: [],
-      ocorrencia: {},
-      modalVisible: false,
-      chatAtivo: false,
-      modalkey: 0,
-      socket: null,
-      inputMessage: "",
-      messages: [],
-      solicitacoes: [],
-      isChatActive: false,
-      activeClient: null, // ID do cliente com o qual está interagindo
-      totalDenuncias: 0,
-      totalOcorrencias: 0,
-      totalConversas: 0,
-      totalAtendidas: 0,
-      intervalId: null
-    };
-  },
-  mounted() {
-    if (this.store.token == null) {
-      window.location.href = '/nao-autorizado';
-    }
-    else {
-      this.buscarOcorrencias();
-      this.buscarTotalDenuncias();
-    }
-
-    this.socket = io("https://libertlla.onrender.com");
-
-    this.socket.on("nova_ocorrencia", () => {
-      this.buscarOcorrencias(); // Atualiza a lista
-    });
-
-    const adminEmail = this.store.usuario.usuario.email
-    // Envia sinal de que é o admin
-    this.socket.emit('admin connect', adminEmail);
-
-    // Recebe solicitações de chat
-    this.socket.on("chat request", (request) => {
-      this.solicitacoes.push(request);
-    });
-
-    // Remove solicitações atendidas
-    this.socket.on("chat taken", ({ clientSocketId }) => {
-      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
-    });
-
-    // Recebe mensagens do servidor
-    this.socket.on("chat message", (msg) => {
-      this.messages.push(msg);
-    });
-
-    // Notifica o administrador se o chat terminar
-    this.socket.on("chat ended", ({ clientSocketId }) => {
-      this.solicitacoes = this.solicitacoes.filter(req => req.socketId !== clientSocketId);
-      console.log(this.solicitacoes)
-      Swal.fire({
-        icon: 'error',
-        title: 'Usuário foi desconectado',
-        timer: 4000,
-      });
-
-      this.endChat();
-    });
-
-  },
-  methods: {
-    async abrirModal(id) {
-      try {
-        const token = this.store.token;
-        const response = await axios.get(`https://libertlla.onrender.com/ocorrencia/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.data && response.data.ocorrencia) {
-          this.ocorrencia = response.data.ocorrencia;
-          this.ocorrencia.id = id; // Salva o ID corretamente
-        } else {
-          console.warn("Nenhuma ocorrência encontrada para o ID:", id);
-        }
-
-        this.modalVisible = true;
-        this.modalkey++;
-      } catch (error) {
-        console.error('Erro ao buscar ocorrência:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro ao carregar detalhes da ocorrência',
-          text: 'Tente novamente mais tarde.',
-        });
-      }
-    },
-    fecharModal() {
-      this.modalVisible = false;
-      this.ocorrencia = {};
-    },
-    async buscarOcorrencias() {
-      try {
-        const token = this.store.token;
-        if (!token) {
-          this.$router.push('/nao-autorizado');
-          return;
-        }
-        const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        this.ocorrencias = response.data.ocorrencias;
-      } catch (error) {
-        console.error('Erro ao buscar ocorrências:', error);
-        // Se a requisição falhar devido a falta de permissão (403), redireciona
-        if (error.response && error.response.status === 403) {
-          this.$router.push('/nao-autorizado');
-        }
-        //router.push('/nao-autorizado');
-
-      }
-    },
-    async aceitarDenuncia(id) {
-      try {
-        const user = this.store.usuario.usuario;
-        const email = user.email;
-        const token = this.store.token;
-
-        await axios.post("https://libertlla.onrender.com/aceitar/ocorrencia", {
-          ocorrenciaId: id,
-          profissionalEmail: email
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        this.buscarOcorrencias();
-        Swal.fire({
-          icon: 'success',
-          title: 'Ocorrência aceita com sucesso',
-          timer: 4000,
-        });
-      } catch (error) {
-        console.error('Erro ao aceitar denúncia:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro ao aceitar denúncia',
-          text: 'Tente novamente mais tarde.',
-        });
-      }
-    },
-    async buscarTotalDenuncias() {
-      try {
-        const token = this.store.token;
-        const response = await axios.get("https://libertlla.onrender.com/todasocorrencias", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        this.totalDenuncias = response.data.totalDenuncias;
-        this.totalOcorrencias = response.data.totalOcorrencias;
-        this.totalConversas = response.data.totalConversas;
-        this.totalAtendidas = response.data.totalAtendidas;
-      } catch (error) {
-        console.error("Erro ao buscar total de denúncias:", error);
-      }
-    },
-    acceptChat(socketId) {
-      if (this.chatAtivo) {
-        Swal.fire({
-          icon: "warning",
-          title: "Você já está em um atendimento!",
-          text: "Termine o chat atual antes de aceitar outro.",
-        });
-      } else {
-        this.socket.emit("accept chat", socketId);
-        this.isChatActive = true;
-        this.chatAtivo = true; // Marca como ocupado
-        this.activeClient = socketId;
-        this.requests = [];
-        this.scrollToChat();
-      }
-    },
-    sendMessage() {
-      if (this.inputMessage.trim()) {
-        const message = { from: 'Admin', content: this.inputMessage };
-        this.socket.emit("chat message", message);
-        this.messages.push(message);
-        this.inputMessage = "";
-      }
-    },
-    endChat() {
-      this.isChatActive = false;
-      //this.socket.emit("disconnect", socketId);
-      this.chatAtivo = false; // Marca como ocupado
-      this.activeClient = null;
-      this.messages = [];
-    }
-  },
-  scrollToChat() {
-    this.$nextTick(() => {
-      const chatContainer = this.$refs.chatContainer;
-      if (chatContainer) {
-        chatContainer.scrollIntoView({ behavior: "smooth" });
-      }
-    });
-  },
-  beforeUnmount() {
-    if (this.socket) {
-      this.socket.emit("end chat");
-      this.socket.disconnect();
-    }
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-  },
-  components: {
-    SideBar,
-    NavBarUser
-  },
-};
-</script>

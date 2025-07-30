@@ -84,100 +84,34 @@
         </div>
       </div>
 
-      <!-- Modal Adicionar Progresso -->
-      <div v-if="modalVisible" :key="modalKey" class="modal-overlay">
-        <div class="modal-content">
-          <div class="quadrado">
-            <h1 class="titulo mb-4">Adicionar Progresso</h1>
-          </div>
-          <form @submit.prevent="adicionarProgresso">
-            <label for="descricao">Descrição:</label>
-            <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
+      <!-- Modal de adicionar progresso-->
+      <ModalAdicionarProgresso :visible="modalVisible" :modalKey="modalKey" @close="fecharModal"
+        @submit="adicionarProgresso" />
 
-            <div class="form-group" id="adicionar_imagem">
-              <label for="imagem">Anexos:</label>
-              <input type="file" id="imagem" name="imagem" accept="image/*" @change="handleFileChange" />
-            </div>
+      <!-- Componente ModalCadastrarVisita -->
+      <ModalCadastrarVisita :visible="modalCadastrarVisible" :modalKey="modalKey" @close="fecharModalVisita"
+        @submit="cadastrarVisita" />
 
-            <div class="modal-actions">
-              <button type="submit" class="btn-salvar">Salvar</button>
-              <button type="button" class="btn-cancelar" @click="fecharModal">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <!-- Modal de vincular vitima -->
+      <ModalVincularVitima :visible="modalVincularVisible" :vitimas="vitimas" @close="fecharModalVincularVitima"
+        @submit="vincularVitima" />
 
-      <!-- Modal Vincular Vítima -->
-      <div v-if="modalVincularVisible" class="modal-overlay">
-        <div class="modal-content">
-          <div class="quadrado">
-            <h3 class="titulo mb-4">Vincular Vítima</h3>
-          </div>
-          <form @submit.prevent="vincularVitima">
-            <div class="dropdown-row">
-              <label for="vitimaSelecionada">Selecione uma vítima:</label>
-              <select v-model="vitimaSelecionada" id="vitimaSelecionada" class="dropdown" required>
-                <option disabled value="">Selecionar</option>
-                <option v-for="vitima in vitimas" :key="vitima.id" :value="vitima.id">
-                  {{ vitima.nome }} - {{ vitima.email }}
-                </option>
-              </select>
-            </div>
+      <!-- Modal de Ocorrências Arquivadas -->
+      <ModalArquivadas v-if="modalArquivadasVisivel" :visivel="modalArquivadasVisivel" :modalKey="modalKey"
+        :ocorrencias="ocorrenciasArquivadas" :conversas="conversasArquivadas" :carregando="loadingArquivadas"
+        @desarquivar="desarquivarOcorrencia" @desarquivarConversa="desarquivarConversa"
+        @fechar="fecharModalArquivadas" />
 
-            <div class="modal-actions">
-              <button type="submit" class="btn-salvar">Salvar</button>
-              <button type="button" class="btn-cancelar" @click="fecharModalVincularVitima">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Modal de cadastrar visita -->
-      <div v-if="modalCadastrarVisible" :key="modalKey" class="modal-overlay">
-        <div class="modal-content">
-          <div class="quadrado">
-            <h1 class="titulo mb-4">Cadastrar Visita</h1>
-          </div>
-          <form @submit.prevent="cadastrarVisita">
-            <label for="descricao">Descrição:</label>
-            <textarea v-model="descricao" id="descricao" rows="4" placeholder="Adicionar descrição"></textarea>
-
-            <label for="testemunhas">Testemunhas:</label>
-            <input type="text" id="testemunhas" v-model="testemunhas" placeholder="Nome das testemunhas" />
-
-            <div class="form-group adicionar-imagem">
-              <label for="anexos">Anexos:</label>
-              <input type="file" id="anexos" name="anexos" accept="image/*" multiple @change="handleFileChange" />
-            </div>
-
-            <div class="form-group adicionar-imagem">
-              <label for="assinaturas">Assinaturas:</label>
-              <input type="file" id="assinaturas" name="assinaturas" accept="image/*"
-                @change="handleAssinaturaChange" />
-            </div>
-
-            <div class="modal-actions">
-              <button type="submit" class="btn-salvar">Salvar</button>
-              <button type="button" class="btn-cancelar" @click="fecharModalVisita">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
-
-    <!-- Modal de Ocorrências Arquivadas -->
-    <modalArquivadas v-if="modalArquivadasVisivel" :visivel="modalArquivadasVisivel" :modalKey="modalKey"
-      :ocorrencias="ocorrenciasArquivadas" :conversas="conversasArquivadas" :carregando="loadingArquivadas"
-      @desarquivar="desarquivarOcorrencia" @desarquivarConversa="desarquivarConversa" @fechar="fecharModalArquivadas" />
-
   </div>
 </template>
 
 <script>
 import SideBar from "@/components/SideBar.vue";
-import modalArquivadas from "@/components/modais/modalArquivadas.vue";
+import ModalArquivadas from "@/components/modais/ModalArquivadas.vue"
+import ModalCadastrarVisita from "@/components/modais/ModalCadastrarVisita.vue";
+import ModalVincularVitima from "@/components/modais/ModalVincularVitima.vue";
+import ModalAdicionarProgresso from "@/components/modais/ModalAdicionarProgresso.vue";
 import axios from "axios";
 import { useAuthStore } from "@/store.js";
 import { formatDate } from "@/utils/dataformatar";
@@ -274,7 +208,7 @@ export default {
 
     fecharModalVincularVitima() {
       this.modalVincularVisible = false;
-      this.vitimaSelecionada = null;
+      this.vitimaSelecionada = "";
       this.ocorrenciaSelecionada = null;
     },
 
@@ -365,7 +299,7 @@ export default {
         const token = this.store.token;
 
         await axios.put(
-          `http://localhost:3000/ocorrencias/${id}/desarquivar`,
+          `https://libertlla.onrender.com/ocorrencias/${id}/desarquivar`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -384,7 +318,7 @@ export default {
         const token = this.store.token;
 
         await axios.put(
-          `http://localhost:3000/conversa/${id}/desarquivar`,
+          `https://libertlla.onrender.com/conversa/${id}/desarquivar`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -435,8 +369,8 @@ export default {
       }
     },
 
-    async cadastrarVisita() {
-      if (!this.descricao.trim()) {
+    async cadastrarVisita({ descricao, testemunhas, anexos, assinatura }) {
+      if (!descricao.trim()) {
         return Swal.fire({
           icon: "warning",
           title: "Campo obrigatório",
@@ -444,22 +378,22 @@ export default {
         });
       }
 
-      let anexos = await this.uploadFiles(this.anexos);
-      let assinatura = await this.uploadFile(this.assinaturas);
-
-      const url = this.ocorrenciaSelecionada
-        ? `https://libertlla.onrender.com/visita/ocorrencia/${this.ocorrenciaSelecionada}`
-        : `https://libertlla.onrender.com/visita/conversa/${this.conversaSelecionada}`;
-
-      const payload = {
-        data: new Date().toISOString(), // ✅ Data e hora automáticas
-        descricao: this.descricao,
-        testemunhas: this.testemunhas,
-        anexos,
-        assinatura,
-      };
-
       try {
+        const anexosUrls = await this.uploadFiles(anexos);
+        const assinaturaUrl = await this.uploadFile(assinatura);
+
+        const url = this.ocorrenciaSelecionada
+          ? `https://libertlla.onrender.com/visita/ocorrencia/${this.ocorrenciaSelecionada}`
+          : `https://libertlla.onrender.com/visita/conversa/${this.conversaSelecionada}`;
+
+        const payload = {
+          data: new Date().toISOString(),
+          descricao,
+          testemunhas,
+          anexos: anexosUrls,
+          assinatura: assinaturaUrl,
+        };
+
         const token = this.store.token;
         await axios.post(url, payload, {
           headers: { Authorization: `Bearer ${token}` },
@@ -482,8 +416,9 @@ export default {
       }
     },
 
-    async adicionarProgresso() {
-      if (!this.descricao.trim()) {
+
+    async adicionarProgresso(progresso) {
+      if (!progresso.descricao || !progresso.descricao.trim()) {
         return Swal.fire({
           icon: "warning",
           title: "Campo obrigatório",
@@ -491,14 +426,17 @@ export default {
         });
       }
 
-      let anexos = await this.uploadFiles(this.anexos);
+      let anexos = [];
+      if (progresso.imagem) {
+        anexos = await this.uploadFiles([progresso.imagem]);
+      }
 
       const url = this.ocorrenciaSelecionada
         ? `https://libertlla.onrender.com/progresso/ocorrencia/${this.ocorrenciaSelecionada}`
         : `https://libertlla.onrender.com/progresso/chat/${this.conversaSelecionada}`;
 
       try {
-        await axios.post(url, { descricao: this.descricao, anexos });
+        await axios.post(url, { descricao: progresso.descricao, anexos });
         Swal.fire({
           icon: "success",
           title: "Progresso Adicionado!",
@@ -584,7 +522,9 @@ export default {
       }
     },
 
-    async vincularVitima() {
+    async vincularVitima(vitimaId) {
+      this.vitimaSelecionada = vitimaId;
+
       if (!this.vitimaSelecionada || !this.ocorrenciaSelecionada) {
         return Swal.fire({
           icon: "warning",
@@ -613,7 +553,10 @@ export default {
 
   components: {
     SideBar,
-    modalArquivadas,
+    ModalArquivadas,
+    ModalCadastrarVisita,
+    ModalVincularVitima,
+    ModalAdicionarProgresso,
   },
 };
 </script>
@@ -635,12 +578,7 @@ export default {
   display: flex;
 }
 
-.div_ocorrencias {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
+.div_ocorrencias,
 .div_conversas {
   display: flex;
   gap: 20px;
@@ -654,20 +592,12 @@ export default {
   border-radius: 10px;
 }
 
-.div_ocorrencias h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: #8b2276;
-  font-weight: bold;
-}
-
 p {
   color: #7E7E7E;
   border: 1px solid #d3d3d3b6;
   border-radius: 4px;
-  padding: 6px;
-  font-family: "Montserrat", sans-serif;
   padding: 12px;
+  font-family: "Montserrat", sans-serif;
 }
 
 label {
@@ -675,10 +605,7 @@ label {
   color: rgba(152, 152, 152, 255);
 }
 
-.denuncia {
-  margin-bottom: 15px;
-}
-
+.denuncia,
 .conversa {
   margin-bottom: 15px;
 }
@@ -701,19 +628,7 @@ label {
   margin-bottom: 20px;
 }
 
-.info_denuncia h3 {
-  margin-bottom: 10px;
-}
-
-
-.info_denuncia p {
-  margin-bottom: 8px;
-  color: #7E7E7E
-}
-
-
 .buttons {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -734,155 +649,42 @@ label {
   text-align: center;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90vw;
-  max-width: 600px;
-  height: auto;
-  max-height: 90vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-
-.modal-content form {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-top: 60px;
-}
-
-.modal-content form label {
-  margin-top: 10px;
-  font-weight: 600;
-  color: rgba(152, 152, 152, 255);
-  font-family: "Montserrat", sans-serif;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  resize: none;
-}
-
-
-
-.quadrado {
-  background-color: #54123F;
-  color: white;
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-}
-
-.quadrado .titulo {
-  margin: 0;
-  font-size: 24px;
-  color: white;
-  padding: 0;
-  text-align: center;
-  padding-top: 20px;
-  font-family: "Montserrat", sans-serif;
-}
-
-input[type="file"] {
-  font-size: 14px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  overflow: hidden;
-  width: 100%;
-  margin-top: 10px;
-  margin-bottom: 20px;
-}
-
-#adicionar_imagem {
-  grid-column: 1 / -1;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-#imagem {
-  margin-top: 10px;
-}
-
-button {
-  font-size: 14px;
-  padding: 8px;
-  border-radius: 5px;
-}
-
-.modal-actions button {
-  margin-top: -15px;
-}
-
-.btn-salvar,
-.btn-cancelar {
-  background-color: rgba(245, 245, 245, 255);
-  color: rgba(152, 152, 152, 255);
+.button_desarquivar {
+  background-color: #9B287B;
+  color: rgba(245, 245, 245, 255);
   border: 1px solid rgba(245, 245, 245, 255);
-  border-radius: 5px;
-  font-size: 14px;
+  border-radius: 14px;
+  font-size: 15px;
   font-family: "Montserrat", sans-serif;
   font-weight: 500;
-  width: 49%;
+  margin-left: auto;
 }
 
-.card-body .form-control {
-  font-family: 'Montserrat', sans-serif;
-  color: rgba(152, 152, 152, 255);
-}
-
-.dropdown {
+textarea,
+input[type="text"],
+input[type="date"],
+input[type="file"] {
   width: 100%;
   padding: 10px;
-  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
   border: 1px solid #ccc;
   font-family: "Montserrat", sans-serif;
-  font-size: 14px;
+  color: #333;
   box-sizing: border-box;
 }
 
-.dropdown-row {
-  margin-bottom: 20px;
+textarea {
+  resize: none;
 }
 
-.dropdown-row label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+.dashboard input::placeholder,
+.dashboard textarea::placeholder {
+  color: rgba(152, 152, 152, 0.7);
+  font-size: 14px;
+  font-weight: 400;
+  padding-left: 2px;
 }
 
 .spinner {
@@ -908,116 +710,43 @@ button {
   }
 }
 
-input[type="text"],
-input[type="date"] {
+button {
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.btn-salvar,
+.btn-cancelar {
+  background-color: rgba(245, 245, 245, 255);
+  color: rgba(152, 152, 152, 255);
+  border: 1px solid rgba(245, 245, 245, 255);
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  width: 49%;
+}
+
+.dropdown {
   width: 100%;
   padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  border-radius: 5px;
+  border-radius: 4px;
   border: 1px solid #ccc;
   font-family: "Montserrat", sans-serif;
-  color: #333;
+  font-size: 14px;
   box-sizing: border-box;
 }
 
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  resize: none;
-  font-family: "Montserrat", sans-serif;
-  color: #333;
+.dropdown-row {
+  margin-bottom: 20px;
 }
 
-.dashboard input::placeholder,
-.dashboard textarea::placeholder {
-  color: rgba(152, 152, 152, 0.7);
-  font-family: "Montserrat", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  opacity: 1;
-  padding-left: 2px;
-}
-
-#descricao {
-  margin-bottom: 1px;
-}
-
-.form-group.adicionar-imagem {
-  margin-top: 1px;
-  margin-bottom: 1px;
-}
-
-#testemunhas {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.button_desarquivar {
-  background-color: #9B287B;
-  color: rgba(245, 245, 245, 255);
-  border: 1px solid rgba(245, 245, 245, 255);
-  border-radius: 14px;
-  font-size: 15px;
-  font-family: "Montserrat", sans-serif;
+.dropdown-row label {
+  display: block;
+  margin-bottom: 8px;
   font-weight: 500;
-  margin-left: auto;
 }
-
-.modal-arquivadas-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.info_arquivadas {
-  border-color: #d3d3d3b6;
-  border-style: solid;
-  padding: 20px;
-}
-
-.primeira-ocorrencia {
-  margin-top: 60px;
-}
-
-.titulo-ocorrencia {
-  color: #9b287b !important;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 20px;
-}
-
-.btn-desarquivar {
-  width: 100%;
-  background-color: #f5f5f5;
-  border: 1px solid #d9d9d9;
-  color: #7e7e7e;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.btn-fecharDesarquivadas {
-  width: 100%;
-  background-color: #f5f5f5;
-  border: 1px solid #d9d9d9;
-  color: #7e7e7e;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
 
 @media (max-width: 768px) {
   .dashboard {
@@ -1037,7 +766,6 @@ textarea {
 
   .formulario {
     width: 100%;
-    min-width: unset;
     background-color: white;
     padding: 15px;
     border-radius: 10px;
@@ -1057,7 +785,6 @@ textarea {
   .btn-cancelar {
     width: 100%;
     margin-bottom: 10px;
-    gap: 10px;
   }
 
   .buttons {
