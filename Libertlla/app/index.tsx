@@ -94,7 +94,7 @@ export default function Index() {
               <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Entrar</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => Linking.openURL("http://localhost:8080/senha")}>
+              <TouchableOpacity onPress={() => Linking.openURL("https://libertlla-clinica-maria-luizas-projects.vercel.app/senha")}>
                 <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
               </TouchableOpacity>
             </View>

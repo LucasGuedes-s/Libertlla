@@ -124,11 +124,11 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    /* background-color: #5C164E; */
     background-color: #54123F;
     padding-top: 20px;
     text-align: center;
     box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.10);
+    z-index: 100;
 }
 
 .sidebar img {
@@ -150,10 +150,8 @@ body {
 
 .sidebar a svg {
     margin-right: 6px;
-    /* Ajusta o espaço entre o ícone e o texto */
     vertical-align: middle;
 }
-
 
 .sidebar a:hover {
     color: #FF00AE;
@@ -167,11 +165,8 @@ body {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    /* Alinhamento com flexbox */
     align-items: center;
-    /* Alinha verticalmente */
     background-color: transparent;
-    /* Sem fundo */
     color: white;
     border: none;
     padding: 10px;

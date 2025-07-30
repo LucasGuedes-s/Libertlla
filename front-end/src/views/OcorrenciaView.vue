@@ -1,8 +1,9 @@
 <template>
-    <div>
-        <div class="wrapper">
-            <SideBar v-if="sidebarVisible" />
-            <div class="container mt-4" style="margin-left: 250px;">
+    <div class="wrapper">
+        <SideBar v-if="sidebarVisible" />
+
+        <div class="main-content">
+            <div class="container mt-4">
                 <div class="card">
                     <div class="card-header bg-light">
                         <h5 class="text-primary">Denúncia - {{ id }}</h5>
@@ -20,6 +21,7 @@
                                     v-model="ocorrencia.tipo_violencia" readonly />
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="relacaoDenunciado" class="form-label">Relação com a Pessoa
@@ -33,65 +35,104 @@
                                     readonly />
                             </div>
                         </div>
+
                         <div class="mb-3">
                             <label for="descricao" class="form-label">Descrição:</label>
                             <textarea id="descricao" class="form-control" rows="3" v-model="ocorrencia.descricao"
                                 readonly></textarea>
                         </div>
+
                         <div class="mb-3">
                             <label for="provas" class="form-label">Provas:</label>
                             <textarea id="provas" class="form-control" rows="3" v-model="ocorrencia.provas"
                                 readonly></textarea>
                         </div>
+
                         <div class="button">
                             <button class="apertarBotao" @click="arquivarOcorrencia">Arquivar</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="container mt-5">
-            <h5 class="linha">Linha do tempo</h5>
-            <div class="timeline">
-                <div v-for="(registro, index) in ocorrencia.registros" :key="registro.id" class="timeline-item"
-                    :class="{ 'left': index % 2 === 0, 'right': index % 2 !== 0 }">
-                    <div class="timeline-box">
-                        <div class="card">
-                            <div class="card-body">
-                                <p class="mb-1">
-                                    <span
-                                        v-if="registro.assinatura && registro.anexos && Array.isArray(registro.testemunhas) && registro.testemunhas.length"
-                                        class="badge text-white" style="background-color: #9B287B;">
-                                        Visita
-                                    </span>
-                                    <span v-else class="badge text-white" style="background-color: #9B287B;">
-                                        Progresso
-                                    </span>
-                                </p>
+            <div class="container mt-5">
+                <h5 class="linha">Linha do tempo</h5>
 
-                                <p class="card-text">{{ registro.descricoes }}</p>
-                                <p v-if="Array.isArray(registro.testemunhas) && registro.testemunhas.length"
-                                    class="card-text">
-                                    <strong class="form-label">Testemunhas:</strong> {{ registro.testemunhas.join(', ')
-                                    }}
-                                </p>
-                                <p v-if="registro.anexos">
-                                    <strong class="form-label">Anexo:</strong>
-                                    <a :href="registro.anexos" target="_blank"
-                                        class="card-title visualizar">Visualizar</a>
-                                </p>
-                                <p v-if="registro.assinatura">
-                                    <strong class="form-label">Assinatura:</strong>
-                                    <a :href="registro.assinatura" target="_blank"
-                                        class="card-title visualizar">Visualizar</a>
-                                </p>
-                                <span class="text-muted">{{ new Date(registro.data).toLocaleString() }}</span>
-                            </div>
-
-                        </div>
+                <div class="filtros-wrapper d-flex justify-content-between align-items-end flex-wrap mb-4">
+                    <div class="filtro-item">
+                        <label class="form-label">Tipo:</label>
+                        <select v-model="filtro.tipo" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="visita">Visita</option>
+                            <option value="progresso">Progresso</option>
+                        </select>
                     </div>
-                    <div class="timeline-dot"></div>
+                    <div class="filtro-item">
+                        <label class="form-label">Mês:</label>
+                        <select v-model="filtro.mes" class="form-select">
+                            <option value="">Todos</option>
+                            <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+                        </select>
+                    </div>
+                    <div class="filtro-item">
+                        <label class="form-label">Ano:</label>
+                        <select v-model="filtro.ano" class="form-select">
+                            <option value="">Todos</option>
+                            <option v-for="ano in anosDisponiveis" :key="ano" :value="ano">
+                                {{ ano }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="filtro-item">
+                        <label class="form-label">⠀</label>
+                        <button class="botaolimpar" @click="limparFiltros">Limpar Filtros</button>
+                    </div>
+                </div>
+
+                <div class="timeline">
+                    <div v-for="(registro, index) in registrosFiltrados" :key="registro.id" class="timeline-item"
+                        :class="{ left: index % 2 === 0, right: index % 2 !== 0 }">
+                        <div class="timeline-box">
+                            <div class="card">
+                                <div class="card-body">
+                                    <p class="mb-1">
+                                        <span v-if="
+                                            registro.assinatura &&
+                                            registro.anexos &&
+                                            Array.isArray(registro.testemunhas) &&
+                                            registro.testemunhas.length
+                                        " class="badge text-white" style="background-color: #9B287B;">
+                                            Visita
+                                        </span>
+                                        <span v-else class="badge text-white" style="background-color: #9B287B;">
+                                            Progresso
+                                        </span>
+                                    </p>
+
+                                    <p class="card-text">{{ registro.descricoes }}</p>
+                                    <p v-if="Array.isArray(registro.testemunhas) && registro.testemunhas.length"
+                                        class="card-text">
+                                        <strong class="form-label">Testemunhas:</strong>
+                                        {{ registro.testemunhas.join(', ') }}
+                                    </p>
+                                    <p v-if="registro.anexos">
+                                        <strong class="form-label">Anexo:</strong>
+                                        <a :href="registro.anexos" target="_blank"
+                                            class="card-title visualizar">Visualizar</a>
+                                    </p>
+                                    <p v-if="registro.assinatura">
+                                        <strong class="form-label">Assinatura:</strong>
+                                        <a :href="registro.assinatura" target="_blank"
+                                            class="card-title visualizar">Visualizar</a>
+                                    </p>
+                                    <span class="text-muted">{{
+                                        new Date(registro.data).toLocaleString()
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,9 +155,7 @@ export default {
     },
     setup() {
         const store = useAuthStore();
-        return {
-            store
-        };
+        return { store };
     },
     data() {
         return {
@@ -129,13 +168,44 @@ export default {
                 descricao: '',
                 local: '',
                 registros: []
+            },
+            filtro: {
+                tipo: '',
+                mes: '',
+                ano: ''
             }
         };
+    },
+    computed: {
+        registrosFiltrados() {
+            return this.ocorrencia.registros.filter(registro => {
+                const data = new Date(registro.data);
+                const tipo = (registro.assinatura && registro.anexos && Array.isArray(registro.testemunhas) && registro.testemunhas.length)
+                    ? 'visita'
+                    : 'progresso';
+
+                const condTipo = this.filtro.tipo === '' || tipo === this.filtro.tipo;
+                const condMes = this.filtro.mes === '' || (data.getMonth() + 1) === Number(this.filtro.mes);
+                const condAno = this.filtro.ano === '' || data.getFullYear() === Number(this.filtro.ano);
+
+                return condTipo && condMes && condAno;
+            });
+        },
+        anosDisponiveis() {
+            const anos = this.ocorrencia.registros.map(r => new Date(r.data).getFullYear());
+            return [...new Set(anos)].sort();
+        }
     },
     mounted() {
         this.carregarOcorrencia();
     },
     methods: {
+        limparFiltros() {
+            this.filtro.tipo = '';
+            this.filtro.mes = '';
+            this.filtro.ano = '';
+        },
+
         async carregarOcorrencia() {
             try {
                 const response = await axios.get(`https://libertlla.onrender.com/ocorrencia/${this.id}`);
@@ -158,15 +228,11 @@ export default {
         async arquivarOcorrencia() {
             try {
                 const token = this.store.getToken;
-
-                const response = await axios.put(`https://libertlla.onrender.com/ocorrencias/arquivar`, {
-                    ocorrenciaId: this.id
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
+                await axios.put(
+                    `https://libertlla.onrender.com/ocorrencias/arquivar`,
+                    { ocorrenciaId: this.id },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
                 Swal.fire({
                     title: 'Sucesso!',
                     text: 'A ocorrência foi arquivada com sucesso.',
@@ -192,31 +258,44 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .wrapper {
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    overflow-x: hidden;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 200px;
+    margin-right: -50px;
+    box-sizing: border-box;
 }
 
 .container {
     width: 90%;
     max-width: 1300px;
-    background: #FFFFFF;
+    background: #ffffff;
     margin: 0 auto;
     padding: 20px;
+    box-sizing: border-box;
 }
 
-.apertarBotao {
+.apertarBotao,
+.botaolimpar {
     flex: 1;
     padding: 10px 20px;
-    background-color: #F5F5F5;
-    border: 1px solid #D9D9D9;
-    color: #7E7E7E;
+    background-color: #f5f5f5;
+    border: 1px solid #d9d9d9;
+    color: #7e7e7e;
     border-radius: 5px;
     cursor: pointer;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
+}
+
+.botaolimpar {
+    padding: 8px 20px;
 }
 
 .button {
@@ -226,12 +305,12 @@ export default {
 }
 
 .card-header {
-    background: #FFFFFF !important;
-    border-bottom: 1px solid #D9D9D9;
+    background: #ffffff !important;
+    border-bottom: 1px solid #d9d9d9;
 }
 
 h5.text-primary {
-    color: #9B287B !important;
+    color: #9b287b !important;
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     font-size: 30px;
@@ -245,7 +324,7 @@ h5.text-primary {
 }
 
 .form-control {
-    border: 1px solid #D9D9D9;
+    border: 1px solid #d9d9d9;
     border-radius: 5px;
     font-size: 16px;
     color: #333;
@@ -297,7 +376,7 @@ textarea.form-control {
 }
 
 .timeline::after {
-    content: "";
+    content: '';
     position: absolute;
     width: 2px;
     background: #ddd;
@@ -308,7 +387,7 @@ textarea.form-control {
 }
 
 .linha {
-    color: #D9D9D9;
+    color: #d9d9d9;
     display: flex;
     justify-content: center;
     padding: 15px;
@@ -321,9 +400,54 @@ textarea.form-control {
     color: black;
 }
 
-@media (min-width: 1024px) {
+.filtros-wrapper {
+    gap: 16px;
+    margin-top: 50px;
+    margin-left: 90px;
+}
+
+.filtro-item {
+    flex: 1 1 250px;
+    min-width: 180px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .wrapper {
+        flex-direction: column;
+    }
+
+    .main-content {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        order: 1;
+        box-sizing: border-box;
+    }
+
     .container {
-        max-width: 90%;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px;
+        margin: 0 auto;
+    }
+
+    .linha {
+        font-size: 24px;
+    }
+
+    .filtros-wrapper {
+        gap: 10px;
+        margin-top: 50px;
+        margin-left: 10px;
+        width:95%;
+    }
+
+    .botaolimpar {
+        padding: 10px 20px;
+        margin-left: 1px;
+        width: 100%;
+
     }
 }
 </style>
