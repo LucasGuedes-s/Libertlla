@@ -38,4 +38,19 @@ async function alterarSenhaProfissional(email, novaSenha) {
   return profissionalAtualizado;
 }
 
-module.exports = {postProfissional, alterarSenhaProfissional};
+async function atualizarFotoProfissional(profissionalId, novaFotoUrl) {
+  const profissional = await prisma.profissionais.findUnique({
+    where: { id: profissionalId }
+  });
+
+  // Atualiza a foto
+  const atualizado = await prisma.profissionais.update({
+    where: { id: profissionalId },
+    data: { foto: novaFotoUrl }
+  });
+
+  return atualizado;
+}
+
+
+module.exports = {postProfissional, alterarSenhaProfissional, atualizarFotoProfissional};

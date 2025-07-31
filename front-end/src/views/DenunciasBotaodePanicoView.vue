@@ -209,6 +209,7 @@ export default {
   margin-top: 30px;
   padding: 20px;
   border-radius: 10px;
+  transition: margin-left 0.3s ease;
 }
 
 h1 {
@@ -234,12 +235,14 @@ h2 {
   margin-top: 30px;
   width: 100%;
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 }
 
 .notificacao-conteudo {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap; 
 }
 
 .info-texto {
@@ -247,10 +250,17 @@ h2 {
   flex-direction: column;
   gap: 8px;
   color: #7E7E7E;
+  flex: 1 1 60%; 
+  min-width: 200px;
 }
 
 .acao-botao {
   margin-left: 20px;
+  flex: 1 1 30%; 
+  min-width: 120px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
 }
 
 .btn-notificar {
@@ -261,6 +271,7 @@ h2 {
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-notificar:hover:enabled {
@@ -294,4 +305,33 @@ h2 {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 768px) {
+  .denunciasapp {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  h1 {
+    margin-top: 20px; /* <-- Adiciona espaçamento superior no título */
+  }
+
+  .notificacao-conteudo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .acao-botao {
+    margin-left: 0;
+    margin-top: 15px;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .info-texto {
+    flex: 1 1 100%;
+  }
+}
+
+
 </style>

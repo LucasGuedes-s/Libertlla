@@ -1,18 +1,11 @@
+Você disse:
 <template>
   <div class="container position-absolute top-0 end-0 p-3">
     <div class="row align-items-center justify-content-end">
-      <div
-        class="col-md-6 user-info d-flex align-items-center justify-content-end"
-        style="cursor: pointer;"
-        @click="mostrarModal = true"
-      >
+      <div class="col-md-6 user-info d-flex align-items-center justify-content-end" style="cursor: pointer;"
+        @click="mostrarModal = true">
         <div class="foto me-3">
-          <img
-            :src="usuario?.foto"
-            alt="Foto"
-            class="rounded-circle"
-            style="width: 40px; height: 40px;"
-          />
+          <img :src="usuario?.foto" alt="Foto" class="rounded-circle" style="width: 40px; height: 40px;" />
         </div>
         <div>
           <div class="user-name fw-bold">{{ usuario?.nome }}</div>
@@ -27,7 +20,8 @@
         <h2>Suas Informações</h2>
 
         <div class="detalhe-foto-centralizada">
-          <img :src="usuario?.foto" alt="Foto do usuário" />
+          <img :src="usuario?.foto" alt="Foto do usuário" @click="selecionarNovaFoto" style="cursor: pointer;" />
+          <input type="file" ref="fileInput" @change="handleFileChange" style="display: none;" />
         </div>
 
         <div class="campo">
@@ -49,21 +43,74 @@
   </div>
 </template>
 
-
 <script>
 import { ref } from 'vue';
 import { useAuthStore } from '@/store.js';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export default {
-  name: 'Dashbboard-home',
+  name: 'Dashboard-home',
   setup() {
     const store = useAuthStore();
     const usuario = store.usuario.usuario;
     const mostrarModal = ref(false);
+    const file = ref(null);
+    const fileInput = ref(null);
+
+    const selecionarNovaFoto = () => {
+      fileInput.value.click(); 
+    };
+
+    const handleFileChange = async (event) => {
+      file.value = event.target.files[0];
+      if (file.value) {
+        await uploadAndAtualizar();
+      }
+    };
+
+    const uploadAndAtualizar = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("file", file.value);
+
+        const response = await fetch("https://libertlla.onrender.com/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        const novaFotoUrl = data.fileUrl;
+
+        if (!novaFotoUrl) throw new Error("URL não recebida");
+
+        await axios.put(`http://localhost:3000/profissional/${usuario.id}/foto`, {
+          foto: novaFotoUrl,
+        });
+
+        usuario.foto = novaFotoUrl;
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Foto atualizada!',
+          confirmButtonColor: '#9B287B',
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro ao atualizar a foto',
+          text: error.message || 'Tente novamente',
+          confirmButtonColor: '#d33',
+        });
+      }
+    };
 
     return {
       usuario,
       mostrarModal,
+      selecionarNovaFoto,
+      handleFileChange,
+      fileInput,
     };
   },
 };
@@ -97,7 +144,7 @@ export default {
   align-items: center;
   margin-right: 20px;
   overflow-y: auto;
-  border: 2px solid #9B287B; /* ✅ Borda roxa adicionada */
+  border: 2px solid #9B287B;
 }
 
 .modal-content h2 {

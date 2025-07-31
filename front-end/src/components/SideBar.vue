@@ -206,4 +206,11 @@ body {
     color: #9B287B;
 }
 
+@media (max-width: 768px) {
+  .button-sidebar {
+    top: 5px; /* Desce o botão apenas no modo mobile */
+    left: -5px;
+  }
+}
+
 </style>

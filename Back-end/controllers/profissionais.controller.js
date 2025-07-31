@@ -35,4 +35,20 @@ async function alterarSenhaController(req, res) {
   }
 }
 
-module.exports = {postProfissional, alterarSenhaController};
+async function atualizarFotoController(req, res) {
+  const profissionalId = parseInt(req.params.id);
+  const { foto } = req.body;
+
+  if (!foto) {
+    return res.status(400).json({ erro: 'URL da foto é obrigatória.' });
+  }
+
+  try {
+    const profissionalAtualizado = await Profissional.atualizarFotoProfissional(profissionalId, foto);
+    return res.status(200).json(profissionalAtualizado);
+  } catch (error) {
+    return res.status(404).json({ erro: error.message });
+  }
+}
+
+module.exports = {postProfissional, alterarSenhaController, atualizarFotoController};

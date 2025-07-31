@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', {
     setAuthData(user, token) {
       this.usuario = user;
       this.token = token;
-      
+
       // Salvar no localStorage e nos cookies
       localStorage.setItem('token', token);
       localStorage.setItem('usuario', JSON.stringify(user));
@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
     carregarDados() {
       // Carregar dados do localStorage
       let token = localStorage.getItem('token');
-      let user = JSON.parse(localStorage.getItem('usuario'));      
+      let user = JSON.parse(localStorage.getItem('usuario'));
       // Se não encontrar no localStorage, tenta nos cookies
 
       if (token && user) {

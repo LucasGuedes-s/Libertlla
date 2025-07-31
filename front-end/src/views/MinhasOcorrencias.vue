@@ -754,8 +754,9 @@ button {
     padding: 10px;
   }
 
-  .titulo-principal {
+ .titulo-principal {
     font-size: 24px;
+    margin-top: 5px;
   }
 
   .div_ocorrencias {

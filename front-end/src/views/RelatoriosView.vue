@@ -1,5 +1,6 @@
 <template>
   <section>
+      <NavBarUser />
     <SideBar />
     <div class="container">
       <div class="titulo-principal">Relatórios</div>
@@ -26,6 +27,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store.js';
 import SideBar from '@/components/SideBar.vue';
+import NavBarUser from '@/components/NavBarUser.vue';
 
 Chart.register(...registerables);
 
@@ -154,6 +156,7 @@ export default {
   },
   components: {
     SideBar,
+    NavBarUser
   },
 };
 </script>

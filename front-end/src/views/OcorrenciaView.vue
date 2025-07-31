@@ -419,18 +419,18 @@ textarea.form-control {
     min-width: 180px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
     .wrapper {
         flex-direction: column;
     }
 
-    .main-content {
+     .main-content {
         width: 100% !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
         order: 1;
         box-sizing: border-box;
+        margin-top: 20px; 
     }
 
     .container {
