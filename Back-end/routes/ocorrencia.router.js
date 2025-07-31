@@ -37,4 +37,6 @@ router.post('/visita/ocorrencia/:id', controller.adicionarVisitaOcorrencia);
 
 router.post('/visita/conversa/:id', controller.adicionarVisitaConversa);
 
+router.post('/ocorrencias/adicionar-profissional', controller.adicionarProfissional);
+
 module.exports = router;

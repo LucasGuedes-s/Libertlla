@@ -277,4 +277,27 @@ async function adicionarVisitaConversa(data, descricao, testemunhas, anexos, ass
   });
 }
 
-module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, desarquivarOcorrencia, desarquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia, adicionarVisitaConversa };
+async function adicionarProfissionalOcorrencia(ocorrenciaId, profissionalId) {
+  const existe = await prisma.ocorrenciasProfissionais.findUnique({
+    where: {
+      ocorrenciaId_profissionalId: {
+        ocorrenciaId,
+        profissionalId
+      }
+    }
+  });
+
+  if (existe) {
+    throw new Error('Este profissional já está associado a esta ocorrência.');
+  }
+
+  return await prisma.ocorrenciasProfissionais.create({
+    data: {
+      ocorrenciaId,
+      profissionalId
+    }
+  });
+}
+
+
+module.exports = { CadrastrarOcorrencias, GetOcorrenciaTotais, GetOcorrencia, getConversasProfissional, GetOcorrencias, getOcorrenciasProfissional, GetOcorrenciaEspecifica, GetTodasOcorrencias, updateOcorrencia, arquivarOcorrencia, arquivarConversa, desarquivarOcorrencia, desarquivarConversa, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitima, adicionarVisitaOcorrencia, adicionarVisitaConversa, adicionarProfissionalOcorrencia};

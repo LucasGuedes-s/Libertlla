@@ -256,6 +256,21 @@ async function adicionarVisitaConversa(req, res) {
   }
 }
 
-module.exports = { PostOcorrencias, GetOcorrencias, getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, arquivarOcorrencia, arquivarConversa, desarquivarOcorrenciaController, desarquivarConversaController, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia, adicionarVisitaConversa };
+async function adicionarProfissional(req, res) {
+  const { ocorrenciaId, profissionalId } = req.body;
+
+  try {
+    const resultado = await Ocorrencia.adicionarProfissionalOcorrencia(ocorrenciaId, profissionalId);
+    res.status(201).json({
+      message: 'Profissional adicionado com sucesso à ocorrência.',
+      data: resultado
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+
+module.exports = { PostOcorrencias, GetOcorrencias, getConversas, GetOcorrenciasTotais, getOcorrenciasProfissional, GetTodasOcorrencias, GetOcorrenciaEspecifica, arquivarOcorrencia, arquivarConversa, desarquivarOcorrenciaController, desarquivarConversaController, updateOcorrencia, adicionarProgressoChat, adicionarProgressoOcorrencia, vincularVitimaController, adicionarVisitaOcorrencia, adicionarVisitaConversa, adicionarProfissional };
 
 

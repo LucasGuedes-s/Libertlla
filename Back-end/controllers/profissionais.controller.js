@@ -51,4 +51,13 @@ async function atualizarFotoController(req, res) {
   }
 }
 
-module.exports = {postProfissional, alterarSenhaController, atualizarFotoController};
+async function listarProfissionais(req, res) {
+  try {
+    const profissionais = await Profissional.listarProfissionais();
+    res.status(200).json(profissionais);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao listar profissionais.' });
+  }
+}
+
+module.exports = {postProfissional, alterarSenhaController, atualizarFotoController, listarProfissionais};

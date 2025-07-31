@@ -43,7 +43,6 @@ async function atualizarFotoProfissional(profissionalId, novaFotoUrl) {
     where: { id: profissionalId }
   });
 
-  // Atualiza a foto
   const atualizado = await prisma.profissionais.update({
     where: { id: profissionalId },
     data: { foto: novaFotoUrl }
@@ -52,5 +51,14 @@ async function atualizarFotoProfissional(profissionalId, novaFotoUrl) {
   return atualizado;
 }
 
+async function listarProfissionais() {
+  return await prisma.profissionais.findMany({
+    select: {
+      nome: true,
+      especialidade: true
+    }
+  });
+}
 
-module.exports = {postProfissional, alterarSenhaProfissional, atualizarFotoProfissional};
+
+module.exports = {postProfissional, alterarSenhaProfissional, atualizarFotoProfissional, listarProfissionais};

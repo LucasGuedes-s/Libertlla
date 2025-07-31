@@ -42,6 +42,7 @@
                   <router-link :to="`/ocorrencia/${ocorrencia.id}`" class="detalhar-btn">Detalhar</router-link>
                   <button type="button" class="btn-vincular" @click="abrirModalVincularVitima(ocorrencia.id)">Vincular
                     Vítima</button>
+                  <button type="button" class="btn-modal" @click="mostrarModal = true">Vincular profissional</button>
                   <button type="button" class="pdf-btn" @click="gerarPDF(ocorrencia.id)">Gerar PDF</button>
                   <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar
                     Progresso</button>
@@ -96,6 +97,10 @@
       <ModalVincularVitima :visible="modalVincularVisible" :vitimas="vitimas" @close="fecharModalVincularVitima"
         @submit="vincularVitima" />
 
+      <!-- Modal de vincular profissional -->
+      <ModalVincularProfissional :visible="modalVincularProfissionalVisivel" :profissionais="profissionais"
+        @submit="vincularProfissional" @close="fecharModalVincularProfissional" />
+
       <!-- Modal de Ocorrências Arquivadas -->
       <ModalArquivadas v-if="modalArquivadasVisivel" :visivel="modalArquivadasVisivel" :modalKey="modalKey"
         :ocorrencias="ocorrenciasArquivadas" :conversas="conversasArquivadas" :carregando="loadingArquivadas"
@@ -111,6 +116,7 @@ import SideBar from "@/components/SideBar.vue";
 import ModalArquivadas from "@/components/modais/ModalArquivadas.vue"
 import ModalCadastrarVisita from "@/components/modais/ModalCadastrarVisita.vue";
 import ModalVincularVitima from "@/components/modais/ModalVincularVitima.vue";
+import ModalVincularProfissional from "@/components/modais/ModalVincularProfissional.vue";
 import ModalAdicionarProgresso from "@/components/modais/ModalAdicionarProgresso.vue";
 import axios from "axios";
 import { useAuthStore } from "@/store.js";
@@ -144,6 +150,9 @@ export default {
       ocorrenciasArquivadas: [],
       conversasArquivadas: [],
       loadingArquivadas: false,
+      profissionais: [],
+      profissionalSelecionado: "",
+      modalVincularProfissionalVisivel: false,
     };
   },
 
@@ -256,6 +265,19 @@ export default {
 
     fecharModalArquivadas() {
       this.modalArquivadasVisivel = false;
+    },
+
+    abrirModalVincularProfissional(idOcorrencia) {
+      this.ocorrenciaSelecionada = idOcorrencia;
+      this.profissionalSelecionado = "";
+      this.modalVincularProfissionalVisivel = true;
+      this.buscarProfissionais();
+    },
+
+    fecharModalVincularProfissional() {
+      this.modalVincularProfissionalVisivel = false;
+      this.profissionalSelecionado = "";
+      this.ocorrenciaSelecionada = null;
     },
 
     async buscarOcorrenciasArquivadas() {
@@ -549,6 +571,36 @@ export default {
         });
       }
     },
+    async buscarProfissionais() {
+      try {
+        const res = await axios.get("https://libertlla.onrender.com/profissionais");
+        this.profissionais = res.data.map(p => ({
+          id: p.id,
+          nome: p.nome,
+          especialidade: p.especialidade
+        }));
+      } catch (error) {
+        console.error("Erro ao carregar profissionais:", error);
+        Swal.fire("Erro", "Não foi possível carregar os profissionais.", "error");
+      }
+    },
+    async vincularProfissional(profissionalId) {
+      if (!this.ocorrenciaSelecionada || !profissionalId) {
+        return Swal.fire("Atenção", "Selecione um profissional para vincular.", "warning");
+      }
+
+      try {
+        await axios.post(`https://libertlla.onrender.com/ocorrencias/${this.ocorrenciaSelecionada}/vincular-profissional`, {
+          profissionalId: Number(profissionalId)
+        });
+        Swal.fire("Sucesso", "Profissional vinculado com sucesso!", "success");
+        this.fecharModalVincularProfissional();
+        this.carregarOcorrencias();
+      } catch (error) {
+        console.error("Erro ao vincular profissional:", error);
+        Swal.fire("Erro", "Erro ao vincular profissional à ocorrência.", "error");
+      }
+    },
   },
 
   components: {
@@ -556,6 +608,7 @@ export default {
     ModalArquivadas,
     ModalCadastrarVisita,
     ModalVincularVitima,
+    ModalVincularProfissional,
     ModalAdicionarProgresso,
   },
 };
@@ -652,11 +705,10 @@ label {
 .button_desarquivar {
   background-color: #9B287B;
   color: rgba(245, 245, 245, 255);
-  border: 1px solid rgba(245, 245, 245, 255);
-  border-radius: 14px;
-  font-size: 15px;
-  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
   font-weight: 500;
+  padding: 4px 40px; /* altura e comprimento */
+  border: none;
   margin-left: auto;
 }
 
@@ -754,7 +806,7 @@ button {
     padding: 10px;
   }
 
- .titulo-principal {
+  .titulo-principal {
     font-size: 24px;
     margin-top: 5px;
   }

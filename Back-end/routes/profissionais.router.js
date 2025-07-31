@@ -9,4 +9,6 @@ router.put('/profissional/recuperar_senha', controller.alterarSenhaController);
 
 router.put('/profissional/:id/foto', controller.atualizarFotoController);
 
+router.get('/profissionais', controller.listarProfissionais)
+
 module.exports = router;
