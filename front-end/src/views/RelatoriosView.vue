@@ -3,7 +3,12 @@
     <SideBar />
     <div class="container">
       <div class="titulo-principal">Relatórios</div>
-      <div class="charts-container">
+
+      <div v-if="loading" class="loading-wrapper">
+        <div class="spinner"></div>
+      </div>
+
+      <div v-else class="charts-container">
         <div class="line-chart-container">
           <canvas id="violenceLineChart"></canvas>
         </div>
@@ -17,7 +22,7 @@
 
 <script>
 import { Chart, registerables } from 'chart.js';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/store.js';
 import SideBar from '@/components/SideBar.vue';
@@ -27,6 +32,9 @@ Chart.register(...registerables);
 export default {
   setup() {
     const store = useAuthStore();
+
+    const loading = ref(true);
+
     const totalDenuncias = ref(0);
     const totalOcorrencias = ref(0);
     const totalConversas = ref(0);
@@ -34,17 +42,19 @@ export default {
     const tiposViolencia = ref([]);
     const quantidadesViolencia = ref([]);
 
+    // Guardar instâncias dos gráficos para destruir antes de recriar
+    let violenceChart = null;
+    let pieChart = null;
+
     const buscarTotalDenuncias = async () => {
       try {
         const token = store.token;
         const response = await axios.get("https://libertlla.onrender.com/todasocorrencias", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        //totalDenuncias.value = response.data.totalDenuncias;
         totalOcorrencias.value = response.data.totalOcorrencias;
         totalConversas.value = response.data.totalConversas;
         totalAtendidas.value = response.data.totalAtendidas;
-        renderPieChart();
       } catch (error) {
         console.error("Erro ao buscar total de denúncias:", error);
       }
@@ -59,8 +69,6 @@ export default {
 
         tiposViolencia.value = response.data.ocorrencias.map(o => o.tipo);
         quantidadesViolencia.value = response.data.ocorrencias.map(o => o.quantidade);
-
-        renderViolenceLineChart();
       } catch (error) {
         console.error("Erro ao buscar ocorrências por tipo:", error);
       }
@@ -68,12 +76,14 @@ export default {
 
     const renderViolenceLineChart = () => {
       const canvas = document.getElementById("violenceLineChart");
-      canvas.width = 1200; // Definir largura maior
-      canvas.height = 400; // Ajustar altura
-      
+      if (!canvas) {
+        console.error("Canvas 'violenceLineChart' não encontrado no DOM");
+        return;
+      }
+      if (violenceChart) violenceChart.destroy();
       const ctx = canvas.getContext("2d");
 
-      new Chart(ctx, {
+      violenceChart = new Chart(ctx, {
         type: "line",
         data: {
           labels: tiposViolencia.value,
@@ -84,7 +94,7 @@ export default {
               borderColor: "#9B287B",
               backgroundColor: "rgba(155, 40, 123, 0.2)",
               fill: true,
-              tension: 0.3, // Suaviza as linhas
+              tension: 0.3,
             },
           ],
         },
@@ -96,8 +106,15 @@ export default {
     };
 
     const renderPieChart = () => {
-      const ctx = document.getElementById("pieChart").getContext("2d");
-      new Chart(ctx, {
+      const canvas = document.getElementById("pieChart");
+      if (!canvas) {
+        console.error("Canvas 'pieChart' não encontrado no DOM");
+        return;
+      }
+      if (pieChart) pieChart.destroy();
+      const ctx = canvas.getContext("2d");
+
+      pieChart = new Chart(ctx, {
         type: "pie",
         data: {
           labels: ["Ocorrências por formulário", "Denuncia via chat", "Atendidas"],
@@ -105,7 +122,6 @@ export default {
             {
               label: "Quantidade",
               data: [
-                //totalDenuncias.value,
                 totalOcorrencias.value,
                 totalConversas.value,
                 totalAtendidas.value,
@@ -117,12 +133,19 @@ export default {
       });
     };
 
-    onMounted(() => {
-      buscarOcorrenciasPorTipo();
-      buscarTotalDenuncias();
+    onMounted(async () => {
+      loading.value = true;
+
+      await Promise.all([buscarOcorrenciasPorTipo(), buscarTotalDenuncias()]);
+      loading.value = false;  
+      await nextTick(); 
+
+      renderViolenceLineChart();
+      renderPieChart();
     });
 
     return {
+      loading,
       totalDenuncias,
       totalOcorrencias,
       totalConversas,
@@ -130,8 +153,8 @@ export default {
     };
   },
   components: {
-    SideBar
-  }
+    SideBar,
+  },
 };
 </script>
 
@@ -183,17 +206,43 @@ export default {
   display: block;
 }
 
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #9B287B;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 900px) {
   .container {
     margin-left: 0;
     max-width: 100vw;
     padding: 20px;
   }
+
   .charts-container {
     display: block;
     width: 100%;
   }
-  .line-chart-container, .pie-chart-container {
+
+  .line-chart-container,
+  .pie-chart-container {
     width: 100%;
     height: 300px;
     margin-bottom: 20px;

@@ -6,29 +6,36 @@
       <div class="container">
         <h1>Notificações do Botão de Pânico</h1>
 
-        <div
-          v-for="notificacao in notificacoes"
-          :key="notificacao.id"
-          class="notificacao-card"
-        >
-          <div class="notificacao-conteudo">
-            <div class="info-texto">
-              <h2>Nova ocorrência</h2>
-              <p><strong>Data:</strong> {{ formatarData(notificacao.data) }}</p>
-              <p><strong>Localização:</strong> {{ notificacao.endereco }}</p>
-            </div>
+        <div v-if="loading" class="loading-wrapper">
+          <div class="spinner"></div>
+        </div>
 
-            <div class="acao-botao">
-              <button
-                class="btn-notificar"
-                :disabled="notificacao.notificada"
-                @click="notificarVitima(notificacao)"
-              >
-                {{ notificacao.notificada ? 'Usuária notificada!' : 'Notificar usuária' }}
-              </button>
+        <div v-else>
+          <div
+            v-for="notificacao in notificacoes"
+            :key="notificacao.id"
+            class="notificacao-card"
+          >
+            <div class="notificacao-conteudo">
+              <div class="info-texto">
+                <h2>Nova ocorrência</h2>
+                <p><strong>Data:</strong> {{ formatarData(notificacao.data) }}</p>
+                <p><strong>Localização:</strong> {{ notificacao.endereco }}</p>
+              </div>
+
+              <div class="acao-botao">
+                <button
+                  class="btn-notificar"
+                  :disabled="notificacao.notificada"
+                  @click="notificarVitima(notificacao)"
+                >
+                  {{ notificacao.notificada ? 'Usuária notificada!' : 'Notificar usuária' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -52,6 +59,7 @@ export default {
       socket: null,
       notificacoes: [],
       vitimaId: null,
+      loading: true,  // <-- controle do loading
     };
   },
   mounted() {
@@ -115,12 +123,14 @@ export default {
   methods: {
     async carregarNotificacoes() {
       try {
+        this.loading = true;  // <-- começa loading
         const res = await fetch('https://libertlla.onrender.com/notificacoes');
         const dados = await res.json();
-        console.log(dados);
         this.notificacoes = dados;
       } catch (error) {
         console.error('Erro ao carregar notificações', error);
+      } finally {
+        this.loading = false;  // <-- termina loading
       }
     },
     formatarData(data) {
@@ -148,7 +158,7 @@ export default {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }
@@ -173,7 +183,6 @@ export default {
           }
           notificacao.notificada = true;
         } else {
-          // Tentar ler a mensagem de erro do backend
           const erroData = await resposta.json().catch(() => null);
           Swal.fire({
             icon: 'error',
@@ -189,8 +198,8 @@ export default {
           text: error.message,
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -236,7 +245,7 @@ h2 {
 .info-texto {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* espaçamento entre h2, data e localização */
+  gap: 8px;
   color: #7E7E7E;
 }
 
@@ -254,12 +263,35 @@ h2 {
   transition: background-color 0.2s ease;
 }
 
-.btn-aceitar:hover:enabled {
+.btn-notificar:hover:enabled {
   background-color: #FF00AE;
 }
 
-.btn-aceitar:disabled {
+.btn-notificar:disabled {
   background-color: #cccccc;
   cursor: default;
+}
+
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #9B287B;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
