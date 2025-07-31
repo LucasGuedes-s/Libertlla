@@ -54,6 +54,7 @@ async function atualizarFotoProfissional(profissionalId, novaFotoUrl) {
 async function listarProfissionais() {
   return await prisma.profissionais.findMany({
     select: {
+      id: true,               
       nome: true,
       especialidade: true
     }

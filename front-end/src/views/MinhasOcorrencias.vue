@@ -42,7 +42,8 @@
                   <router-link :to="`/ocorrencia/${ocorrencia.id}`" class="detalhar-btn">Detalhar</router-link>
                   <button type="button" class="btn-vincular" @click="abrirModalVincularVitima(ocorrencia.id)">Vincular
                     Vítima</button>
-                  <button type="button" class="btn-modal" @click="mostrarModal = true">Vincular profissional</button>
+                  <button type="button" class="btn-modal" @click="modalVincularProfissionalVisivel = true">Vincular
+                    profissional</button>
                   <button type="button" class="pdf-btn" @click="gerarPDF(ocorrencia.id)">Gerar PDF</button>
                   <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar
                     Progresso</button>
@@ -590,9 +591,11 @@ export default {
       }
 
       try {
-        await axios.post(`https://libertlla.onrender.com/ocorrencias/${this.ocorrenciaSelecionada}/vincular-profissional`, {
+        await axios.post(`https://libertlla.onrender.com/ocorrencias/adicionar-profissional`, {
+          ocorrenciaId: this.ocorrenciaSelecionada,
           profissionalId: Number(profissionalId)
         });
+
         Swal.fire("Sucesso", "Profissional vinculado com sucesso!", "success");
         this.fecharModalVincularProfissional();
         this.carregarOcorrencias();
@@ -704,13 +707,20 @@ label {
 
 .button_desarquivar {
   background-color: #9B287B;
-  color: rgba(245, 245, 245, 255);
+  color: #f5f5f5;
   font-size: 14px;
   font-weight: 500;
-  padding: 4px 40px; /* altura e comprimento */
+  padding: 8px 42px;
+  line-height: 1;
+  height: 28px;
   border: none;
+  border-radius: 4px;
   margin-left: auto;
+  display: block;
+  box-sizing: border-box;
+  cursor: pointer;
 }
+
 
 textarea,
 input[type="text"],
