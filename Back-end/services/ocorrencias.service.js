@@ -202,7 +202,7 @@ async function desarquivarOcorrencia(id) {
 
   const ocorrenciaAtualizada = await prisma.ocorrencias.update({
     where: { id: Number(id) },
-    data: { status: 'Andamento' },
+    data: { status: 'Em progresso' },
   });
 
   return ocorrenciaAtualizada;
@@ -211,7 +211,7 @@ async function desarquivarOcorrencia(id) {
 async function desarquivarConversa(conversaId) {
   const conversa = await prisma.conversa.update({
     where: { id: conversaId },
-    data: { status: 'Andamento' },
+    data: { status: 'Em progresso' },
   });
   return conversa;
 }
