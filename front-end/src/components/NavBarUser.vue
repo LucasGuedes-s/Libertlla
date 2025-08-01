@@ -93,6 +93,7 @@ export default {
         Swal.fire({
           icon: 'success',
           title: 'Foto atualizada!',
+          text:  'Sua foto será atualizada no próximo login!',
           confirmButtonColor: '#9B287B',
         });
       } catch (error) {
@@ -100,7 +101,7 @@ export default {
           icon: 'error',
           title: 'Erro ao atualizar a foto',
           text: error.message || 'Tente novamente',
-          confirmButtonColor: '#d33',
+          confirmButtonColor: '#9B287B',
         });
       }
     };

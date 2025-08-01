@@ -25,7 +25,7 @@
         <div class="div_ocorrencias">
           <div class="ocorrencias_formulario">
             <h2>Ocorrências por Formulário</h2>
-            <div class="info_denuncia" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+            <div class="info_denuncia" v-for="ocorrencia in ocorrenciasDisponiveis" :key="ocorrencia.id">
               <p><strong>Denúncia - #{{ ocorrencia.id }}</strong></p>
               <p><strong>Data:</strong> {{ formatDate(ocorrencia.data_denuncia) }} </p>
               <p><strong>Tipo de Denúncia:</strong> {{ ocorrencia.tipo_denuncia }} </p>
@@ -157,6 +157,19 @@ export default {
     });
 
   },
+  computed: {
+    ocorrenciasDisponiveis() {
+      const idProfissionalLogado = this.store.usuario.usuario.id; // ajuste conforme necessário
+
+      return this.ocorrencias.filter(ocorrencia => {
+        // Exemplo: se ocorrerncia.profissionaisAceitos for array de ids
+        // Ajuste isso conforme sua estrutura real
+        if (!ocorrencia.profissionaisAceitos) return true;
+
+        return !ocorrencia.profissionaisAceitos.includes(idProfissionalLogado);
+      });
+    }
+  },
   methods: {
     async abrirModal(id) {
       try {
@@ -196,7 +209,10 @@ export default {
         const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        this.ocorrencias = response.data.ocorrencias;
+
+        this.ocorrencias = response.data.ocorrencias.filter(
+          o => o.status !== 'Em progresso' && o.status !== 'Arquivada'
+        );
       } catch (error) {
         console.error('Erro ao buscar ocorrências:', error);
         if (error.response && error.response.status === 403) {

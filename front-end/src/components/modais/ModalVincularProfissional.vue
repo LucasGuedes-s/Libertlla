@@ -9,7 +9,11 @@
           <label for="profissionalSelecionado">Selecione um profissional:</label>
           <select v-model="selecionado" id="profissionalSelecionado" class="dropdown" required>
             <option disabled value="">Selecionar</option>
-            <option v-for="profissional in profissionais" :key="profissional.id" :value="profissional.id">
+            <option
+              v-for="profissional in profissionais"
+              :key="profissional.id"
+              :value="profissional.id"
+            >
               {{ profissional.nome }} - {{ profissional.especialidade }}
             </option>
           </select>
@@ -28,22 +32,37 @@
 export default {
   name: "ModalVincularProfissional",
   props: {
-    visible: Boolean,
+    visible: {
+      type: Boolean,
+      required: true,
+    },
     profissionais: {
       type: Array,
       required: true,
-    }
+    },
+    idOcorrencia: {
+      type: [String, Number, null],  
+      required: false,               
+      default: null,
+    },
   },
   data() {
     return {
-      selecionado: ""
+      selecionado: "", 
     };
   },
   methods: {
     emitirVinculo() {
-      this.$emit("submit", this.selecionado);
-    }
-  }
+      if (!this.selecionado) {
+        alert("Por favor, selecione um profissional antes de salvar.");
+        return;
+      }
+      this.$emit("vincular-profissional", {
+        idOcorrencia: this.idOcorrencia,
+        profissional: this.selecionado,
+      });
+    },
+  },
 };
 </script>
 

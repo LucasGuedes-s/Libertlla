@@ -42,8 +42,8 @@
                   <router-link :to="`/ocorrencia/${ocorrencia.id}`" class="detalhar-btn">Detalhar</router-link>
                   <button type="button" class="btn-vincular" @click="abrirModalVincularVitima(ocorrencia.id)">Vincular
                     Vítima</button>
-                  <button type="button" class="btn-modal" @click="modalVincularProfissionalVisivel = true">Vincular
-                    profissional</button>
+                  <button type="button" class="btn-modal"
+                    @click="abrirModalVincularProfissional(ocorrencia.id)">Vincular profissional</button>
                   <button type="button" class="pdf-btn" @click="gerarPDF(ocorrencia.id)">Gerar PDF</button>
                   <button type="button" class="btn-modal" @click="abrirModalOcorrencia(ocorrencia.id)">Adicionar
                     Progresso</button>
@@ -99,8 +99,10 @@
         @submit="vincularVitima" />
 
       <!-- Modal de vincular profissional -->
-      <ModalVincularProfissional :visible="modalVincularProfissionalVisivel" :profissionais="profissionais"
-        @submit="vincularProfissional" @close="fecharModalVincularProfissional" />
+      <ModalVincularProfissional v-if="modalVincularProfissionalVisivel && ocorrenciaSelecionada !== null"
+        :visible="modalVincularProfissionalVisivel" :profissionais="profissionaisFiltrados"
+        :idOcorrencia="ocorrenciaSelecionada" @vincular-profissional="vincularProfissional"
+        @close="fecharModalVincularProfissional" />
 
       <!-- Modal de Ocorrências Arquivadas -->
       <ModalArquivadas v-if="modalArquivadasVisivel" :visivel="modalArquivadasVisivel" :modalKey="modalKey"
@@ -158,6 +160,13 @@ export default {
   },
 
   computed: {
+    profissionaisFiltrados() {
+      if (!this.profissionais || !this.store || !this.store.usuario) return [];
+
+      const idLogado = this.store.usuario.usuario.id;
+
+      return this.profissionais.filter(p => p.id !== idLogado);
+    },
     vitimasFiltradas() {
       return this.vitimas.filter(
         (v) =>
@@ -171,6 +180,7 @@ export default {
     this.store = useAuthStore();
     this.carregarOcorrencias();
     this.getConversas();
+    this.buscarProfissionais();
   },
 
   methods: {
@@ -274,13 +284,11 @@ export default {
       this.modalVincularProfissionalVisivel = true;
       this.buscarProfissionais();
     },
-
     fecharModalVincularProfissional() {
       this.modalVincularProfissionalVisivel = false;
       this.profissionalSelecionado = "";
       this.ocorrenciaSelecionada = null;
     },
-
     async buscarOcorrenciasArquivadas() {
       try {
         const email = this.store.usuario.usuario.email;
@@ -585,27 +593,43 @@ export default {
         Swal.fire("Erro", "Não foi possível carregar os profissionais.", "error");
       }
     },
-    async vincularProfissional(profissionalId) {
-      if (!this.ocorrenciaSelecionada || !profissionalId) {
-        return Swal.fire("Atenção", "Selecione um profissional para vincular.", "warning");
+    async vincularProfissional({ idOcorrencia, profissional }) {
+      if (!idOcorrencia || !profissional) {
+        return Swal.fire("Erro", "Dados incompletos para vinculação.", "error");
       }
 
       try {
-        await axios.post(`https://libertlla.onrender.com/ocorrencias/adicionar-profissional`, {
-          ocorrenciaId: this.ocorrenciaSelecionada,
-          profissionalId: Number(profissionalId)
-        });
+        const token = this.store.token;
+
+        await axios.post('https://libertlla.onrender.com/ocorrencias/adicionar-profissional',
+          {
+            ocorrenciaId: idOcorrencia,
+            profissionalId: profissional,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         Swal.fire("Sucesso", "Profissional vinculado com sucesso!", "success");
-        this.fecharModalVincularProfissional();
+        this.modalVincularProfissionalVisivel = false;
         this.carregarOcorrencias();
       } catch (error) {
-        console.error("Erro ao vincular profissional:", error);
-        Swal.fire("Erro", "Erro ao vincular profissional à ocorrência.", "error");
+        const mensagemBackend = error.response?.data?.error || "";
+        if (
+          mensagemBackend.toLowerCase().includes("já está associado") ||
+          mensagemBackend.toLowerCase().includes("já vinculado")
+        ) {
+          Swal.fire("Aviso", "Este profissional já está vinculado a esta ocorrência.", "warning");
+        } else {
+          console.error(error.response || error);
+          Swal.fire("Erro", "Erro ao vincular profissional.", "error");
+        }
       }
-    },
+    }
   },
-
   components: {
     SideBar,
     ModalArquivadas,
@@ -710,17 +734,17 @@ label {
   color: #f5f5f5;
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 42px;
-  line-height: 1;
-  height: 28px;
+  padding: 0 35px;
+  height: 40px;
+  line-height: 40px;
   border: none;
   border-radius: 4px;
   margin-left: auto;
   display: block;
   box-sizing: border-box;
   cursor: pointer;
+  text-align: center;
 }
-
 
 textarea,
 input[type="text"],
