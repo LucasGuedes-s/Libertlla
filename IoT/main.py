@@ -1,11 +1,40 @@
-from machine import Pin, SoftI2C, RTC
-from ssd1306 import SSD1306_I2C
-import ubluetooth
+from machine import Pin, SPI, RTC
 import utime
+from gc9a01 import GC9A01
+import vga1_8x8 as font
+import ubluetooth
+import math
 
-# === Display OLED Setup ===
-i2c = SoftI2C(scl=Pin(15), sda=Pin(14))
-oled = SSD1306_I2C(128, 64, i2c)
+# --- Inicializa SPI e pinos ---
+spi = SPI(0, baudrate=40000000, polarity=1, phase=1, sck=Pin(18), mosi=Pin(19))
+dc = Pin(8, Pin.OUT)
+cs = Pin(9, Pin.OUT)
+rst = Pin(4, Pin.OUT)
+
+# --- Inicializa display ---
+oled = GC9A01(spi=spi, dc=dc, cs=cs, reset=rst)
+oled.fill(0x0000)
+
+# --- Desenha borda ---
+BORD_COLOR = 0xF81F  # magenta
+CENTER_X = 120
+CENTER_Y = 120
+RADIUS = (240 // 2) - 10
+
+def desenhar_borda():
+    passo_angulo = 5
+    pontos = []
+    for ang in range(0, 361, passo_angulo):
+        rad = math.radians(ang)
+        x = int(CENTER_X + RADIUS * math.cos(rad))
+        y = int(CENTER_Y + RADIUS * math.sin(rad))
+        pontos.append((x, y))
+    for i in range(len(pontos)-1):
+        x1, y1 = pontos[i]
+        x2, y2 = pontos[i+1]
+        oled.line(x1, y1, x2, y2, BORD_COLOR)
+
+desenhar_borda()
 
 led_green = Pin(11, Pin.OUT)
 botao_panico = Pin(5, Pin.IN, Pin.PULL_UP)
@@ -49,14 +78,12 @@ class BLEConexao:
         global relogio_ativo
 
         if event == 1:
-            # Central conectou
             conn_handle, _, _ = data
             self._connections.add(conn_handle)
             self.conectado = True
             led_green.value(1)
 
         elif event == 2:
-            # Central desconectou
             conn_handle, _, _ = data
             self._connections.discard(conn_handle)
             self.conectado = False
@@ -64,7 +91,6 @@ class BLEConexao:
             self.advertise()
 
         elif event == 3:
-            # Dados recebidos via BLE
             conn_handle, attr_handle = data
             if attr_handle == self._char_handle:
                 valor = self.ble.gatts_read(self._char_handle).decode().strip()
@@ -110,22 +136,31 @@ while True:
 
     if not ble.conectado:
         if utime.ticks_diff(agora, tempo_ultimo) >= 500:
-            oled.fill(0)
-            oled.text("Esperando BLE" + "." * pontos, 0, 20)
-            oled.show()
+            texto = "Esperando BLE" + "." * pontos
+            x = (240 - len(texto) * 8) // 2
+            oled.fill_rect(0, 110, 240, 30, 0x0000)
+            oled.text(font, texto, x, 120, 0xFFFF, 0x0000)
             pontos = pontos + 1 if pontos < 3 else 1
             tempo_ultimo = agora
+
     else:
-        oled.fill(0)
         if relogio_ativo:
             _, _, _, _, horas, minutos, segundos, _ = rtc.datetime()
-            oled.text("Hora atual", 20, 0)
-            oled.text("{:02d}:{:02d}:{:02d}".format(horas, minutos, segundos), 0, 25)
-        else:
-            oled.text("Aguardando hora", 0, 25)
-        oled.show()
+            texto1 = "Hora atual"
+            x1 = (240 - len(texto1) * 8) // 2
+            oled.fill_rect(0, 100, 240, 30, 0x0000)
+            oled.text(font, texto1, x1, 110, 0xFFFF, 0x0000)
 
-        # Verifica botão de pânico
+            hora_formatada = "{:02d}:{:02d}:{:02d}".format(horas, minutos, segundos)
+            x2 = (240 - len(hora_formatada) * 8) // 2
+            oled.text(font, hora_formatada, x2, 120, 0xFFFF, 0x0000)
+
+        else:
+            texto2 = "Aguardando hora"
+            x3 = (240 - len(texto2) * 8) // 2
+            oled.fill_rect(0, 100, 240, 30, 0x0000)
+            oled.text(font, texto2, x3, 110, 0xFFFF, 0x0000)
+
         if botao_panico.value() == 0 and utime.ticks_diff(agora, ultima_mensagem) > 3000:
             print("Botao do panico pressionado!")
             ble.enviar_mensagem("ALERTA")
