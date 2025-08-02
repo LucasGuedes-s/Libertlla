@@ -1,6 +1,6 @@
 <template>
   <section>
-      <NavBarUser />
+    <NavBarUser />
     <SideBar />
     <div class="container">
       <div class="titulo-principal">Relatórios</div>
@@ -139,8 +139,8 @@ export default {
       loading.value = true;
 
       await Promise.all([buscarOcorrenciasPorTipo(), buscarTotalDenuncias()]);
-      loading.value = false;  
-      await nextTick(); 
+      loading.value = false;
+      await nextTick();
 
       renderViolenceLineChart();
       renderPieChart();
@@ -173,7 +173,7 @@ export default {
   font-size: 30px;
   font-family: "Montserrat", sans-serif;
   font-weight: bold;
-  margin-top: 20px;
+  margin-top: 15px;
   margin-left: 7px;
   color: #9B287B;
 }
@@ -232,7 +232,7 @@ export default {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .container {
     margin-left: 0;
     max-width: 100vw;
@@ -250,5 +250,15 @@ export default {
     height: 300px;
     margin-bottom: 20px;
   }
+
+  .titulo-principal {
+    font-size: 30px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+    margin-top: 40px;
+    margin-left: 7px;
+    color: #9B287B;
+  }
+
 }
 </style>

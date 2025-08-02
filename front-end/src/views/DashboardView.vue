@@ -159,11 +159,9 @@ export default {
   },
   computed: {
     ocorrenciasDisponiveis() {
-      const idProfissionalLogado = this.store.usuario.usuario.id; // ajuste conforme necessário
+      const idProfissionalLogado = this.store.usuario.usuario.id; 
 
       return this.ocorrencias.filter(ocorrencia => {
-        // Exemplo: se ocorrerncia.profissionaisAceitos for array de ids
-        // Ajuste isso conforme sua estrutura real
         if (!ocorrencia.profissionaisAceitos) return true;
 
         return !ocorrencia.profissionaisAceitos.includes(idProfissionalLogado);
@@ -206,7 +204,7 @@ export default {
           this.$router.push('/nao-autorizado');
           return;
         }
-        const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
+        const response = await axios.get("http://localhost:3000/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` }
         });
 

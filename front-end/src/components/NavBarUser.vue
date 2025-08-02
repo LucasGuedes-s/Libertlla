@@ -1,4 +1,3 @@
-Você disse:
 <template>
   <div class="container position-absolute top-0 end-0 p-3">
     <div class="row align-items-center justify-content-end">
@@ -128,7 +127,7 @@ export default {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  z-index: 1000;
+  z-index: 10;
   padding-top: 20px;
 }
 
