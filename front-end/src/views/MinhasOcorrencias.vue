@@ -116,7 +116,7 @@
 
 <script>
 import SideBar from "@/components/SideBar.vue";
-import ModalArquivadas from "@/components/modais/ModalArquivadas.vue"
+import ModalArquivadas from "@/components/modais/modalArquivadas.vue"
 import ModalCadastrarVisita from "@/components/modais/ModalCadastrarVisita.vue";
 import ModalVincularVitima from "@/components/modais/ModalVincularVitima.vue";
 import ModalVincularProfissional from "@/components/modais/ModalVincularProfissional.vue";
