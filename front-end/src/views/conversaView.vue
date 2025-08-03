@@ -124,24 +124,25 @@ export default {
   },
   setup() {
     const store = useAuthStore();
-    return {
-      store
-    };
+    return { store };
   },
   data() {
     return {
       formatDate,
       sidebarVisible: true,
       conversa: {
+        id: null,
         createdAt: '',
         messages: [],
-        registros: []
+        registros: [],
+        status: ''
       },
       filtro: {
         tipo: '',
         mes: '',
         ano: ''
-      }
+      },
+      loading: false
     };
   },
   mounted() {
@@ -173,11 +174,17 @@ export default {
       this.filtro.mes = '';
       this.filtro.ano = '';
     },
+
     async getConversas() {
+      this.loading = true;
       try {
-        const user = this.store.usuario.usuario;
-        const email = user.email;
+        const user = this.store.usuario?.usuario;
+        const email = user?.email;
         const token = this.store.token;
+
+        if (!token || !email) {
+          throw new Error('Usuário ou token não encontrado.');
+        }
 
         const response = await axios.get(`https://libertlla.onrender.com/conversas/${email}`, {
           headers: {
@@ -187,17 +194,20 @@ export default {
 
         if (response.data && response.data.conversas) {
           const conversas = response.data.conversas;
-
-          if (conversas.length > 0) {
-            this.conversa = conversas.find(conversa => String(conversa.id) === String(this.id)) || conversas[0];
+          const encontrada = conversas.find(c => String(c.id) === String(this.id));
+          if (encontrada) {
+            this.conversa = encontrada;
           } else {
-            console.warn('Nenhuma conversa encontrada para o usuário.');
+            console.warn('Conversa não encontrada com o ID fornecido.');
+            this.conversa.id = this.id; 
           }
         } else {
           console.warn('Resposta da API não contém conversas.');
         }
       } catch (error) {
-        console.error('Erro ao buscar conversas:', error);
+        console.error('Erro ao buscar conversas:', error.response?.data || error.message);
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -213,13 +223,21 @@ export default {
     async arquivarConversa() {
       try {
         const token = this.store.token;
-        const response = await axios.put('https://libertlla.onrender.com/conversas/arquivar', {
-          conversaId: this.conversa.id
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const conversaId = this.id; 
+
+        if (!token || !conversaId) {
+          throw new Error('Token ou ID da conversa não encontrado.');
+        }
+
+        await axios.put(
+          'https://libertlla.onrender.com/conversas/arquivar',
+          { conversaId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        });
+        );
 
         Swal.fire({
           title: 'Sucesso!',
@@ -227,14 +245,14 @@ export default {
           icon: 'success'
         });
 
-        this.conversa.status = "Arquivada";
-
+        this.conversa.status = 'Arquivada';
         router.push('/minhasocorrencias');
+
       } catch (error) {
-        console.error("Erro ao arquivar conversa:", error);
+        console.error('Erro ao arquivar conversa:', error.response?.data || error.message);
         Swal.fire({
           title: 'Erro!',
-          text: 'Não foi possível arquivar a conversa.',
+          text: 'Não foi possível arquivar a conversa. Tente novamente.',
           icon: 'error'
         });
       }

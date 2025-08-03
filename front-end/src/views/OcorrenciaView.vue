@@ -230,17 +230,31 @@ export default {
                     };
                 }
             } catch (error) {
-                console.error('Erro ao buscar ocorrência:', error);
+                console.error('Erro ao buscar ocorrência:', error.response?.data || error.message);
             }
         },
+
         async arquivarOcorrencia() {
             try {
                 const token = this.store.getToken;
+                if (!token) {
+                    throw new Error('Token de autenticação não encontrado.');
+                }
+
+                if (!this.id) {
+                    throw new Error('ID da ocorrência não definido.');
+                }
+
                 await axios.put(
                     `https://libertlla.onrender.com/ocorrencias/arquivar`,
                     { ocorrenciaId: this.id },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
                 );
+
                 Swal.fire({
                     title: 'Sucesso!',
                     text: 'A ocorrência foi arquivada com sucesso.',
@@ -249,8 +263,9 @@ export default {
                 }).then(() => {
                     router.push('/minhasocorrencias');
                 });
+
             } catch (error) {
-                console.error('Erro ao arquivar ocorrência:', error);
+                console.error('Erro ao arquivar ocorrência:', error.response?.data || error.message);
                 Swal.fire({
                     title: 'Erro!',
                     text: 'Não foi possível arquivar a ocorrência. Tente novamente.',
