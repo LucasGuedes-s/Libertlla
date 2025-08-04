@@ -5,6 +5,36 @@
         <h1 class="titulo mb-4">Denúncias Arquivadas</h1>
       </div>
 
+      <!-- FILTROS -->
+      <div class="filtros-wrapper d-flex justify-content-between align-items-end flex-wrap mb-4 conteudo-modal">
+        <div class="filtro-item">
+          <label class="form-label">Tipo:</label>
+          <select v-model="filtro.tipo" class="form-select">
+            <option value="">Todos</option>
+            <option value="conversa">Conversa</option>
+            <option value="ocorrencia">Ocorrência</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label class="form-label">Mês:</label>
+          <select v-model="filtro.mes" class="form-select">
+            <option value="">Todos</option>
+            <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label class="form-label">Ano:</label>
+          <select v-model="filtro.ano" class="form-select">
+            <option value="">Todos</option>
+            <option v-for="ano in anosDisponiveis" :key="ano" :value="ano">{{ ano }}</option>
+          </select>
+        </div>
+        <div class="filtro-item">
+          <label class="form-label">⠀</label>
+          <button class="botaolimpar" @click="limparFiltros">Limpar Filtros</button>
+        </div>
+      </div>
+
       <div class="conteudo-modal">
         <div class="loading-wrapper" v-if="carregando">
           <div class="spinner"></div>
@@ -17,8 +47,8 @@
 
         <template v-else>
           <!-- Ocorrências -->
-          <div class="ocorrencias-wrapper" v-if="ocorrencias.length">
-            <div class="info_arquivadas" v-for="ocorrencia in ocorrencias" :key="ocorrencia.id">
+          <div class="ocorrencias-wrapper" v-if="ocorrenciasFiltradas.length">
+            <div class="info_arquivadas" v-for="ocorrencia in ocorrenciasFiltradas" :key="ocorrencia.id">
               <div class="denuncia">
                 <h1 class="titulo-ocorrencia">Ocorrência {{ ocorrencia.id }}</h1>
               </div>
@@ -42,8 +72,8 @@
           </div>
 
           <!-- Conversas -->
-          <div v-if="conversas.length">
-            <div class="info_arquivadas" v-for="conversa in conversas" :key="conversa.id">
+          <div v-if="conversasFiltradas.length">
+            <div class="info_arquivadas" v-for="conversa in conversasFiltradas" :key="conversa.id">
               <div class="denuncia">
                 <h1 class="titulo-ocorrencia">Conversa</h1>
               </div>
@@ -61,10 +91,14 @@
               </button>
             </div>
           </div>
+
+          <div v-if="!ocorrenciasFiltradas.length && !conversasFiltradas.length">
+            <p class="nenhuma-encontrada">Nenhuma conversa ou ocorrência encontrada com os filtros aplicados.</p>
+          </div>
         </template>
       </div>
 
-        <button class="btn-fecharDesarquivadas" @click="$emit('fechar')">Fechar</button>
+      <button class="btn-fecharDesarquivadas" @click="$emit('fechar')">Fechar</button>
     </div>
   </div>
 </template>
@@ -80,8 +114,47 @@ export default {
     modalKey: Number,
     carregando: Boolean,
   },
+  data() {
+    return {
+      filtro: {
+        tipo: '',
+        mes: '',
+        ano: '',
+      },
+    };
+  },
+  computed: {
+    conversasFiltradas() {
+      return this.conversas.filter(registro => {
+        const data = new Date(registro.data);
+        const condTipo = this.filtro.tipo === '' || this.filtro.tipo === 'conversa';
+        const condMes = this.filtro.mes === '' || (data.getMonth() + 1) === Number(this.filtro.mes);
+        const condAno = this.filtro.ano === '' || data.getFullYear() === Number(this.filtro.ano);
+        return condTipo && condMes && condAno;
+      });
+    },
+    ocorrenciasFiltradas() {
+      return this.ocorrencias.filter(registro => {
+        const data = new Date(registro.data_denuncia);
+        const condTipo = this.filtro.tipo === '' || this.filtro.tipo === 'ocorrencia';
+        const condMes = this.filtro.mes === '' || (data.getMonth() + 1) === Number(this.filtro.mes);
+        const condAno = this.filtro.ano === '' || data.getFullYear() === Number(this.filtro.ano);
+        return condTipo && condMes && condAno;
+      });
+    },
+    anosDisponiveis() {
+      const anosConversas = this.conversas.map(r => new Date(r.data)).filter(d => !isNaN(d)).map(d => d.getFullYear());
+      const anosOcorrencias = this.ocorrencias.map(r => new Date(r.data_denuncia)).filter(d => !isNaN(d)).map(d => d.getFullYear());
+      return [...new Set([...anosConversas, ...anosOcorrencias])].sort();
+    },
+  },
   methods: {
     formatDate,
+    limparFiltros() {
+      this.filtro.tipo = '';
+      this.filtro.mes = '';
+      this.filtro.ano = '';
+    },
   },
 };
 </script>
@@ -181,7 +254,7 @@ export default {
   font-size: 20px;
 }
 
-.btn-desarquivar{
+.btn-desarquivar {
   width: 100%;
   background-color: #f5f5f5;
   border: 1px solid #d9d9d9;
@@ -191,8 +264,9 @@ export default {
   padding: 10px 20px;
   font-family: "Montserrat", sans-serif;
 }
-.btn-fecharDesarquivadas{
-   margin: -10px 20px 20px 20px; 
+
+.btn-fecharDesarquivadas {
+  margin: -10px 20px 20px 20px;
   background-color: #f5f5f5;
   border: 1px solid #d9d9d9;
   color: #7e7e7e;
@@ -246,5 +320,54 @@ export default {
   padding: 15px;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
+}
+
+.filtros-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 30px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.filtro-item {
+  flex: 1 1 250px;
+  min-width: 180px;
+}
+
+.form-label {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: block;
+  color: #333;
+}
+
+.form-select {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.botaolimpar {
+  width: 100%;
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  color: #7e7e7e;
+  border-radius: 5px;
+  font-size: 14px;
+  padding: 10px 20px;
+  font-family: "Montserrat", sans-serif;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.botaolimpar:hover {
+  background-color: #eaeaea;
 }
 </style>
