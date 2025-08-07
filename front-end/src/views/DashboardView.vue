@@ -204,7 +204,7 @@ export default {
           this.$router.push('/nao-autorizado');
           return;
         }
-        const response = await axios.get("http://localhost:3000/ocorrencias", {
+        const response = await axios.get("https://libertlla.onrender.com/ocorrencias", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
