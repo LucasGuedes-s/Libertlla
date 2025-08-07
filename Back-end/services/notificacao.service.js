@@ -2,19 +2,21 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function CriarNotificacaoService(req) {
-  const { endereco, data } = req.body;
+  const { endereco } = req.body;
   const vitimaId = req.user.id;
+  // Obtem a data atual em UTC
+    const now = new Date();
 
-  //const data = new Date();
-  //data.setHours(0, 0, 0, 0); // Zera a hora
+    // Ajusta para o horário de Brasília (UTC-3)
+    const brasilTime = new Date(now.getTime() - 3 * 60 * 60 * 1000);
 
-  const notificacao = await prisma.notificacao_botao.create({
-    data: {
-      endereco,
-      data,
-      vitimaId,
-    },
-  });
+    const notificacao = await prisma.notificacao_botao.create({
+      data: {
+        endereco,
+        data: brasilTime,
+        vitimaId,
+      },
+    });
 
   return notificacao;
 }
