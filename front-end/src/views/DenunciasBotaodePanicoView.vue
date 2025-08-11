@@ -49,6 +49,14 @@ import Swal from 'sweetalert2';
 import { jwtDecode } from 'jwt-decode';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
 export default {
   components: {
     SideBar,
@@ -126,7 +134,9 @@ export default {
         this.loading = true;  // <-- começa loading
         const res = await fetch('https://libertlla.onrender.com/notificacoes');
         const dados = await res.json();
+        console.log('Notificações carregadas:', dados);
         this.notificacoes = dados;
+        
       } catch (error) {
         console.error('Erro ao carregar notificações', error);
       } finally {
@@ -134,7 +144,9 @@ export default {
       }
     },
     formatarData(data) {
-      return new Date(data).toLocaleString('pt-BR', {
+      const d = new Date(data);
+      d.setHours(d.getHours() + 3); // UTC para UTC-3
+      return d.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
