@@ -126,7 +126,7 @@ model Permissoes {
 model Notificacao_botao{
   id         Int      @id @default(autoincrement())
   endereco   String
-  data       DateTime @db.Date
+  data       DateTime?
   token      String?
   vitimaId   Int?
   vitima     Vitima? @relation(fields: [vitimaId], references: [id])

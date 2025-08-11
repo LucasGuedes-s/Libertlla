@@ -6,10 +6,8 @@ async function CriarNotificacaoService(req) {
   const vitimaId = req.user.id;
   // Obtem a data atual em UTC
     const now = new Date();
-
-    // Ajusta para o horário de Brasília (UTC-3)
-    const brasilTime = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-
+    const brasilTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    
     const notificacao = await prisma.notificacao_botao.create({
       data: {
         endereco,
